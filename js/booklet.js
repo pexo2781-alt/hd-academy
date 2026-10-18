@@ -1,12 +1,16 @@
 // ============================================
-// booklet.js — Reads puzzles & rewards from CONFIG
+// booklet.js — V3: per-subject puzzle banks
 // ============================================
 
 window.Booklet = (function () {
-
+  let activeSubject = null;
   let activeFillblank = null, activeMatching = null, activeLogic = null;
 
-  function getPUZZLES() { return window.CONFIG.booklet; }
+  function getBank(type) {
+    if (!activeSubject) return [];
+    const sub = window.CONFIG.questions[activeSubject];
+    return (sub && sub[type]) || [];
+  }
   function getRewards() { return window.CONFIG.rewards; }
 
   function shuffle(arr) {
@@ -18,12 +22,17 @@ window.Booklet = (function () {
     return a;
   }
 
-  // ---------- FILL BLANK ----------
+  function setSubject(s) {
+    activeSubject = s;
+    document.getElementById("puzzleTypeSelect").classList.remove("hidden");
+    document.getElementById("puzzleArea").classList.add("hidden");
+  }
+
   function startFillblank() {
-    const pool = getPUZZLES().fillblank || [];
-    if (!pool.length) return alert("No fill-blank puzzles configured.");
-    activeFillblank = shuffle(pool).slice(0, Math.min(5, pool.length));
-    activeFillblank.forEach(p => p.solved = false);
+    const pool = getBank("fillblank");
+    if (!pool.length) return alert("No fill-blank puzzles for this subject.");
+    activeFillblank = shuffle(pool).slice(0, Math.min(5, pool.length)).map(p => ({ ...p, solved: false }));
+    document.getElementById("puzzleArea").classList.remove("hidden");
     renderFillblank();
   }
 
@@ -33,14 +42,12 @@ window.Booklet = (function () {
       <h2>Fill in the Blank</h2>
       <p style="color:var(--anhs-grey); margin-bottom:1rem;">Complete each sentence. Case-insensitive.</p>
       <div id="fbList"></div>
-      <div class="text-center mt-1">
-        <button class="btn" onclick="Booklet.checkFillblank()">Check Answers</button>
-      </div>`;
+      <div class="text-center mt-1"><button class="btn" onclick="Booklet.checkFillblank()">Check Answers</button></div>`;
     document.getElementById("fbList").innerHTML = activeFillblank.map((p, i) => `
       <div class="card" style="margin-bottom:0.75rem; border-left-color:${p.solved ? 'var(--safe)' : 'var(--anhs-red)'};">
         <div>${p.sentence}</div>
         <input id="fbInput${i}" type="text" placeholder="Your answer…"
-          style="margin-top:0.5rem; width:100%; padding:0.5rem; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:white; font-size:1rem;"
+          style="margin-top:0.5rem; width:100%; padding:0.5rem; background:var(--anhs-dark); border:1px solid #444; border-radius:4px; color:var(--anhs-text); font-size:1rem;"
           ${p.solved ? 'disabled value="' + p.answer + '"' : ''}>
         <div style="font-size:0.8rem; color:var(--anhs-grey); margin-top:0.25rem;">💡 ${p.hint || ""}</div>
         <div id="fbResult${i}" style="margin-top:0.25rem; font-weight:700;"></div>
@@ -59,9 +66,7 @@ window.Booklet = (function () {
         input.style.borderColor = "var(--safe)";
         res.textContent = "✓ Correct"; res.style.color = "var(--safe)";
         correct++;
-      } else {
-        res.textContent = "✗ Try again"; res.style.color = "var(--danger)";
-      }
+      } else { res.textContent = "✗ Try again"; res.style.color = "var(--danger)"; }
     });
     if (correct === activeFillblank.length) {
       const R = getRewards();
@@ -69,19 +74,17 @@ window.Booklet = (function () {
     }
   }
 
-  // ---------- MATCHING ----------
   function startMatching() {
-    const pool = getPUZZLES().matching || [];
-    if (!pool.length) return alert("No matching puzzles configured.");
+    const pool = getBank("matching");
+    if (!pool.length) return alert("No matching puzzles for this subject.");
     const puzzle = pool[Math.floor(Math.random() * pool.length)];
     activeMatching = {
-      title: puzzle.title,
-      pairs: puzzle.pairs,
+      title: puzzle.title, pairs: puzzle.pairs,
       left: shuffle(puzzle.pairs.map(p => p.left)),
       right: shuffle(puzzle.pairs.map(p => p.right)),
-      selectedLeft: null,
-      matched: []
+      selectedLeft: null, matched: []
     };
+    document.getElementById("puzzleArea").classList.remove("hidden");
     renderMatching();
   }
 
@@ -90,13 +93,11 @@ window.Booklet = (function () {
     const wrap = document.getElementById("puzzleArea");
     wrap.innerHTML = `
       <h2>${m.title}</h2>
-      <p style="color:var(--anhs-grey); margin-bottom:1rem;">Click a left item, then its match on the right.</p>
+      <p style="color:var(--anhs-grey); margin-bottom:1rem;">Click a left item, then its match.</p>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
         <div id="mLeft"></div><div id="mRight"></div>
       </div>
-      <div class="text-center mt-1">
-        <button class="btn btn-secondary" onclick="Booklet.startMatching()">New Puzzle</button>
-      </div>`;
+      <div class="text-center mt-1"><button class="btn btn-secondary" onclick="Booklet.startMatching()">New Puzzle</button></div>`;
     document.getElementById("mLeft").innerHTML = m.left.map(item => {
       const done = m.matched.some(p => p.left === item);
       return `<button class="answer-btn" style="width:100%; margin-bottom:0.5rem; ${done ? 'background:var(--safe); border-color:var(--safe);' : ''}" ${done ? 'disabled' : ''} onclick="Booklet.selectLeft('${item}')">${item}</button>`;
@@ -131,12 +132,12 @@ window.Booklet = (function () {
     }
   }
 
-  // ---------- LOGIC ----------
   function startLogic() {
-    const pool = getPUZZLES().logicgrid || [];
-    if (!pool.length) return alert("No logic puzzles configured.");
+    const pool = getBank("logic");
+    if (!pool.length) return alert("No logic puzzles for this subject.");
     const puzzle = pool[Math.floor(Math.random() * pool.length)];
     activeLogic = { ...puzzle, assignments: {} };
+    document.getElementById("puzzleArea").classList.remove("hidden");
     renderLogic();
   }
 
@@ -154,14 +155,12 @@ window.Booklet = (function () {
       ${Array.from({ length: L.seats }, (_, i) => i + 1).map(seat => `
         <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
           <span style="font-weight:700; min-width:60px;">Seat ${seat}</span>
-          <select id="logicSeat${seat}" style="flex:1; padding:0.5rem; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:white;">
+          <select id="logicSeat${seat}" style="flex:1; padding:0.5rem; background:var(--anhs-dark); border:1px solid #444; border-radius:4px; color:var(--anhs-text);">
             <option value="">— choose —</option>
             ${names.map(n => `<option value="${n}" ${L.assignments[seat] === n ? 'selected' : ''}>${n}</option>`).join("")}
           </select>
         </div>`).join("")}
-      <div class="text-center mt-1">
-        <button class="btn" onclick="Booklet.checkLogic()">Submit Solution</button>
-      </div>
+      <div class="text-center mt-1"><button class="btn" onclick="Booklet.checkLogic()">Submit Solution</button></div>
       <div id="logicResult" class="text-center mt-1"></div>`;
   }
 
@@ -178,7 +177,7 @@ window.Booklet = (function () {
       res.innerHTML = `<span style="color:var(--safe); font-weight:700;">✓ Correct!</span>`;
       finishPuzzle(getRewards().bookletLogic, "Logic Grid");
     } else {
-      res.innerHTML = `<span style="color:var(--danger); font-weight:700;">✗ Not quite. Re-read the clues.</span>`;
+      res.innerHTML = `<span style="color:var(--danger); font-weight:700;">✗ Not quite.</span>`;
     }
   }
 
@@ -201,5 +200,5 @@ window.Booklet = (function () {
       </div>`;
   }
 
-  return { startFillblank, startMatching, startLogic, selectLeft, selectRight, checkFillblank, checkLogic };
+  return { setSubject, startFillblank, startMatching, startLogic, selectLeft, selectRight, checkFillblank, checkLogic };
 })();
