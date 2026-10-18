@@ -13,7 +13,6 @@
     <h1>Quiz Arena</h1>
     <p class="subtitle">Answer fast. Answer right. Climb the hierarchy.</p>
 
-    <!-- Subject selector (shown before start) -->
     <div id="subjectSelect" class="card text-center">
       <h2>Select Subject</h2>
       <div class="mt-1">
@@ -23,7 +22,6 @@
       </div>
     </div>
 
-    <!-- Quiz screen -->
     <div id="quizScreen" class="card hidden">
       <div class="quiz-header">
         <span id="quizProgress" style="color:var(--anhs-grey);"></span>
@@ -38,18 +36,17 @@
       <div id="scoreboard" class="scoreboard"></div>
     </div>
 
-    <!-- Result screen -->
     <div id="resultScreen" class="hidden"></div>
   </div>
 
   <script src="js/state.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/questions.js"></script>
+  <script src="js/ai-students.js"></script>
+  <script src="js/ranking.js"></script>
   <script src="js/quiz-engine.js"></script>
   <script>
     renderNav("quiz");
-
-    // Read subject from URL ?subject=math
     const params = new URLSearchParams(location.search);
     const preSubject = params.get("subject");
 
