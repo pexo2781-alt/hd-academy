@@ -186,4 +186,52 @@
   function showStatus(msg, type) {
     statusEl.textContent = msg;
     statusEl.style.color = type === "safe" ? "var(--safe)" : "var(--danger)";
-    setTimeout(() => { statusEl.text
+    setTimeout(() => { statusEl.textContent = ""; }, 3000);
+  }
+
+  function onAdminToggle() {
+    cfg.admin = adminToggle.checked;
+    if (adminToggle.checked) {
+      // Snapshot basic first
+      collectBasic();
+      window.CONFIG_API.save(cfg);
+      adminContainer.classList.remove("hidden");
+      renderAdmin();
+    } else {
+      adminContainer.classList.add("hidden");
+    }
+  }
+
+  // ---------- GLOBAL HELPERS ----------
+  window.resetAllConfig = function () {
+    if (!confirm("Reset ALL settings AND question banks to defaults?")) return;
+    cfg = window.CONFIG_API.reset();
+    window.CONFIG = cfg;
+    window.CONFIG_API.applyTheme(cfg);
+    renderBasic();
+    if (adminToggle.checked) renderAdmin();
+    showStatus("✓ Config reset.", "safe");
+  };
+
+  window.resetQuestionsSection = function () {
+    if (!confirm("Reset question banks to defaults?")) return;
+    cfg.questions = JSON.parse(JSON.stringify(window.CONFIG_API.defaults.questions));
+    window.CONFIG_API.save(cfg);
+    window.CONFIG = cfg;
+    if (adminToggle.checked) renderAdmin();
+    showStatus("✓ Question banks reset.", "safe");
+  };
+
+  // ---------- INIT ----------
+  renderBasic();
+  adminToggle.checked = cfg.admin || false;
+  if (adminToggle.checked) {
+    adminContainer.classList.remove("hidden");
+    renderAdmin();
+  }
+  adminToggle.addEventListener("change", onAdminToggle);
+  saveBtn.addEventListener("click", save);
+  resetBtn.addEventListener("click", window.resetAllConfig);
+
+  function escapeAttr(s) { return String(s).replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+})();
