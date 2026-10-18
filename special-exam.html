@@ -46,10 +46,10 @@
   <script>
     renderNav("exam");
 
-    const EXAM_TIME = 10;
-    const EXAM_QUESTIONS = 10;
-    const PASS_THRESHOLD = 7;
-
+    const EXAM_TIME = window.CONFIG.gameplay.specialExamTimePerQuestion;
+    const EXAM_QUESTIONS = window.CONFIG.gameplay.specialExamQuestionCount;
+    const PASS_THRESHOLD = window.CONFIG.gameplay.specialExamPassThreshold;
+    
     let exam = null;
 
     function shuffle(arr) {
@@ -65,7 +65,7 @@
       // Build 10 mixed questions
       const all = [];
       ["math", "science", "english"].forEach(sub => {
-        window.QUESTIONS[sub].forEach(q => all.push({ ...q, subject: sub }));
+      (window.CONFIG.questions[sub] || []).forEach(q => all.push({ ...q, subject: sub }));
       });
       const picked = shuffle(all).slice(0, EXAM_QUESTIONS).map(q => {
         const indexed = q.a.map((text, i) => ({ text, isCorrect: i === q.c }));
