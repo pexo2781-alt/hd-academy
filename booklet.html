@@ -1,17 +1,47 @@
-<div class="card text-center">
-  <h2>Select Subject</h2>
-  <div class="mt-1">
-    <button class="btn" onclick="Booklet.setSubject('math')" style="margin:0.25rem;">Math</button>
-    <button class="btn" onclick="Booklet.setSubject('science')" style="margin:0.25rem;">Science</button>
-    <button class="btn" onclick="Booklet.setSubject('english')" style="margin:0.25rem;">English</button>
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HDL — Booklet</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
+  <div class="container">
+    <h1>Booklet</h1>
+    <p class="subtitle">Puzzles test the mind. Choose subject, then type.</p>
 
-<div id="puzzleTypeSelect" class="card text-center hidden">
-  <h2>Select Puzzle Type</h2>
-  <div class="mt-1">
-    <button class="btn" onclick="Booklet.startFillblank()" style="margin:0.25rem;">Fill in the Blank</button>
-    <button class="btn" onclick="Booklet.startMatching()" style="margin:0.25rem;">Matching</button>
-    <button class="btn" onclick="Booklet.startLogic()" style="margin:0.25rem;">Logic Grid</button>
+    <div id="puzzleSubjectSelect" class="card text-center">
+      <h2>Select Subject</h2>
+      <div class="mt-1">
+        <button class="btn" onclick="Booklet.setSubject('math')" style="margin:0.25rem;">Math</button>
+        <button class="btn" onclick="Booklet.setSubject('science')" style="margin:0.25rem;">Science</button>
+        <button class="btn" onclick="Booklet.setSubject('english')" style="margin:0.25rem;">English</button>
+      </div>
+    </div>
+
+    <div id="puzzleTypeSelect" class="card text-center hidden">
+      <h2>Select Puzzle Type</h2>
+      <div class="mt-1">
+        <button class="btn" onclick="Booklet.startFillblank()" style="margin:0.25rem;">Fill in the Blank</button>
+        <button class="btn" onclick="Booklet.startMatching()" style="margin:0.25rem;">Matching</button>
+        <button class="btn" onclick="Booklet.startLogic()" style="margin:0.25rem;">Logic Grid</button>
+      </div>
+    </div>
+
+    <div id="puzzleArea" class="card hidden"></div>
+
+    <div class="text-center mt-2">
+      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
   </div>
-</div>
+
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/ranking.js"></script>
+  <script src="js/booklet.js"></script>
+  <script>renderNav("booklet");</script>
+</body>
+</html>
