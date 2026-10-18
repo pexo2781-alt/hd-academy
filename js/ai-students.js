@@ -4,12 +4,8 @@
 
 window.AI_STUDENTS = [
   {
-    id: "horikita",
-    name: "Horikita Suzune",
-    specialty: "math",
-    skill: 0.85,              // 0-1, base accuracy
-    growth: 0.02,             // gains skill per quiz
-    personality: "cold",
+    id: "horikita", name: "Horikita Suzune", specialty: "math",
+    skill: 0.85, growth: 0.02, personality: "cold",
     tagline: "Results matter. Feelings do not.",
     lines: {
       win:   ["Expected. Don't let it get to your head.", "Adequate. Barely.", "You're improving. Marginally."],
@@ -21,12 +17,8 @@ window.AI_STUDENTS = [
     }
   },
   {
-    id: "koenji",
-    name: "Koenji Rokusuke",
-    specialty: "science",
-    skill: 0.82,
-    growth: 0.015,
-    personality: "arrogant",
+    id: "koenji", name: "Koenji Rokusuke", specialty: "science",
+    skill: 0.82, growth: 0.015, personality: "arrogant",
     tagline: "Perfection is my natural state.",
     lines: {
       win:   ["Naturally. I am perfect.", "Did you expect otherwise?", "A trivial victory."],
@@ -38,12 +30,8 @@ window.AI_STUDENTS = [
     }
   },
   {
-    id: "kushida",
-    name: "Kushida Kikyo",
-    specialty: "english",
-    skill: 0.78,
-    growth: 0.02,
-    personality: "friendly",
+    id: "kushida", name: "Kushida Kikyo", specialty: "english",
+    skill: 0.78, growth: 0.02, personality: "friendly",
     tagline: "Let's all get along, okay? ♡",
     lines: {
       win:   ["Yay! I did it! ♡", "We're both doing great!", "Don't be too down, okay?"],
@@ -55,12 +43,8 @@ window.AI_STUDENTS = [
     }
   },
   {
-    id: "ayanokoji",
-    name: "Ayanokoji Kiyotaka",
-    specialty: "all",
-    skill: 0.88,
-    growth: 0.025,
-    personality: "silent",
+    id: "ayanokoji", name: "Ayanokoji Kiyotaka", specialty: "all",
+    skill: 0.88, growth: 0.025, personality: "silent",
     tagline: "...",
     lines: {
       win:   ["...", "That's all.", "Hm."],
@@ -73,7 +57,16 @@ window.AI_STUDENTS = [
   }
 ];
 
-// Get a random line from a category for an AI
+// Load persisted AI skills
+(function loadAISkills() {
+  const st = window.ANHS.loadState();
+  if (st.aiSkills) {
+    window.AI_STUDENTS.forEach(ai => {
+      if (typeof st.aiSkills[ai.id] === "number") ai.skill = st.aiSkills[ai.id];
+    });
+  }
+})();
+
 window.aiLine = function (aiId, category) {
   const ai = AI_STUDENTS.find(a => a.id === aiId);
   if (!ai || !ai.lines[category]) return "...";
@@ -81,25 +74,24 @@ window.aiLine = function (aiId, category) {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-// Determine category based on player vs AI score comparison
 window.aiReactionCategory = function (aiScore, playerScore, gap = 50) {
-  if (playerScore > aiScore + gap) return "lose";      // AI lost → uses "lose" lines (they're behind)
-  if (aiScore > playerScore + gap) return "win";        // AI won → uses "win" lines
+  if (playerScore > aiScore + gap) return "lose";
+  if (aiScore > playerScore + gap) return "win";
   return "tie";
 };
 
-// Simulate AI answering one question (returns points earned this question)
 window.aiSimulateAnswer = function (ai) {
-  const roll = Math.random();
-  if (roll < ai.skill) {
-    const base = 100;
-    const timeBonus = Math.floor(Math.random() * 40);
-    return base + timeBonus;
+  if (Math.random() < ai.skill) {
+    return 100 + Math.floor(Math.random() * 40);
   }
   return 0;
 };
 
-// Grow AI skill slightly after each quiz (makes them harder over time)
+// Grow skill and persist
 window.aiGrow = function (ai) {
   ai.skill = Math.min(0.98, ai.skill + ai.growth);
+  const st = window.ANHS.loadState();
+  st.aiSkills = st.aiSkills || {};
+  st.aiSkills[ai.id] = ai.skill;
+  window.ANHS.saveState(st);
 };
