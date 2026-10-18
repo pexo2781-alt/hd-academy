@@ -17,7 +17,7 @@ window.QuizEngine = (function () {
 
   function start(subject) {
     const cfg = window.CONFIG.gameplay;
-    const bank = (window.CONFIG.questions && window.CONFIG.questions[subject]) || [];
+   const bank = (window.CONFIG.questions[subject] && window.CONFIG.questions[subject].written) || [];
     if (!bank || bank.length === 0) { alert("No questions for subject: " + subject); return; }
 
     const N = Math.min(cfg.quizQuestionCount, bank.length);
