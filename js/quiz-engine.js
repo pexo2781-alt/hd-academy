@@ -1,25 +1,10 @@
 // ============================================
-// quiz-engine.js — Now with real AI classmates
+// quiz-engine.js — Reads counts/time/CP from CONFIG
 // ============================================
 
 window.QuizEngine = (function () {
 
-  const QUESTIONS_PER_QUIZ = 8;
-  const TIME_PER_QUESTION = 15;
-
-  let state = {
-    subject: "math",
-    questions: [],
-    currentIdx: 0,
-    correct: 0,
-    streak: 0,
-    bestStreak: 0,
-    score: 0,
-    timer: null,
-    timeLeft: 0,
-    answered: false,
-    aiScores: {}
-  };
+  let state = {};
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -31,40 +16,31 @@ window.QuizEngine = (function () {
   }
 
   function start(subject) {
-    state.subject = subject;
-    const bank = window.QUESTIONS[subject];
+    const cfg = window.CONFIG.gameplay;
+    const bank = (window.CONFIG.questions && window.CONFIG.questions[subject]) || [];
     if (!bank || bank.length === 0) { alert("No questions for subject: " + subject); return; }
 
-    const picked = shuffle(bank).slice(0, Math.min(QUESTIONS_PER_QUIZ, bank.length)).map(q => {
+    const N = Math.min(cfg.quizQuestionCount, bank.length);
+    const picked = shuffle(bank).slice(0, N).map(q => {
       const indexed = q.a.map((text, i) => ({ text, isCorrect: i === q.c }));
       const shuffled = shuffle(indexed);
-      return {
-        q: q.q,
-        options: shuffled.map(o => o.text),
-        correctIdx: shuffled.findIndex(o => o.isCorrect)
-      };
+      return { q: q.q, options: shuffled.map(o => o.text), correctIdx: shuffled.findIndex(o => o.isCorrect) };
     });
 
-    state.questions = picked;
-    state.currentIdx = 0;
-    state.correct = 0;
-    state.streak = 0;
-    state.bestStreak = 0;
-    state.score = 0;
-    state.answered = false;
-    state.aiScores = {};
+    state = {
+      subject, questions: picked, currentIdx: 0, correct: 0, streak: 0,
+      bestStreak: 0, score: 0, timer: null, timeLeft: 0, answered: false, aiScores: {}
+    };
     window.AI_STUDENTS.forEach(ai => state.aiScores[ai.id] = 0);
-
     renderQuestion();
   }
 
   function renderQuestion() {
     const q = state.questions[state.currentIdx];
     state.answered = false;
-    state.timeLeft = TIME_PER_QUESTION;
+    state.timeLeft = window.CONFIG.gameplay.quizTimePerQuestion;
 
-    document.getElementById("quizProgress").textContent =
-      `Question ${state.currentIdx + 1} / ${state.questions.length}`;
+    document.getElementById("quizProgress").textContent = `Question ${state.currentIdx + 1} / ${state.questions.length}`;
     document.getElementById("questionText").textContent = q.q;
     document.getElementById("scoreDisplay").textContent = state.score;
     document.getElementById("streakDisplay").textContent = state.streak;
@@ -78,20 +54,18 @@ window.QuizEngine = (function () {
       btn.onclick = () => handleAnswer(i);
       answersDiv.appendChild(btn);
     });
-
     startTimer();
   }
 
   function startTimer() {
     clearInterval(state.timer);
-    const timerEl = document.getElementById("timer");
-    timerEl.textContent = state.timeLeft + "s";
-    timerEl.classList.remove("warning");
-
+    const el = document.getElementById("timer");
+    el.textContent = state.timeLeft + "s";
+    el.classList.remove("warning");
     state.timer = setInterval(() => {
       state.timeLeft--;
-      timerEl.textContent = state.timeLeft + "s";
-      if (state.timeLeft <= 5) timerEl.classList.add("warning");
+      el.textContent = state.timeLeft + "s";
+      if (state.timeLeft <= 5) el.classList.add("warning");
       if (state.timeLeft <= 0) {
         clearInterval(state.timer);
         if (!state.answered) handleAnswer(-1);
@@ -113,32 +87,22 @@ window.QuizEngine = (function () {
       state.correct++;
       state.streak++;
       state.bestStreak = Math.max(state.bestStreak, state.streak);
-      const base = 100;
-      const streakBonus = state.streak * 20;
-      const timeBonus = state.timeLeft * 5;
-      state.score += base + streakBonus + timeBonus;
+      state.score += 100 + state.streak * 20 + state.timeLeft * 5;
     } else {
       if (idx >= 0) btns[idx].classList.add("wrong");
       btns[q.correctIdx].classList.add("correct");
       state.streak = 0;
     }
-
     document.getElementById("scoreDisplay").textContent = state.score;
     document.getElementById("streakDisplay").textContent = state.streak;
 
-    // Real AI answering
-    window.AI_STUDENTS.forEach(ai => {
-      state.aiScores[ai.id] += window.aiSimulateAnswer(ai);
-    });
+    window.AI_STUDENTS.forEach(ai => { state.aiScores[ai.id] += window.aiSimulateAnswer(ai); });
     renderScoreboard();
 
     setTimeout(() => {
       state.currentIdx++;
-      if (state.currentIdx >= state.questions.length) {
-        finish();
-      } else {
-        renderQuestion();
-      }
+      if (state.currentIdx >= state.questions.length) finish();
+      else renderQuestion();
     }, 1400);
   }
 
@@ -146,15 +110,10 @@ window.QuizEngine = (function () {
     const sb = document.getElementById("scoreboard");
     if (!sb) return;
     const rows = [
-      { id: "player", name: "YOU", score: state.score, player: true },
-      ...window.AI_STUDENTS.map(ai => ({ id: ai.id, name: ai.name.split(" ")[0], score: state.aiScores[ai.id], player: false }))
+      { name: "YOU", score: state.score, player: true },
+      ...window.AI_STUDENTS.map(ai => ({ name: ai.name.split(" ")[0], score: state.aiScores[ai.id], player: false }))
     ].sort((a, b) => b.score - a.score);
-
-    sb.innerHTML = rows.map(r =>
-      `<div class="scoreboard-row ${r.player ? 'player' : ''}">
-        <span>${r.name}</span><span>${r.score}</span>
-      </div>`
-    ).join("");
+    sb.innerHTML = rows.map(r => `<div class="scoreboard-row ${r.player ? 'player' : ''}"><span>${r.name}</span><span>${r.score}</span></div>`).join("");
   }
 
   function finish() {
@@ -171,37 +130,33 @@ window.QuizEngine = (function () {
     subj.total += state.questions.length;
     subj.best = Math.max(subj.best, state.correct);
 
-    const wrong = state.questions.length - state.correct;
-    const cpDelta = state.correct * 10 - wrong * 5;
+    const g = window.CONFIG.gameplay;
+    const cpDelta = state.correct * g.cpPerCorrect + (state.questions.length - state.correct) * g.cpPerWrong;
     window.ANHS.applyCPChange(st, cpDelta);
-
-    // Run ranking evaluation for class changes/expulsion
     const events = window.Ranking.evaluate(st);
 
-    // Collect AI reactions based on final scores
     const reactions = window.AI_STUDENTS.map(ai => {
       const aiScore = state.aiScores[ai.id];
       const cat = window.aiReactionCategory(aiScore, state.score);
       return { ai, aiScore, line: window.aiLine(ai.id, cat) };
     }).sort((a, b) => b.aiScore - a.aiScore);
 
-    // Grow AI skill after each quiz (they get harder over time)
     window.AI_STUDENTS.forEach(ai => window.aiGrow(ai));
-
     window.ANHS.saveState(st);
 
     document.getElementById("quizScreen").classList.add("hidden");
     const result = document.getElementById("resultScreen");
     result.classList.remove("hidden");
 
-    // Build events banner
+    if (st.expelled) {
+      result.innerHTML = `<div class="result-box"><h1 style="color:var(--danger);">EXPELLED</h1><p class="subtitle">You have been removed from ANHS.</p><button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button></div>`;
+      return;
+    }
+
     const eventsHtml = events.length
-      ? `<div class="card" style="border-left-color:${events.some(e=>e.type==='expelled'||e.type==='demotion') ? 'var(--danger)' : 'var(--safe)'}; margin-top:1rem;">
-           ${events.map(e => `<div style="padding:0.25rem 0; font-weight:${e.type==='expelled'?'900':'600'};">${e.message}</div>`).join("")}
-         </div>`
+      ? `<div class="card" style="border-left-color:${events.some(e => e.type === 'expelled' || e.type === 'demotion') ? 'var(--danger)' : 'var(--safe)'}; margin-top:1rem;">${events.map(e => `<div style="padding:0.25rem 0;">${e.message}</div>`).join("")}</div>`
       : "";
 
-    // Build reactions list
     const reactionsHtml = reactions.map(r => {
       const beat = r.aiScore < state.score;
       return `<div style="display:flex; justify-content:space-between; gap:1rem; padding:0.5rem 0; border-bottom:1px solid #333;">
@@ -213,16 +168,6 @@ window.QuizEngine = (function () {
       </div>`;
     }).join("");
 
-    if (st.expelled) {
-      result.innerHTML = `
-        <div class="result-box">
-          <h1 style="color:var(--danger);">EXPELLED</h1>
-          <p class="subtitle">You have been removed from ANHS.</p>
-          <button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button>
-        </div>`;
-      return;
-    }
-
     result.innerHTML = `
       <div class="result-box">
         <h2>Quiz Complete</h2>
@@ -230,10 +175,7 @@ window.QuizEngine = (function () {
         <div class="result-detail">Score: ${state.score} · Best Streak: ${state.bestStreak}</div>
         <div class="result-detail">CP Change: <span style="color:${cpDelta >= 0 ? 'var(--safe)' : 'var(--danger)'}; font-weight:700;">${cpDelta >= 0 ? '+' : ''}${cpDelta}</span></div>
       </div>
-      <div class="card mt-1">
-        <h3>Classmate Reactions</h3>
-        ${reactionsHtml}
-      </div>
+      <div class="card mt-1"><h3>Classmate Reactions</h3>${reactionsHtml}</div>
       ${eventsHtml}
       <div class="mt-2 text-center">
         <a href="index.html" class="btn">Back to Dashboard</a>
