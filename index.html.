@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANHS — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
 
+  <div class="container">
+    <h1>Classroom of the Elite</h1>
+    <p class="subtitle">Welcome back, Student. The hierarchy awaits.</p>
+
+    <!-- CLASS + DANGER -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Current Class</div>
+          <div id="classBadge" class="class-badge">D</div>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Class Points</div>
+          <div id="cpValue" style="font-size:1.8rem; font-weight:700;">1000</div>
+          <div class="danger-meter"><div id="dangerFill" class="danger-fill" style="width:0%"></div></div>
+          <div id="dangerLabel" style="font-size:0.8rem; color:var(--anhs-grey); margin-top:0.25rem;">Safe</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="card-grid">
+      <div class="stat-card"><div class="label">Total Score</div><div class="value" id="statScore">0</div></div>
+      <div class="stat-card"><div class="label">Quizzes</div><div class="value" id="statQuizzes">0</div></div>
+      <div class="stat-card"><div class="label">Accuracy</div><div class="value" id="statAccuracy">—</div></div>
+      <div class="stat-card"><div class="label">Best Streak</div><div class="value" id="statStreak">0</div></div>
+    </div>
+
+    <!-- SUBJECT STATS -->
+    <div class="card">
+      <h2>Subject Mastery</h2>
+      <div id="subjectStats"></div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card text-center">
+      <h2>Enter the Arena</h2>
+      <p style="color:var(--anhs-grey); margin-bottom:1rem;">Choose your subject and prove your worth.</p>
+      <a href="quiz.html?subject=math"    class="btn" style="margin:0.25rem;">Math</a>
+      <a href="quiz.html?subject=science" class="btn" style="margin:0.25rem;">Science</a>
+      <a href="quiz.html?subject=english" class="btn" style="margin:0.25rem;">English</a>
+    </div>
+
+    <div class="text-center mt-2">
+      <button class="btn btn-secondary" onclick="if(confirm('Reset all progress?')){ANHS.resetState(); location.reload();}">Reset Progress</button>
+    </div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    renderNav("home");
+    const state = ANHS.loadState();
+
+    if (state.expelled) {
+      document.body.innerHTML = `
+        <div class="container text-center" style="padding-top:4rem;">
+          <h1 style="color:var(--danger);">EXPELLED</h1>
+          <p class="subtitle">You have been removed from ANHS.</p>
+          <button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button>
+        </div>`;
+    } else {
+      document.getElementById("classBadge").textContent = state.classRank;
+      document.getElementById("classBadge").className = "class-badge class-" + state.classRank;
+      document.getElementById("cpValue").textContent = state.classPoints;
+
+      const dangerPct = (state.dangerLevel / 3) * 100;
+      document.getElementById("dangerFill").style.width = dangerPct + "%";
+      const labels = ["Safe", "Caution", "Warning", "CRITICAL — Expulsion imminent"];
+      document.getElementById("dangerLabel").textContent = labels[state.dangerLevel];
+      document.getElementById("dangerLabel").style.color = state.dangerLevel >= 2 ? "var(--danger)" : "var(--anhs-grey)";
+
+      document.getElementById("statScore").textContent = state.totalScore;
+      document.getElementById("statQuizzes").textContent = state.quizzesTaken;
+      const acc = state.questionsTotal > 0 ? Math.round((state.correctTotal / state.questionsTotal) * 100) + "%" : "—";
+      document.getElementById("statAccuracy").textContent = acc;
+      document.getElementById("statStreak").textContent = state.bestStreak;
+
+      const subjects = ["math", "science", "english"];
+      document.getElementById("subjectStats").innerHTML = subjects.map(s => {
+        const st = state.subjectStats[s];
+        const pct = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+        return `
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+              <span style="text-transform:capitalize; font-weight:600;">${s}</span>
+              <span style="color:var(--anhs-grey);">${st.correct}/${st.total} (${pct}%)</span>
+            </div>
+            <div class="danger-meter"><div class="danger-fill" style="width:${pct}%; background:var(--anhs-red);"></div></div>
+          </div>`;
+      }).join("");
+    }
+  </script>
+</body>
+</html>
