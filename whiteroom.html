@@ -1,7 +1,49 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>ANHS — White Room</title><link rel="stylesheet" href="css/style.css"></head>
-<body class="whiteroom"><nav id="nav"></nav>
-<div class="container"><h1>White Room</h1><p class="subtitle">Rapid-fire drills coming in Drop 3.</p>
-<a href="index.html" class="btn">Back to Dashboard</a></div>
-<script src="js/state.js"></script><script src="js/nav.js"></script>
-<script>renderNav("whiteroom");</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANHS — White Room</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="whiteroom">
+  <nav id="nav"></nav>
+  <div class="container">
+    <h1>White Room</h1>
+    <p class="subtitle">Speed. Precision. No mercy.</p>
+
+    <div id="introCard" class="card text-center">
+      <h2>Rapid-Fire Drill</h2>
+      <p style="margin:1rem 0; color:#555;">
+        <strong>15 questions</strong> · <strong>5 seconds each</strong><br>
+        Mental math &amp; pattern recognition.<br><br>
+        <span style="color:#2e7d32; font-weight:700;">90%+ → +200 CP (ELITE)</span><br>
+        <span style="color:#1565c0; font-weight:700;">70%+ → +100 CP</span><br>
+        <span style="color:#555; font-weight:700;">50%+ → +20 CP</span><br>
+        <span style="color:#c62828; font-weight:700;">Below 50% → −80 CP</span>
+      </p>
+      <button class="btn" onclick="WhiteRoom.start()">Begin Drill</button>
+    </div>
+
+    <div id="drillScreen" class="card hidden">
+      <div class="quiz-header">
+        <span id="drillProgress" style="color:#666;"></span>
+        <span id="drillTimer" class="timer">5s</span>
+      </div>
+      <div class="quiz-header">
+        <span>Correct: <strong id="drillCorrect">0</strong></span>
+      </div>
+      <div id="drillQuestion" class="question-text"></div>
+      <div id="drillAnswers" class="answers"></div>
+    </div>
+
+    <div id="drillResult" class="hidden"></div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/ranking.js"></script>
+  <script src="js/whiteroom.js"></script>
+  <script>renderNav("whiteroom");</script>
+</body>
+</html>
