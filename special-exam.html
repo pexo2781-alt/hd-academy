@@ -64,9 +64,10 @@
     function startExam() {
       // Build 10 mixed questions
       const all = [];
-      ["math", "science", "english"].forEach(sub => {
-      (window.CONFIG.questions[sub] || []).forEach(q => all.push({ ...q, subject: sub }));
-      });
+     ["math", "science", "english"].forEach(sub => {
+  const bank = (window.CONFIG.questions[sub] && window.CONFIG.questions[sub].written) || [];
+  bank.forEach(q => all.push({ ...q, subject: sub }));
+});
       const picked = shuffle(all).slice(0, EXAM_QUESTIONS).map(q => {
         const indexed = q.a.map((text, i) => ({ text, isCorrect: i === q.c }));
         const shuffled = shuffle(indexed);
