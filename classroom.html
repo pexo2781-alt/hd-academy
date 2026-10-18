@@ -1,7 +1,25 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>ANHS — Classroom</title><link rel="stylesheet" href="css/style.css"></head>
-<body><nav id="nav"></nav>
-<div class="container"><h1>Classroom</h1><p class="subtitle">AI classmates arrive in Drop 2.</p>
-<a href="index.html" class="btn">Back to Dashboard</a></div>
-<script src="js/state.js"></script><script src="js/nav.js"></script>
-<script>renderNav("classroom");</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANHS — Classroom</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
+  <div class="container">
+    <h1>Classroom</h1>
+    <p class="subtitle">Your classmates. Their eyes are on you.</p>
+    <div id="classmatesGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;"></div>
+    <div class="text-center mt-2">
+      <a href="index.html" class="btn">Back to Dashboard</a>
+    </div>
+  </div>
+  <script src="js/state.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/ai-students.js"></script>
+  <script src="js/classroom.js"></script>
+  <script>renderNav("classroom");</script>
+</body>
+</html>
