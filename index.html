@@ -58,12 +58,19 @@
 
     <!-- ACTIONS -->
     <div class="card text-center">
-      <h2>Enter the Arena</h2>
-      <p style="color:var(--anhs-grey); margin-bottom:1rem;">Choose your subject and prove your worth.</p>
-      <a href="quiz.html?subject=math"    class="btn" style="margin:0.25rem;">Math</a>
-      <a href="quiz.html?subject=science" class="btn" style="margin:0.25rem;">Science</a>
-      <a href="quiz.html?subject=english" class="btn" style="margin:0.25rem;">English</a>
-    </div>
+  <h2>Enter the Arena</h2>
+  <p style="color:var(--anhs-grey); margin-bottom:1rem;">Quizzes, puzzles, and drills — all grant CP.</p>
+  <div style="margin-bottom:1rem;">
+    <a href="quiz.html?subject=math"    class="btn" style="margin:0.25rem;">Math Quiz</a>
+    <a href="quiz.html?subject=science" class="btn" style="margin:0.25rem;">Science Quiz</a>
+    <a href="quiz.html?subject=english" class="btn" style="margin:0.25rem;">English Quiz</a>
+  </div>
+  <div>
+    <a href="booklet.html"   class="btn btn-secondary" style="margin:0.25rem;">Booklet Puzzles</a>
+    <a href="whiteroom.html" class="btn btn-secondary" style="margin:0.25rem;">White Room</a>
+    <a href="special-exam.html" class="btn btn-secondary" style="margin:0.25rem;">Special Exam</a>
+  </div>
+</div>
 
     <div class="text-center mt-2">
       <button class="btn btn-secondary" onclick="if(confirm('Reset all progress?')){ANHS.resetState(); location.reload();}">Reset Progress</button>
