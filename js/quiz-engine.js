@@ -1,11 +1,11 @@
 // ============================================
-// quiz-engine.js — Timer, scoring, streaks, results
+// quiz-engine.js — Now with real AI classmates
 // ============================================
 
 window.QuizEngine = (function () {
 
   const QUESTIONS_PER_QUIZ = 8;
-  const TIME_PER_QUESTION = 15; // seconds
+  const TIME_PER_QUESTION = 15;
 
   let state = {
     subject: "math",
@@ -17,12 +17,9 @@ window.QuizEngine = (function () {
     score: 0,
     timer: null,
     timeLeft: 0,
-    answered: false
+    answered: false,
+    aiScores: {}
   };
-
-  // Simple 1v1+AI score simulation for this drop (real AI in Drop 2)
-  const AI_NAMES = ["Horikita", "Koenji", "Kushida", "Ayanokoji"];
-  let aiScores = {};
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -38,7 +35,6 @@ window.QuizEngine = (function () {
     const bank = window.QUESTIONS[subject];
     if (!bank || bank.length === 0) { alert("No questions for subject: " + subject); return; }
 
-    // Pick questions, shuffle answer options
     const picked = shuffle(bank).slice(0, Math.min(QUESTIONS_PER_QUIZ, bank.length)).map(q => {
       const indexed = q.a.map((text, i) => ({ text, isCorrect: i === q.c }));
       const shuffled = shuffle(indexed);
@@ -56,9 +52,8 @@ window.QuizEngine = (function () {
     state.bestStreak = 0;
     state.score = 0;
     state.answered = false;
-
-    aiScores = {};
-    AI_NAMES.forEach(n => aiScores[n] = 0);
+    state.aiScores = {};
+    window.AI_STUDENTS.forEach(ai => state.aiScores[ai.id] = 0);
 
     renderQuestion();
   }
@@ -99,7 +94,7 @@ window.QuizEngine = (function () {
       if (state.timeLeft <= 5) timerEl.classList.add("warning");
       if (state.timeLeft <= 0) {
         clearInterval(state.timer);
-        if (!state.answered) handleAnswer(-1); // timeout
+        if (!state.answered) handleAnswer(-1);
       }
     }, 1000);
   }
@@ -118,7 +113,6 @@ window.QuizEngine = (function () {
       state.correct++;
       state.streak++;
       state.bestStreak = Math.max(state.bestStreak, state.streak);
-      // Base 100 + streak bonus + time bonus
       const base = 100;
       const streakBonus = state.streak * 20;
       const timeBonus = state.timeLeft * 5;
@@ -132,9 +126,9 @@ window.QuizEngine = (function () {
     document.getElementById("scoreDisplay").textContent = state.score;
     document.getElementById("streakDisplay").textContent = state.streak;
 
-    // Simulated AI performance
-    AI_NAMES.forEach(n => {
-      if (Math.random() < 0.65) aiScores[n] += 80 + Math.floor(Math.random() * 100);
+    // Real AI answering
+    window.AI_STUDENTS.forEach(ai => {
+      state.aiScores[ai.id] += window.aiSimulateAnswer(ai);
     });
     renderScoreboard();
 
@@ -152,8 +146,8 @@ window.QuizEngine = (function () {
     const sb = document.getElementById("scoreboard");
     if (!sb) return;
     const rows = [
-      { name: "YOU", score: state.score, player: true },
-      ...AI_NAMES.map(n => ({ name: n, score: aiScores[n], player: false }))
+      { id: "player", name: "YOU", score: state.score, player: true },
+      ...window.AI_STUDENTS.map(ai => ({ id: ai.id, name: ai.name.split(" ")[0], score: state.aiScores[ai.id], player: false }))
     ].sort((a, b) => b.score - a.score);
 
     sb.innerHTML = rows.map(r =>
@@ -177,26 +171,73 @@ window.QuizEngine = (function () {
     subj.total += state.questions.length;
     subj.best = Math.max(subj.best, state.correct);
 
-    // CP change: +correct * 10, -wrong * 5
     const wrong = state.questions.length - state.correct;
     const cpDelta = state.correct * 10 - wrong * 5;
     window.ANHS.applyCPChange(st, cpDelta);
+
+    // Run ranking evaluation for class changes/expulsion
+    const events = window.Ranking.evaluate(st);
+
+    // Collect AI reactions based on final scores
+    const reactions = window.AI_STUDENTS.map(ai => {
+      const aiScore = state.aiScores[ai.id];
+      const cat = window.aiReactionCategory(aiScore, state.score);
+      return { ai, aiScore, line: window.aiLine(ai.id, cat) };
+    }).sort((a, b) => b.aiScore - a.aiScore);
+
+    // Grow AI skill after each quiz (they get harder over time)
+    window.AI_STUDENTS.forEach(ai => window.aiGrow(ai));
 
     window.ANHS.saveState(st);
 
     document.getElementById("quizScreen").classList.add("hidden");
     const result = document.getElementById("resultScreen");
     result.classList.remove("hidden");
+
+    // Build events banner
+    const eventsHtml = events.length
+      ? `<div class="card" style="border-left-color:${events.some(e=>e.type==='expelled'||e.type==='demotion') ? 'var(--danger)' : 'var(--safe)'}; margin-top:1rem;">
+           ${events.map(e => `<div style="padding:0.25rem 0; font-weight:${e.type==='expelled'?'900':'600'};">${e.message}</div>`).join("")}
+         </div>`
+      : "";
+
+    // Build reactions list
+    const reactionsHtml = reactions.map(r => {
+      const beat = r.aiScore < state.score;
+      return `<div style="display:flex; justify-content:space-between; gap:1rem; padding:0.5rem 0; border-bottom:1px solid #333;">
+        <div>
+          <strong style="color:${beat ? 'var(--safe)' : 'var(--danger)'};">${r.ai.name}</strong>
+          <div style="color:var(--anhs-grey); font-size:0.9rem; font-style:italic;">"${r.line}"</div>
+        </div>
+        <div style="font-weight:700;">${r.aiScore}</div>
+      </div>`;
+    }).join("");
+
+    if (st.expelled) {
+      result.innerHTML = `
+        <div class="result-box">
+          <h1 style="color:var(--danger);">EXPELLED</h1>
+          <p class="subtitle">You have been removed from ANHS.</p>
+          <button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button>
+        </div>`;
+      return;
+    }
+
     result.innerHTML = `
       <div class="result-box">
         <h2>Quiz Complete</h2>
         <div class="result-score">${state.correct} / ${state.questions.length}</div>
         <div class="result-detail">Score: ${state.score} · Best Streak: ${state.bestStreak}</div>
         <div class="result-detail">CP Change: <span style="color:${cpDelta >= 0 ? 'var(--safe)' : 'var(--danger)'}; font-weight:700;">${cpDelta >= 0 ? '+' : ''}${cpDelta}</span></div>
-        <div class="mt-2">
-          <a href="index.html" class="btn">Back to Dashboard</a>
-          <button class="btn btn-secondary" onclick="location.reload()">Retry</button>
-        </div>
+      </div>
+      <div class="card mt-1">
+        <h3>Classmate Reactions</h3>
+        ${reactionsHtml}
+      </div>
+      ${eventsHtml}
+      <div class="mt-2 text-center">
+        <a href="index.html" class="btn">Back to Dashboard</a>
+        <button class="btn btn-secondary" onclick="location.reload()">Retry</button>
       </div>`;
   }
 
