@@ -13,19 +13,32 @@
     <h1>Classroom of the Elite</h1>
     <p class="subtitle">Welcome back, Student. The hierarchy awaits.</p>
 
-    <!-- CLASS + DANGER -->
+    <!-- CLASS + DANGER + PROTECTION -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
         <div>
           <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Current Class</div>
           <div id="classBadge" class="class-badge">D</div>
         </div>
-        <div style="flex:1; min-width:200px;">
+        <div style="flex:1; min-width:220px;">
           <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Class Points</div>
           <div id="cpValue" style="font-size:1.8rem; font-weight:700;">1000</div>
           <div class="danger-meter"><div id="dangerFill" class="danger-fill" style="width:0%"></div></div>
           <div id="dangerLabel" style="font-size:0.8rem; color:var(--anhs-grey); margin-top:0.25rem;">Safe</div>
         </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Protection</div>
+          <div id="protectionValue" style="font-size:1.8rem; font-weight:700;">1</div>
+        </div>
+      </div>
+
+      <!-- Class progress to next tier -->
+      <div id="classProgressWrap" class="mt-1">
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--anhs-grey); margin-bottom:0.25rem;">
+          <span id="progressLabel">Progress to Class C</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="danger-meter"><div id="progressFill" class="danger-fill" style="width:0%; background:var(--anhs-red);"></div></div>
       </div>
     </div>
 
@@ -59,27 +72,44 @@
 
   <script src="js/state.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/ranking.js"></script>
   <script>
     renderNav("home");
     const state = ANHS.loadState();
 
     if (state.expelled) {
       document.body.innerHTML = `
+        <nav id="nav"></nav>
         <div class="container text-center" style="padding-top:4rem;">
           <h1 style="color:var(--danger);">EXPELLED</h1>
           <p class="subtitle">You have been removed from ANHS.</p>
           <button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button>
         </div>`;
+      renderNav("home");
     } else {
       document.getElementById("classBadge").textContent = state.classRank;
       document.getElementById("classBadge").className = "class-badge class-" + state.classRank;
       document.getElementById("cpValue").textContent = state.classPoints;
+      document.getElementById("protectionValue").textContent = state.protectionPoints;
 
+      // Danger meter
       const dangerPct = (state.dangerLevel / 3) * 100;
       document.getElementById("dangerFill").style.width = dangerPct + "%";
       const labels = ["Safe", "Caution", "Warning", "CRITICAL — Expulsion imminent"];
       document.getElementById("dangerLabel").textContent = labels[state.dangerLevel];
       document.getElementById("dangerLabel").style.color = state.dangerLevel >= 2 ? "var(--danger)" : "var(--anhs-grey)";
+
+      // Class progress
+      const prog = Ranking.classProgress(state);
+      if (prog.next) {
+        document.getElementById("progressLabel").textContent = `Progress to Class ${prog.next} (${prog.nextThreshold} CP)`;
+        document.getElementById("progressPct").textContent = prog.progressPct + "%";
+        document.getElementById("progressFill").style.width = prog.progressPct + "%";
+      } else {
+        document.getElementById("progressLabel").textContent = "MAX CLASS — Class A";
+        document.getElementById("progressPct").textContent = "Top";
+        document.getElementById("progressFill").style.width = "100%";
+      }
 
       document.getElementById("statScore").textContent = state.totalScore;
       document.getElementById("statQuizzes").textContent = state.quizzesTaken;
