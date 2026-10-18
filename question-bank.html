@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANHS — Question Bank</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
+  <div class="container">
+    <h1>Question Bank</h1>
+    <p class="subtitle">View, add, edit, or delete questions across all systems.</p>
 
+    <div id="qbTabs" style="margin-bottom:1rem; text-align:center;"></div>
+    <div id="qbContent"></div>
+
+    <div class="text-center mt-2">
+      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <script>renderNav("question-bank");</script>
+  <script src="js/question-bank.js"></script>
+</body>
+</html>
