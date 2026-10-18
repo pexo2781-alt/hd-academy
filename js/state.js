@@ -4,8 +4,8 @@
 
 const DEFAULT_STATE = {
   playerName: "Student",
-  classRank: "D",           // A, B, C, D
-  classPoints: 1000,         // CP — starts at 1000 like COTE
+  classRank: "D",
+  classPoints: 1000,
   totalScore: 0,
   quizzesTaken: 0,
   correctTotal: 0,
@@ -16,30 +16,30 @@ const DEFAULT_STATE = {
     science: { correct: 0, total: 0, best: 0 },
     english: { correct: 0, total: 0, best: 0 }
   },
-  dangerLevel: 0,            // 0-3 (3 = expulsion imminent)
+  dangerLevel: 0,
   protectionPoints: 1,
   specialExamsFailed: 0,
   expelled: false,
+  aiSkills: {},   // { horikita: 0.87, ... }
   lastPlayed: null
 };
 
-// Class thresholds (CP required to BE in that class)
-const CLASS_THRESHOLDS = {
-  A: 2000,
-  B: 1600,
-  C: 1300,
-  D: 0
-};
+const CLASS_THRESHOLDS = { A: 2000, B: 1600, C: 1300, D: 0 };
 
 function loadState() {
   try {
     const raw = localStorage.getItem("anhs_state");
-    if (!raw) return { ...DEFAULT_STATE };
+    if (!raw) return { ...DEFAULT_STATE, subjectStats: JSON.parse(JSON.stringify(DEFAULT_STATE.subjectStats)), aiSkills: {} };
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_STATE, ...parsed, subjectStats: { ...DEFAULT_STATE.subjectStats, ...(parsed.subjectStats || {}) } };
+    return {
+      ...DEFAULT_STATE,
+      ...parsed,
+      subjectStats: { ...DEFAULT_STATE.subjectStats, ...(parsed.subjectStats || {}) },
+      aiSkills: parsed.aiSkills || {}
+    };
   } catch (e) {
     console.warn("State load failed, using default.", e);
-    return { ...DEFAULT_STATE };
+    return { ...DEFAULT_STATE, subjectStats: JSON.parse(JSON.stringify(DEFAULT_STATE.subjectStats)), aiSkills: {} };
   }
 }
 
@@ -50,10 +50,9 @@ function saveState(state) {
 
 function resetState() {
   localStorage.removeItem("anhs_state");
-  return { ...DEFAULT_STATE };
+  return { ...DEFAULT_STATE, subjectStats: JSON.parse(JSON.stringify(DEFAULT_STATE.subjectStats)), aiSkills: {} };
 }
 
-// Compute class from CP
 function computeClass(cp) {
   if (cp >= CLASS_THRESHOLDS.A) return "A";
   if (cp >= CLASS_THRESHOLDS.B) return "B";
@@ -61,7 +60,6 @@ function computeClass(cp) {
   return "D";
 }
 
-// Recalculate danger level based on CP + failed exams
 function computeDanger(state) {
   let danger = 0;
   if (state.classPoints < 800) danger = 1;
@@ -70,13 +68,11 @@ function computeDanger(state) {
   return danger;
 }
 
-// Apply CP change + recompute class/danger + check expulsion
 function applyCPChange(state, delta) {
   state.classPoints = Math.max(0, state.classPoints + delta);
   state.classRank = computeClass(state.classPoints);
   state.dangerLevel = computeDanger(state);
 
-  // Expulsion check: 3 failed special exams OR CP hits 0
   if (state.specialExamsFailed >= 3 || state.classPoints <= 0) {
     if (state.protectionPoints > 0) {
       state.protectionPoints -= 1;
@@ -91,14 +87,8 @@ function applyCPChange(state, delta) {
   return state;
 }
 
-// Expose globally
 window.ANHS = {
-  DEFAULT_STATE,
-  CLASS_THRESHOLDS,
-  loadState,
-  saveState,
-  resetState,
-  computeClass,
-  computeDanger,
-  applyCPChange
+  DEFAULT_STATE, CLASS_THRESHOLDS,
+  loadState, saveState, resetState,
+  computeClass, computeDanger, applyCPChange
 };
