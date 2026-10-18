@@ -1,13 +1,12 @@
-
 // ============================================
-// ranking.js — Class demotion, protection points, expulsion, AI expulsion
+// ranking.js — Class demotion, protection, expulsion
 // ============================================
 
 window.Ranking = (function () {
+  const CLASS_ORDER = ["D", "C", "B", "A"];
 
-  const CLASS_ORDER = ["D", "C", "B", "A"]; // D = lowest
+  function getR() { return (window.CONFIG && window.CONFIG.ranking) || {}; }
 
-  // Called after a quiz or special exam to update class + danger
   function evaluate(st) {
     const oldClass = st.classRank;
     st.classRank = window.ANHS.computeClass(st.classPoints);
@@ -15,74 +14,58 @@ window.Ranking = (function () {
 
     let events = [];
 
-    // Class change?
     if (st.classRank !== oldClass) {
       const promoted = CLASS_ORDER.indexOf(st.classRank) > CLASS_ORDER.indexOf(oldClass);
       events.push({
         type: promoted ? "promotion" : "demotion",
-        from: oldClass,
-        to: st.classRank,
+        from: oldClass, to: st.classRank,
         message: promoted
           ? `Promoted to Class ${st.classRank}! The elite recognize you.`
           : `Demoted to Class ${st.classRank}. The fall is swift.`
       });
     }
 
-    // Danger escalation
     if (st.dangerLevel >= 3 && !st.expelled) {
-      events.push({
-        type: "danger",
-        message: "CRITICAL: You are one failure away from expulsion."
-      });
+      events.push({ type: "danger", message: "CRITICAL: You are one failure away from expulsion." });
     }
 
-    // Expulsion check
-    if (st.specialExamsFailed >= 3 || st.classPoints <= 0) {
+    const r = getR();
+    const expelLimit = r.examsFailedForExpulsion ?? 3;
+    if (st.specialExamsFailed >= expelLimit || st.classPoints <= 0) {
       if (st.protectionPoints > 0) {
         st.protectionPoints--;
         st.classPoints = Math.max(st.classPoints, 300);
         st.specialExamsFailed = 0;
         st.dangerLevel = window.ANHS.computeDanger(st);
         st.classRank = window.ANHS.computeClass(st.classPoints);
-        events.push({
-          type: "protected",
-          message: `Protection Point consumed! You survived expulsion. (${st.protectionPoints} left)`
-        });
+        events.push({ type: "protected", message: `Protection Point consumed! You survived. (${st.protectionPoints} left)` });
       } else {
         st.expelled = true;
-        events.push({
-          type: "expelled",
-          message: "You have been expelled from ANHS."
-        });
+        events.push({ type: "expelled", message: "You have been expelled from ANHS." });
       }
     }
-
     return events;
   }
 
-  // Called when a special exam is failed
   function failSpecialExam(st) {
+    const r = getR();
     st.specialExamsFailed++;
-    st.classPoints = Math.max(0, st.classPoints - 200);
+    st.classPoints = Math.max(0, st.classPoints - (r.failExamCPPenalty ?? 200));
     return evaluate(st);
   }
 
-  // Called when a special exam is passed
   function passSpecialExam(st) {
+    const r = getR();
     st.specialExamsFailed = Math.max(0, st.specialExamsFailed - 1);
-    st.classPoints += 300;
+    st.classPoints += (r.passExamCPReward ?? 300);
     return evaluate(st);
   }
 
-  // Award a protection point (e.g., 5 perfect quizzes in a row — future feature)
-  function awardProtection(st) {
-    st.protectionPoints++;
-    return evaluate(st);
-  }
+  function awardProtection(st) { st.protectionPoints++; return evaluate(st); }
 
-  // Get class progress info
   function classProgress(st) {
-    const thresholds = window.ANHS.CLASS_THRESHOLDS;
+    const cfg = window.CONFIG || {};
+    const thresholds = (cfg.ranking && cfg.ranking.classThresholds) || { A: 2000, B: 1600, C: 1300, D: 0 };
     const order = ["D", "C", "B", "A"];
     const idx = order.indexOf(st.classRank);
     const nextClass = idx < order.length - 1 ? order[idx + 1] : null;
@@ -95,14 +78,7 @@ window.Ranking = (function () {
       const inRange = st.classPoints - currentThreshold;
       progressPct = Math.min(100, Math.max(0, Math.round((inRange / range) * 100)));
     }
-
-    return {
-      current: st.classRank,
-      next: nextClass,
-      progressPct,
-      currentCP: st.classPoints,
-      nextThreshold
-    };
+    return { current: st.classRank, next: nextClass, progressPct, currentCP: st.classPoints, nextThreshold };
   }
 
   return { evaluate, failSpecialExam, passSpecialExam, awardProtection, classProgress };
