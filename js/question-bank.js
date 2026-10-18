@@ -1,59 +1,71 @@
 // ============================================
-// question-bank.js — View/edit all questions & puzzles
+// question-bank.js — V3: per-subject, per-type, modal editors
 // ============================================
 
 (function () {
   let cfg = window.CONFIG_API.load();
-  const tabs = ["math", "science", "english", "booklet:fillblank", "booklet:matching", "booklet:logicgrid"];
-  let activeTab = "math";
-
-  const tabLabels = {
-    "math": "Math",
-    "science": "Science",
-    "english": "English",
-    "booklet:fillblank": "Booklet — Fill-in-Blank",
-    "booklet:matching": "Booklet — Matching",
-    "booklet:logicgrid": "Booklet — Logic Grid"
+  const SUBJECTS = ["math", "science", "english"];
+  const TYPES = ["written", "fillblank", "matching", "logic"];
+  const TYPE_LABELS = {
+    written: "Written (MCQ)",
+    fillblank: "Fill in the Blank",
+    matching: "Matching",
+    logic: "Logic Grid"
   };
 
-  const container = document.getElementById("qbContent");
-  const tabBar = document.getElementById("qbTabs");
+  let activeSubject = "math";
+  let activeType = "written";
 
+  const tabsEl = document.getElementById("qbTabs");
+  const contentEl = document.getElementById("qbContent");
+
+  // ---------- TABS ----------
   function renderTabs() {
-    tabBar.innerHTML = tabs.map(t =>
-      `<button class="btn ${t === activeTab ? '' : 'btn-secondary'}" style="margin:0.25rem; font-size:0.85rem;" data-tab="${t}">${tabLabels[t]}</button>`
-    ).join("");
-    tabBar.querySelectorAll("button").forEach(b => {
-      b.onclick = () => { activeTab = b.dataset.tab; renderTabs(); renderContent(); };
-    });
+    tabsEl.innerHTML = `
+      <div style="margin-bottom:0.75rem;">
+        <strong style="color:var(--anhs-grey); font-size:0.8rem; text-transform:uppercase;">Subject:</strong>
+        ${SUBJECTS.map(s =>
+          `<button class="btn ${s === activeSubject ? '' : 'btn-secondary'}" style="margin:0.25rem; font-size:0.85rem;" onclick="window.qbSetSubject('${s}')">${s}</button>`
+        ).join("")}
+      </div>
+      <div>
+        <strong style="color:var(--anhs-grey); font-size:0.8rem; text-transform:uppercase;">Type:</strong>
+        ${TYPES.map(t =>
+          `<button class="btn ${t === activeType ? '' : 'btn-secondary'}" style="margin:0.25rem; font-size:0.85rem;" onclick="window.qbSetType('${t}')">${TYPE_LABELS[t]}</button>`
+        ).join("")}
+      </div>
+    `;
   }
 
+  window.qbSetSubject = function (s) { activeSubject = s; renderTabs(); renderContent(); };
+  window.qbSetType = function (t) { activeType = t; renderTabs(); renderContent(); };
+
+  // ---------- CONTENT ROUTER ----------
   function renderContent() {
-    if (activeTab === "math" || activeTab === "science" || activeTab === "english") {
-      renderMCQ(activeTab);
-    } else if (activeTab === "booklet:fillblank") {
-      renderFillblank();
-    } else if (activeTab === "booklet:matching") {
-      renderMatching();
-    } else if (activeTab === "booklet:logicgrid") {
-      renderLogic();
-    }
+    const bank = (cfg.questions[activeSubject] || {})[activeType] || [];
+    if (activeType === "written") renderMCQList(bank);
+    else if (activeType === "fillblank") renderFillblankList(bank);
+    else if (activeType === "matching") renderMatchingList(bank);
+    else if (activeType === "logic") renderLogicList(bank);
   }
 
-  // ---------- MCQs (Math/Science/English) ----------
-  function renderMCQ(subject) {
-    const list = cfg.questions[subject] || [];
-    container.innerHTML = `
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3 style="margin:0;">${list.length} question(s) in <strong>${subject}</strong></h3>
-          <button class="btn" onclick="window.qbAddMCQ('${subject}')">+ Add Question</button>
-        </div>
-        <div id="mcqList"></div>
-      </div>`;
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function escapeAttr(s) { return String(s).replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
 
+  function header(title, count, addLabel, addFn) {
+    return `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+      <h3 style="margin:0;">${count} ${title} <span style="color:var(--anhs-grey); font-size:0.85rem;">— ${activeSubject}/${activeType}</span></h3>
+      <button class="btn" onclick="window.${addFn}()">${addLabel}</button>
+    </div>`;
+  }
+
+  // ---------- LIST: WRITTEN ----------
+  function renderMCQList(list) {
+    contentEl.innerHTML = `<div class="card">${header("question(s)", list.length, "+ Add Question", "qbAddMCQ")}<div id="mcqList"></div></div>`;
     document.getElementById("mcqList").innerHTML = list.map((q, i) => `
-      <div class="card" style="background:#1a1a1a; margin-bottom:0.75rem;">
+      <div class="card" style="background:var(--anhs-dark); margin-bottom:0.75rem;">
         <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;">
           <div style="flex:1;">
             <div style="font-size:0.8rem; color:var(--anhs-grey); margin-bottom:0.25rem;">Q${i + 1}</div>
@@ -64,27 +76,19 @@
               </div>`).join("")}
           </div>
           <div style="display:flex; flex-direction:column; gap:0.25rem;">
-            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="window.qbEditMCQ('${subject}', ${i})">Edit</button>
-            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger);" onclick="window.qbDeleteMCQ('${subject}', ${i})">Delete</button>
+            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="window.qbEditMCQ(${i})">Edit</button>
+            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger); color:var(--danger);" onclick="window.qbDeleteMCQ(${i})">Delete</button>
           </div>
         </div>
       </div>
-    `).join("") || "<p style='color:var(--anhs-grey);'>No questions yet.</p>";
+    `).join("") || "<p style='color:var(--anhs-grey);'>No questions yet. Click + Add.</p>";
   }
 
-  // ---------- FILL BLANK ----------
-  function renderFillblank() {
-    const list = cfg.booklet.fillblank || [];
-    container.innerHTML = `
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3 style="margin:0;">${list.length} fill-in-the-blank puzzle(s)</h3>
-          <button class="btn" onclick="window.qbAddFillblank()">+ Add Puzzle</button>
-        </div>
-        <div id="fbList"></div>
-      </div>`;
+  // ---------- LIST: FILLBLANK ----------
+  function renderFillblankList(list) {
+    contentEl.innerHTML = `<div class="card">${header("puzzle(s)", list.length, "+ Add Puzzle", "qbAddFillblank")}<div id="fbList"></div></div>`;
     document.getElementById("fbList").innerHTML = list.map((p, i) => `
-      <div class="card" style="background:#1a1a1a; margin-bottom:0.75rem;">
+      <div class="card" style="background:var(--anhs-dark); margin-bottom:0.75rem;">
         <div style="display:flex; justify-content:space-between; gap:1rem;">
           <div style="flex:1;">
             <div style="font-size:0.8rem; color:var(--anhs-grey);">Puzzle ${i + 1}</div>
@@ -94,26 +98,18 @@
           </div>
           <div style="display:flex; flex-direction:column; gap:0.25rem;">
             <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="window.qbEditFillblank(${i})">Edit</button>
-            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger);" onclick="window.qbDeleteFillblank(${i})">Delete</button>
+            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger); color:var(--danger);" onclick="window.qbDeleteFillblank(${i})">Delete</button>
           </div>
         </div>
       </div>
     `).join("") || "<p style='color:var(--anhs-grey);'>No puzzles yet.</p>";
   }
 
-  // ---------- MATCHING ----------
-  function renderMatching() {
-    const list = cfg.booklet.matching || [];
-    container.innerHTML = `
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3 style="margin:0;">${list.length} matching puzzle(s)</h3>
-          <button class="btn" onclick="window.qbAddMatching()">+ Add Matching Set</button>
-        </div>
-        <div id="matchingList"></div>
-      </div>`;
+  // ---------- LIST: MATCHING ----------
+  function renderMatchingList(list) {
+    contentEl.innerHTML = `<div class="card">${header("matching set(s)", list.length, "+ Add Matching Set", "qbAddMatching")}<div id="matchingList"></div></div>`;
     document.getElementById("matchingList").innerHTML = list.map((m, i) => `
-      <div class="card" style="background:#1a1a1a; margin-bottom:0.75rem;">
+      <div class="card" style="background:var(--anhs-dark); margin-bottom:0.75rem;">
         <div style="display:flex; justify-content:space-between; gap:1rem;">
           <div style="flex:1;">
             <div style="font-weight:700; margin-bottom:0.5rem;">${escapeHtml(m.title)}</div>
@@ -121,26 +117,18 @@
           </div>
           <div style="display:flex; flex-direction:column; gap:0.25rem;">
             <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="window.qbEditMatching(${i})">Edit</button>
-            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger);" onclick="window.qbDeleteMatching(${i})">Delete</button>
+            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger); color:var(--danger);" onclick="window.qbDeleteMatching(${i})">Delete</button>
           </div>
         </div>
       </div>
     `).join("") || "<p style='color:var(--anhs-grey);'>No matching sets yet.</p>";
   }
 
-  // ---------- LOGIC ----------
-  function renderLogic() {
-    const list = cfg.booklet.logicgrid || [];
-    container.innerHTML = `
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3 style="margin:0;">${list.length} logic puzzle(s)</h3>
-          <button class="btn" onclick="window.qbAddLogic()">+ Add Logic Puzzle</button>
-        </div>
-        <div id="logicList"></div>
-      </div>`;
+  // ---------- LIST: LOGIC ----------
+  function renderLogicList(list) {
+    contentEl.innerHTML = `<div class="card">${header("logic puzzle(s)", list.length, "+ Add Logic Puzzle", "qbAddLogic")}<div id="logicList"></div></div>`;
     document.getElementById("logicList").innerHTML = list.map((l, i) => `
-      <div class="card" style="background:#1a1a1a; margin-bottom:0.75rem;">
+      <div class="card" style="background:var(--anhs-dark); margin-bottom:0.75rem;">
         <div style="display:flex; justify-content:space-between; gap:1rem;">
           <div style="flex:1;">
             <div style="font-weight:700; margin-bottom:0.5rem;">${escapeHtml(l.title)}</div>
@@ -152,117 +140,289 @@
           </div>
           <div style="display:flex; flex-direction:column; gap:0.25rem;">
             <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="window.qbEditLogic(${i})">Edit</button>
-            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger);" onclick="window.qbDeleteLogic(${i})">Delete</button>
+            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem; border-color:var(--danger); color:var(--danger);" onclick="window.qbDeleteLogic(${i})">Delete</button>
           </div>
         </div>
       </div>
     `).join("") || "<p style='color:var(--anhs-grey);'>No logic puzzles yet.</p>";
   }
 
-  // ---------- EDITORS (use prompt/JSON for simplicity) ----------
+  // ---------- MODAL SYSTEM ----------
+  function openModal(title, bodyHtml, onSave) {
+    closeModal();
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.id = "qbModal";
+    backdrop.innerHTML = `
+      <div class="modal">
+        <h2>${title}</h2>
+        <div id="modalBody">${bodyHtml}</div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="window.qbCloseModal()">Cancel</button>
+          <button class="btn" id="modalSaveBtn">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(backdrop);
+    document.getElementById("modalSaveBtn").onclick = () => {
+      const ok = onSave();
+      if (ok !== false) closeModal();
+    };
+  }
+
+  window.qbCloseModal = function () {
+    const m = document.getElementById("qbModal");
+    if (m) m.remove();
+  };
+
+  function closeModal() { window.qbCloseModal(); }
+
   function persist() {
     window.CONFIG_API.save(cfg);
     window.CONFIG = cfg;
   }
 
-  window.qbAddMCQ = function (subject) {
-    const raw = prompt("Paste MCQ as JSON:\n{\"q\":\"...\",\"a\":[\"opt1\",\"opt2\",\"opt3\",\"opt4\"],\"c\":0}\n\n(c = index of correct answer, 0-based)");
-    if (!raw) return;
-    try {
-      const obj = JSON.parse(raw);
-      if (!obj.q || !Array.isArray(obj.a) || typeof obj.c !== "number") throw new Error("Missing q/a/c");
-      cfg.questions[subject].push(obj);
-      persist();
-      renderContent();
-    } catch (e) { alert("Invalid JSON: " + e.message); }
-  };
+  // ---------- WRITTEN EDITOR ----------
+  function openMCQEditor(index) {
+    const isNew = index === undefined || index === null;
+    const q = isNew ? { q: "", a: ["", "", "", ""], c: 0 } : JSON.parse(JSON.stringify(cfg.questions[activeSubject].written[index]));
 
-  window.qbEditMCQ = function (subject, idx) {
-    const q = cfg.questions[subject][idx];
-    const raw = prompt("Edit MCQ as JSON:", JSON.stringify(q, null, 2));
-    if (!raw) return;
-    try {
-      const obj = JSON.parse(raw);
-      cfg.questions[subject][idx] = obj;
-      persist(); renderContent();
-    } catch (e) { alert("Invalid JSON: " + e.message); }
-  };
+    function renderOptions() {
+      return q.a.map((opt, i) => `
+        <div class="option-row">
+          <input type="radio" name="correctOpt" ${i === q.c ? "checked" : ""} onchange="window.qbSetCorrect(${i})">
+          <input type="text" class="opt-input" data-idx="${i}" value="${escapeAttr(opt)}" placeholder="Option ${i + 1}" oninput="window.qbUpdateOpt(${i}, this.value)">
+          ${q.a.length > 2 ? `<button class="remove-opt" onclick="window.qbRemoveOpt(${i})">×</button>` : ""}
+        </div>`).join("");
+    }
 
-  window.qbDeleteMCQ = function (subject, idx) {
-    if (!confirm("Delete this question?")) return;
-    cfg.questions[subject].splice(idx, 1);
-    persist(); renderContent();
-  };
+    window.qbSetCorrect = function (i) { q.c = i; };
+    window.qbUpdateOpt = function (i, v) { q.a[i] = v; };
+    window.qbRemoveOpt = function (i) {
+      q.a.splice(i, 1);
+      if (q.c >= q.a.length) q.c = 0;
+      document.getElementById("optList").innerHTML = renderOptions();
+    };
+    window.qbAddOpt = function () {
+      q.a.push("");
+      document.getElementById("optList").innerHTML = renderOptions();
+    };
 
-  window.qbAddFillblank = function () {
-    const raw = prompt("Paste fill-blank as JSON:\n{\"sentence\":\"The sky is ___.\",\"answer\":\"blue\",\"hint\":\"Color\"}");
-    if (!raw) return;
-    try {
-      const obj = JSON.parse(raw);
-      cfg.booklet.fillblank.push(obj);
-      persist(); renderContent();
-    } catch (e) { alert("Invalid JSON: " + e.message); }
-  };
+    openModal(
+      isNew ? "New Written Question" : "Edit Written Question",
+      `
+        <div class="form-row">
+          <label>Question</label>
+          <input type="text" id="mcqQuestion" value="${escapeAttr(q.q)}" placeholder="What is 2+2?">
+        </div>
+        <div class="form-row">
+          <label>Options (select radio for correct answer)</label>
+          <div id="optList">${renderOptions()}</div>
+          <button class="add-row-btn" onclick="window.qbAddOpt()">+ Add option</button>
+        </div>
+      `,
+      () => {
+        q.q = document.getElementById("mcqQuestion").value.trim();
+        if (!q.q) { alert("Question is required."); return false; }
+        if (q.a.length < 2) { alert("Need at least 2 options."); return false; }
+        if (q.a.some(o => !o.trim())) { alert("All options must be filled."); return false; }
 
-  window.qbEditFillblank = function (idx) {
-    const p = cfg.booklet.fillblank[idx];
-    const raw = prompt("Edit puzzle:", JSON.stringify(p, null, 2));
-    if (!raw) return;
-    try { cfg.booklet.fillblank[idx] = JSON.parse(raw); persist(); renderContent(); }
-    catch (e) { alert("Invalid JSON: " + e.message); }
-  };
-
-  window.qbDeleteFillblank = function (idx) {
-    if (!confirm("Delete this puzzle?")) return;
-    cfg.booklet.fillblank.splice(idx, 1);
-    persist(); renderContent();
-  };
-
-  window.qbAddMatching = function () {
-    const raw = prompt("Paste matching set as JSON:\n{\"title\":\"Match X\",\"pairs\":[{\"left\":\"A\",\"right\":\"1\"},{\"left\":\"B\",\"right\":\"2\"}]}");
-    if (!raw) return;
-    try { cfg.booklet.matching.push(JSON.parse(raw)); persist(); renderContent(); }
-    catch (e) { alert("Invalid JSON: " + e.message); }
-  };
-
-  window.qbEditMatching = function (idx) {
-    const m = cfg.booklet.matching[idx];
-    const raw = prompt("Edit matching set:", JSON.stringify(m, null, 2));
-    if (!raw) return;
-    try { cfg.booklet.matching[idx] = JSON.parse(raw); persist(); renderContent(); }
-    catch (e) { alert("Invalid JSON: " + e.message); }
-  };
-
-  window.qbDeleteMatching = function (idx) {
-    if (!confirm("Delete this matching set?")) return;
-    cfg.booklet.matching.splice(idx, 1);
-    persist(); renderContent();
-  };
-
-  window.qbAddLogic = function () {
-    const raw = prompt("Paste logic puzzle as JSON:\n{\"title\":\"...\",\"clues\":[\"...\"],\"seats\":4,\"answer\":{\"1\":\"A\",\"2\":\"B\",\"3\":\"C\",\"4\":\"D\"}}");
-    if (!raw) return;
-    try { cfg.booklet.logicgrid.push(JSON.parse(raw)); persist(); renderContent(); }
-    catch (e) { alert("Invalid JSON: " + e.message); }
-  };
-
-  window.qbEditLogic = function (idx) {
-    const l = cfg.booklet.logicgrid[idx];
-    const raw = prompt("Edit logic puzzle:", JSON.stringify(l, null, 2));
-    if (!raw) return;
-    try { cfg.booklet.logicgrid[idx] = JSON.parse(raw); persist(); renderContent(); }
-    catch (e) { alert("Invalid JSON: " + e.message); }
-  };
-
-  window.qbDeleteLogic = function (idx) {
-    if (!confirm("Delete this logic puzzle?")) return;
-    cfg.booklet.logicgrid.splice(idx, 1);
-    persist(); renderContent();
-  };
-
-  function escapeHtml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        if (isNew) cfg.questions[activeSubject].written.push(q);
+        else cfg.questions[activeSubject].written[index] = q;
+        persist();
+        renderContent();
+        return true;
+      }
+    );
   }
+
+  // ---------- FILLBLANK EDITOR ----------
+  function openFillblankEditor(index) {
+    const isNew = index === undefined || index === null;
+    const p = isNew ? { sentence: "", answer: "", hint: "" } : JSON.parse(JSON.stringify(cfg.questions[activeSubject].fillblank[index]));
+
+    openModal(
+      isNew ? "New Fill-in-Blank" : "Edit Fill-in-Blank",
+      `
+        <div class="form-row"><label>Sentence (use ___ for blank)</label>
+          <input type="text" id="fbSentence" value="${escapeAttr(p.sentence)}" placeholder="The sky is ___.">
+        </div>
+        <div class="form-row"><label>Answer (case-insensitive)</label>
+          <input type="text" id="fbAnswer" value="${escapeAttr(p.answer)}" placeholder="blue">
+        </div>
+        <div class="form-row"><label>Hint (optional)</label>
+          <input type="text" id="fbHint" value="${escapeAttr(p.hint || "")}" placeholder="A color">
+        </div>
+      `,
+      () => {
+        p.sentence = document.getElementById("fbSentence").value.trim();
+        p.answer = document.getElementById("fbAnswer").value.trim();
+        p.hint = document.getElementById("fbHint").value.trim();
+        if (!p.sentence || !p.answer) { alert("Sentence and answer required."); return false; }
+        if (isNew) cfg.questions[activeSubject].fillblank.push(p);
+        else cfg.questions[activeSubject].fillblank[index] = p;
+        persist(); renderContent();
+        return true;
+      }
+    );
+  }
+
+  // ---------- MATCHING EDITOR ----------
+  function openMatchingEditor(index) {
+    const isNew = index === undefined || index === null;
+    const m = isNew ? { title: "", pairs: [{ left: "", right: "" }, { left: "", right: "" }] } : JSON.parse(JSON.stringify(cfg.questions[activeSubject].matching[index]));
+
+    function renderPairs() {
+      return m.pairs.map((p, i) => `
+        <div class="pair-row">
+          <input type="text" data-side="left" data-idx="${i}" value="${escapeAttr(p.left)}" placeholder="Left ${i + 1}"
+            oninput="window.qbUpdatePair(${i}, 'left', this.value)">
+          <span>↔</span>
+          <input type="text" data-side="right" data-idx="${i}" value="${escapeAttr(p.right)}" placeholder="Right ${i + 1}"
+            oninput="window.qbUpdatePair(${i}, 'right', this.value)">
+          ${m.pairs.length > 1 ? `<button class="remove-opt" onclick="window.qbRemovePair(${i})">×</button>` : ""}
+        </div>`).join("");
+    }
+
+    window.qbUpdatePair = function (i, side, v) { m.pairs[i][side] = v; };
+    window.qbRemovePair = function (i) {
+      m.pairs.splice(i, 1);
+      document.getElementById("pairList").innerHTML = renderPairs();
+    };
+    window.qbAddPair = function () {
+      m.pairs.push({ left: "", right: "" });
+      document.getElementById("pairList").innerHTML = renderPairs();
+    };
+
+    openModal(
+      isNew ? "New Matching Set" : "Edit Matching Set",
+      `
+        <div class="form-row"><label>Title</label>
+          <input type="text" id="mTitle" value="${escapeAttr(m.title)}" placeholder="Match the Elements">
+        </div>
+        <div class="form-row"><label>Pairs (left ↔ right)</label>
+          <div id="pairList">${renderPairs()}</div>
+          <button class="add-row-btn" onclick="window.qbAddPair()">+ Add pair</button>
+        </div>
+      `,
+      () => {
+        m.title = document.getElementById("mTitle").value.trim();
+        if (!m.title) { alert("Title required."); return false; }
+        if (m.pairs.length < 1) { alert("Need at least 1 pair."); return false; }
+        if (m.pairs.some(p => !p.left.trim() || !p.right.trim())) { alert("All pairs must be filled."); return false; }
+        if (isNew) cfg.questions[activeSubject].matching.push(m);
+        else cfg.questions[activeSubject].matching[index] = m;
+        persist(); renderContent();
+        return true;
+      }
+    );
+  }
+
+  // ---------- LOGIC EDITOR ----------
+  function openLogicEditor(index) {
+    const isNew = index === undefined || index === null;
+    const l = isNew
+      ? { title: "", clues: ["", ""], seats: 3, answer: { 1: "", 2: "", 3: "" } }
+      : JSON.parse(JSON.stringify(cfg.questions[activeSubject].logic[index]));
+
+    function renderClues() {
+      return l.clues.map((c, i) => `
+        <div class="clue-row">
+          <input type="text" value="${escapeAttr(c)}" placeholder="Clue ${i + 1}"
+            oninput="window.qbUpdateClue(${i}, this.value)">
+          ${l.clues.length > 1 ? `<button class="remove-opt" onclick="window.qbRemoveClue(${i})">×</button>` : ""}
+        </div>`).join("");
+    }
+
+    function renderSeatInputs() {
+      return Object.keys(l.answer).sort((a, b) => parseInt(a) - parseInt(b)).map(seat => `
+        <div class="pair-row">
+          <label style="min-width:70px; color:var(--anhs-grey); font-size:0.85rem;">Seat ${seat}</label>
+          <input type="text" value="${escapeAttr(l.answer[seat])}" placeholder="e.g. Ayanokoji"
+            oninput="window.qbSetSeat('${seat}', this.value)">
+        </div>`).join("");
+    }
+
+    window.qbUpdateClue = function (i, v) { l.clues[i] = v; };
+    window.qbRemoveClue = function (i) {
+      l.clues.splice(i, 1);
+      document.getElementById("clueList").innerHTML = renderClues();
+    };
+    window.qbAddClue = function () {
+      l.clues.push("");
+      document.getElementById("clueList").innerHTML = renderClues();
+    };
+    window.qbSetSeat = function (seat, v) { l.answer[seat] = v; };
+    window.qbSetSeats = function (n) {
+      n = Math.max(2, Math.min(8, parseInt(n) || 3));
+      l.seats = n;
+      const newAns = {};
+      for (let i = 1; i <= n; i++) newAns[i] = l.answer[i] || "";
+      l.answer = newAns;
+      document.getElementById("seatInputs").innerHTML = renderSeatInputs();
+    };
+
+    openModal(
+      isNew ? "New Logic Puzzle" : "Edit Logic Puzzle",
+      `
+        <div class="form-row"><label>Title</label>
+          <input type="text" id="lTitle" value="${escapeAttr(l.title)}" placeholder="Who owns the fish?">
+        </div>
+        <div class="form-row"><label>Number of seats</label>
+          <input type="number" id="lSeats" min="2" max="8" value="${l.seats}" onchange="window.qbSetSeats(this.value)">
+        </div>
+        <div class="form-row"><label>Clues</label>
+          <div id="clueList">${renderClues()}</div>
+          <button class="add-row-btn" onclick="window.qbAddClue()">+ Add clue</button>
+        </div>
+        <div class="form-row"><label>Correct Answer per Seat</label>
+          <div id="seatInputs">${renderSeatInputs()}</div>
+        </div>
+      `,
+      () => {
+        l.title = document.getElementById("lTitle").value.trim();
+        if (!l.title) { alert("Title required."); return false; }
+        if (l.clues.some(c => !c.trim())) { alert("All clues must be filled."); return false; }
+        if (Object.values(l.answer).some(v => !v.trim())) { alert("All seat answers required."); return false; }
+        if (isNew) cfg.questions[activeSubject].logic.push(l);
+        else cfg.questions[activeSubject].logic[index] = l;
+        persist(); renderContent();
+        return true;
+      }
+    );
+  }
+
+  // ---------- PUBLIC ADD/EDIT/DELETE ----------
+  window.qbAddMCQ = () => openMCQEditor();
+  window.qbEditMCQ = (i) => openMCQEditor(i);
+  window.qbDeleteMCQ = (i) => {
+    if (!confirm("Delete this question?")) return;
+    cfg.questions[activeSubject].written.splice(i, 1);
+    persist(); renderContent();
+  };
+
+  window.qbAddFillblank = () => openFillblankEditor();
+  window.qbEditFillblank = (i) => openFillblankEditor(i);
+  window.qbDeleteFillblank = (i) => {
+    if (!confirm("Delete this puzzle?")) return;
+    cfg.questions[activeSubject].fillblank.splice(i, 1);
+    persist(); renderContent();
+  };
+
+  window.qbAddMatching = () => openMatchingEditor();
+  window.qbEditMatching = (i) => openMatchingEditor(i);
+  window.qbDeleteMatching = (i) => {
+    if (!confirm("Delete this matching set?")) return;
+    cfg.questions[activeSubject].matching.splice(i, 1);
+    persist(); renderContent();
+  };
+
+  window.qbAddLogic = () => openLogicEditor();
+  window.qbEditLogic = (i) => openLogicEditor(i);
+  window.qbDeleteLogic = (i) => {
+    if (!confirm("Delete this logic puzzle?")) return;
+    cfg.questions[activeSubject].logic.splice(i, 1);
+    persist(); renderContent();
+  };
 
   // ---------- INIT ----------
   renderTabs();
