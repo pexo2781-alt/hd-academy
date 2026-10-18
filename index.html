@@ -10,8 +10,8 @@
   <nav id="nav"></nav>
 
   <div class="container">
-    <h1>Classroom of the Elite</h1>
-    <p class="subtitle">Welcome back, Student. The hierarchy awaits.</p>
+    <h1 id="siteTitle">Classroom of the Elite</h1>
+<p class="subtitle" id="siteSubtitle">Welcome back, Student. The hierarchy awaits.</p>
 
     <!-- CLASS + DANGER + PROTECTION -->
     <div class="card">
@@ -83,6 +83,8 @@
   <script src="js/ranking.js"></script>
   <script>
     renderNav("home");
+    document.getElementById("siteTitle").textContent = window.CONFIG.site.title;
+document.getElementById("siteSubtitle").textContent = window.CONFIG.site.subtitle;
     const state = ANHS.loadState();
 
     if (state.expelled) {
