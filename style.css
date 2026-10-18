@@ -1,1 +1,228 @@
 
+/* ============================================
+   style.css — ANHS theme (red/black/white)
+   + White Room variant
+   ============================================ */
+
+:root {
+  --anhs-red: #c8102e;
+  --anhs-dark: #1a1a1a;
+  --anhs-mid: #2a2a2a;
+  --anhs-light: #f5f5f5;
+  --anhs-grey: #888;
+  --wr-white: #fafafa;
+  --wr-grey: #e0e0e0;
+  --danger: #ff3b3b;
+  --safe: #4caf50;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--anhs-dark);
+  color: var(--anhs-light);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ---------- NAV ---------- */
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  background: #0d0d0d;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--anhs-red);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav a {
+  color: var(--anhs-light);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.nav a:hover { background: var(--anhs-mid); }
+.nav a.active { background: var(--anhs-red); }
+
+/* ---------- CONTAINER ---------- */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--anhs-red);
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+h2 { font-size: 1.4rem; margin-bottom: 1rem; color: var(--anhs-light); }
+h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+
+.subtitle { color: var(--anhs-grey); margin-bottom: 2rem; font-style: italic; }
+
+/* ---------- CARDS ---------- */
+.card {
+  background: var(--anhs-mid);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--anhs-red);
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--anhs-mid);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  border-top: 3px solid var(--anhs-red);
+}
+.stat-card .label { color: var(--anhs-grey); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+.stat-card .value { font-size: 1.8rem; font-weight: 700; color: var(--anhs-light); margin-top: 0.25rem; }
+
+/* ---------- CLASS BADGE ---------- */
+.class-badge {
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  padding: 0.25rem 1rem;
+  border-radius: 6px;
+  background: var(--anhs-red);
+  color: white;
+  letter-spacing: 2px;
+}
+.class-A { background: #ffd700; color: #000; }
+.class-B { background: #c0c0c0; color: #000; }
+.class-C { background: #cd7f32; color: #fff; }
+.class-D { background: var(--anhs-red); color: #fff; }
+
+/* ---------- DANGER METER ---------- */
+.danger-meter {
+  height: 12px;
+  background: #333;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.danger-fill {
+  height: 100%;
+  transition: width 0.4s;
+  background: linear-gradient(90deg, var(--safe), #ffb300, var(--danger));
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--anhs-red);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, background 0.2s;
+}
+.btn:hover { background: #a00d25; transform: translateY(-1px); }
+.btn:disabled { background: #555; cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--anhs-mid); border: 1px solid var(--anhs-red); }
+.btn-secondary:hover { background: #3a3a3a; }
+
+/* ---------- QUIZ ---------- */
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.timer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--anhs-red);
+}
+.timer.warning { color: var(--danger); animation: pulse 0.6s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.question-text {
+  font-size: 1.5rem;
+  margin: 1.5rem 0;
+  line-height: 1.4;
+}
+.answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.answer-btn {
+  padding: 1rem;
+  background: var(--anhs-mid);
+  color: var(--anhs-light);
+  border: 2px solid #444;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.answer-btn:hover:not(:disabled) { border-color: var(--anhs-red); background: #3a3a3a; }
+.answer-btn.correct { background: var(--safe); border-color: var(--safe); color: white; }
+.answer-btn.wrong { background: var(--danger); border-color: var(--danger); color: white; }
+.answer-btn:disabled { cursor: default; }
+
+/* ---------- SCOREBOARD (AI) ---------- */
+.scoreboard {
+  background: #0d0d0d;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+.scoreboard-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #222;
+  font-size: 0.9rem;
+}
+.scoreboard-row:last-child { border-bottom: none; }
+.scoreboard-row.player { color: var(--anhs-red); font-weight: 700; }
+
+/* ---------- RESULT ---------- */
+.result-box { text-align: center; padding: 2rem 1rem; }
+.result-score { font-size: 3rem; font-weight: 900; color: var(--anhs-red); }
+.result-detail { color: var(--anhs-grey); margin-top: 0.5rem; }
+
+/* ---------- WHITE ROOM THEME ---------- */
+body.whiteroom {
+  background: var(--wr-white);
+  color: #111;
+}
+body.whiteroom .nav { background: #fff; border-bottom-color: #111; }
+body.whiteroom .nav a { color: #111; }
+body.whiteroom .nav a:hover { background: var(--wr-grey); }
+body.whiteroom .nav a.active { background: #111; color: #fff; }
+body.whiteroom h1 { color: #111; }
+body.whiteroom .card { background: #fff; border-left-color: #111; border: 1px solid #ddd; }
+body.whiteroom .answer-btn { background: #fff; color: #111; border-color: #ccc; }
+body.whiteroom .answer-btn:hover:not(:disabled) { border-color: #111; background: #f0f0f0; }
+
+/* ---------- UTIL ---------- */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.hidden { display: none; }
