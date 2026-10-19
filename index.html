@@ -12,13 +12,23 @@
 
     :root {
       --accent: #ffffff;
-      --accent-muted: rgba(255, 255, 255, 0.6);
-      --accent-dim: rgba(255, 255, 255, 0.1);
+      --accent-rgb: 255, 255, 255;
+      --accent-muted: rgba(var(--accent-rgb), 0.6);
+      --accent-dim: rgba(var(--accent-rgb), 0.1);
+      --accent-faint: rgba(var(--accent-rgb), 0.04);
       --bg: #000000;
       --surface: #0a0a0a;
+      --text-primary: var(--accent);
+      --text-secondary: rgba(255, 255, 255, 0.5);
       --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-accent: 'Inter', system-ui, sans-serif;
       --transition: 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
 
     body {
@@ -29,107 +39,128 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      cursor: none; /* hide default cursor since we have the orb */
       transition: background 0.4s ease;
+      position: relative;
     }
 
-    /* ----- BACKGROUND PATTERN ----- */
-    .lab-bg-pattern {
+    /* ---------- BACKGROUND LAYERS ---------- */
+    /* 1. Base grid — perspective-free fine grid */
+    .bg-grid {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      /* Dot grid + radial vignette, all driven by accent */
       background-image:
-        radial-gradient(circle at 20% 30%, var(--accent-dim) 0%, transparent 35%),
-        radial-gradient(circle at 80% 70%, var(--accent-dim) 0%, transparent 40%),
-        radial-gradient(var(--accent-dim) 1px, transparent 1.2px),
-        radial-gradient(var(--accent-dim) 1px, transparent 1.2px);
-      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
-      background-position: 0 0, 0 0, 0 0, 16px 16px;
-      opacity: 0.9;
-      transition: background-image 0.4s ease;
+        linear-gradient(to right, var(--accent-faint) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--accent-faint) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
+      animation: gridDrift 40s linear infinite;
+      transition: background-image var(--transition);
     }
 
-    /* Faint scanline / noise layer for texture */
-    .lab-bg-pattern::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0.015) 0px,
-        rgba(255, 255, 255, 0.015) 1px,
-        transparent 1px,
-        transparent 4px
-      );
-      pointer-events: none;
+    @keyframes gridDrift {
+      0%   { background-position: 0 0, 0 0; }
+      100% { background-position: 48px 48px, 48px 48px; }
     }
 
-    /* Soft radial vignette in accent, centered */
-    .lab-bg-vignette {
+    /* 2. Coarse accent grid — bigger squares, slower, adds depth */
+    .bg-grid-coarse {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.6) 80%);
+      background-image:
+        linear-gradient(to right, var(--accent-dim) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--accent-dim) 1px, transparent 1px);
+      background-size: 192px 192px;
+      mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
+      -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
+      animation: gridDriftCoarse 60s linear infinite;
+      transition: background-image var(--transition);
     }
 
-    /* ----- MOUSE ORB + TRAIL ----- */
-    .lab-orb {
+    @keyframes gridDriftCoarse {
+      0%   { background-position: 0 0, 0 0; }
+      100% { background-position: -192px -192px, -192px -192px; }
+    }
+
+    /* 3. Central pulsing glow behind the title */
+    .bg-glow {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-      box-shadow:
-        0 0 15px var(--accent),
-        0 0 30px var(--accent),
-        0 0 60px var(--accent);
-      opacity: 0.95;
-      mix-blend-mode: screen;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      will-change: transform;
-    }
-
-    /* Small solid core inside the orb */
-    .lab-orb::before {
-      content: '';
-      position: absolute;
       top: 50%;
       left: 50%;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
+      width: 900px;
+      height: 900px;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px var(--accent);
-    }
-
-    /* Trail particle template – created via JS */
-    .lab-trail {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
+      z-index: 0;
       pointer-events: none;
-      z-index: 9998;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-      box-shadow: 0 0 10px var(--accent);
-      mix-blend-mode: screen;
-      will-change: transform, opacity;
+      background: radial-gradient(
+        circle,
+        rgba(var(--accent-rgb), 0.08) 0%,
+        rgba(var(--accent-rgb), 0.03) 30%,
+        transparent 65%
+      );
+      animation: glowPulse 6s ease-in-out infinite alternate;
+      transition: background var(--transition);
     }
 
-    /* ----- LAB CONTAINER ----- */
+    @keyframes glowPulse {
+      0%   { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+      100% { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    /* 4. Vertical scanlines that slowly slide — CRT / lab feel */
+    .bg-scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(var(--accent-rgb), 0.012) 3px,
+        transparent 4px
+      );
+      animation: scanShift 12s linear infinite;
+      opacity: 0.9;
+      transition: background-image var(--transition);
+    }
+
+    @keyframes scanShift {
+      0%   { background-position: 0 0; }
+      100% { background-position: 0 40px; }
+    }
+
+    /* 5. Vignette to focus the center */
+    .bg-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        transparent 40%,
+        rgba(0, 0, 0, 0.55) 85%,
+        rgba(0, 0, 0, 0.85) 100%
+      );
+    }
+
+    /* 6. Subtle noise grain (SVG data-uri) for texture */
+    .bg-noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.035;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    /* ---------- LAB CONTAINER ---------- */
     .lab {
       width: 100%;
       max-width: 1400px;
@@ -140,10 +171,10 @@
       align-items: center;
       padding: 2rem;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
-    /* ----- LANDING VIEW ----- */
+    /* ---------- LANDING ---------- */
     .lab-landing {
       display: flex;
       flex-direction: column;
@@ -170,15 +201,15 @@
       letter-spacing: -0.03em;
       line-height: 1.1;
       color: var(--accent);
-      text-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent-dim);
+      text-shadow: 0 0 30px var(--accent), 0 0 60px rgba(var(--accent-rgb), 0.2);
       animation: titlePulse 4s infinite alternate ease-in-out;
       margin-bottom: 0.5rem;
       transition: color var(--transition), text-shadow var(--transition);
     }
 
     @keyframes titlePulse {
-      0% { text-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent-dim); }
-      100% { text-shadow: 0 0 40px var(--accent), 0 0 80px var(--accent-muted); }
+      0%   { text-shadow: 0 0 20px var(--accent), 0 0 40px rgba(var(--accent-rgb), 0.1); }
+      100% { text-shadow: 0 0 40px var(--accent), 0 0 80px rgba(var(--accent-rgb), 0.4); }
     }
 
     .lab-quote {
@@ -198,7 +229,7 @@
     }
 
     @keyframes fadeSlideUp {
-      0% { opacity: 0; transform: translateY(20px); }
+      0%   { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
 
@@ -212,11 +243,12 @@
       letter-spacing: 0.3em;
       text-transform: uppercase;
       padding: 1rem 3.5rem;
-      cursor: none;
+      cursor: pointer;
       position: relative;
       transition: all var(--transition);
       border-radius: 0;
       overflow: hidden;
+      z-index: 0;
     }
 
     .lab-start-btn::before {
@@ -233,7 +265,7 @@
 
     .lab-start-btn:hover {
       color: #000;
-      box-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent-dim);
+      box-shadow: 0 0 30px var(--accent), 0 0 60px rgba(var(--accent-rgb), 0.3);
     }
 
     .lab-start-btn:hover::before { left: 0; }
@@ -250,7 +282,7 @@
       transition: background var(--transition);
     }
 
-    /* ----- SETTINGS VIEW ----- */
+    /* ---------- SETTINGS ---------- */
     .lab-settings {
       display: none;
       flex-direction: column;
@@ -261,14 +293,15 @@
       padding: 2rem;
       background: rgba(10, 10, 10, 0.85);
       border: 1px solid var(--accent-dim);
-      box-shadow: 0 0 60px var(--accent-dim);
+      box-shadow: 0 0 60px rgba(var(--accent-rgb), 0.05);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       transition: border-color var(--transition), box-shadow var(--transition);
       animation: settingsFadeIn 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
     }
 
     @keyframes settingsFadeIn {
-      0% { opacity: 0; transform: translateY(10px); }
+      0%   { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
 
@@ -300,7 +333,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: none;
+      cursor: pointer;
       transition: all var(--transition);
       border-radius: 0;
       font-family: var(--font-main);
@@ -341,19 +374,18 @@
       transition: all var(--transition);
       border-radius: 0;
       width: 100%;
-      cursor: none;
     }
 
     .settings-group input:focus,
     .settings-group select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-dim);
+      box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.1);
     }
 
     .settings-group input[type="color"] {
       padding: 0.2rem;
       height: 50px;
-      cursor: none;
+      cursor: pointer;
     }
 
     .settings-group select option {
@@ -376,7 +408,7 @@
       font-weight: 500;
       font-size: 0.9rem;
       padding: 0.9rem 1.5rem;
-      cursor: none;
+      cursor: pointer;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       transition: all var(--transition);
@@ -399,8 +431,10 @@
       background: var(--accent-muted);
       color: #000;
       border-color: var(--accent-muted);
-      box-shadow: 0 0 20px var(--accent-dim);
+      box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2);
     }
+
+    .hidden { display: none !important; }
 
     .lab-footer {
       position: absolute;
@@ -412,20 +446,19 @@
       transition: color var(--transition);
       z-index: 2;
     }
-
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <!-- Background pattern layers -->
-  <div class="lab-bg-pattern"></div>
-  <div class="lab-bg-vignette"></div>
-
-  <!-- Glowing orb that follows the mouse -->
-  <div class="lab-orb" id="labOrb"></div>
+  <!-- BACKGROUND LAYERS -->
+  <div class="bg-grid"></div>
+  <div class="bg-grid-coarse"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-scanlines"></div>
+  <div class="bg-vignette"></div>
+  <div class="bg-noise"></div>
 
   <div class="lab">
-    <!-- LANDING -->
+    <!-- LANDING SECTION -->
     <div class="lab-landing" id="labLanding">
       <h1 class="lab-title" id="labTitle">SUBJECT 001</h1>
       <p class="lab-quote" id="labQuote">“The self is the only laboratory that matters.”</p>
@@ -433,7 +466,7 @@
       <div class="lab-bottom-line"></div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- SETTINGS SECTION -->
     <div class="lab-settings" id="labSettings">
       <div class="lab-settings-header">
         <h2>LAB CONFIG</h2>
@@ -480,128 +513,6 @@
 
   <script>
     (function() {
-      // ---------- ORB + TRAIL ----------
-      const orb = document.getElementById('labOrb');
-      const body = document.body;
-
-      // Current target position
-      let targetX = window.innerWidth / 2;
-      let targetY = window.innerHeight / 2;
-      // Orb current position (lerped)
-      let orbX = targetX;
-      let orbY = targetY;
-
-      // Trail particles
-      const trailParticles = [];
-      const MAX_TRAIL = 24;
-      const TRAIL_LIFE = 28; // frames
-
-      // Spawn a trail particle roughly every N frames when moving
-      let spawnCounter = 0;
-      const SPAWN_INTERVAL = 1;
-
-      function createTrailParticle(x, y) {
-        const el = document.createElement('div');
-        el.className = 'lab-trail';
-        // randomize size slightly for organic feel
-        const size = 6 + Math.random() * 10;
-        el.style.width = size + 'px';
-        el.style.height = size + 'px';
-        el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-        document.body.appendChild(el);
-        return {
-          el,
-          x,
-          y,
-          life: TRAIL_LIFE,
-          maxLife: TRAIL_LIFE,
-          size
-        };
-      }
-
-      function updateTrail() {
-        for (let i = trailParticles.length - 1; i >= 0; i--) {
-          const p = trailParticles[i];
-          p.life -= 1;
-          const t = p.life / p.maxLife;
-          if (p.life <= 0) {
-            p.el.remove();
-            trailParticles.splice(i, 1);
-            continue;
-          }
-          // Fade & shrink
-          p.el.style.opacity = (t * 0.7).toFixed(3);
-          const scale = 0.3 + t * 0.7;
-          // slight drift upward for magical feel
-          p.y -= 0.15;
-          p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) scale(${scale})`;
-        }
-      }
-
-      // Main animation loop
-      function animate() {
-        // Lerp orb toward mouse
-        const lerpFactor = 0.22;
-        orbX += (targetX - orbX) * lerpFactor;
-        orbY += (targetY - orbY) * lerpFactor;
-
-        // Get previous orb position for trail spawn
-        const prevX = orbX;
-        const prevY = orbY;
-
-        orb.style.transform = `translate(${orbX}px, ${orbY}px) translate(-50%, -50%)`;
-
-        // Spawn trail based on movement distance (so it doesn't spawn when stationary)
-        const dx = targetX - orbX;
-        const dy = targetY - orbY;
-        const speed = Math.sqrt(dx * dx + dy * dy);
-
-        if (speed > 2) {
-          spawnCounter++;
-          if (spawnCounter >= SPAWN_INTERVAL) {
-            spawnCounter = 0;
-            // Spawn slightly behind the orb with jitter for wand effect
-            const jitterX = (Math.random() - 0.5) * 8;
-            const jitterY = (Math.random() - 0.5) * 8;
-            const particle = createTrailParticle(prevX + jitterX, prevY + jitterY);
-            trailParticles.push(particle);
-
-            if (trailParticles.length > MAX_TRAIL) {
-              const old = trailParticles.shift();
-              old.el.remove();
-            }
-          }
-        }
-
-        updateTrail();
-        requestAnimationFrame(animate);
-      }
-
-      // Mouse move listener
-      window.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-      });
-
-      // Touch support for mobile
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-          targetX = e.touches[0].clientX;
-          targetY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-
-      // Handle window resize
-      window.addEventListener('resize', () => {
-        // Keep orb in bounds
-        targetX = Math.min(targetX, window.innerWidth);
-        targetY = Math.min(targetY, window.innerHeight);
-      });
-
-      // Start animation loop
-      animate();
-
-      // ---------- CORE APP LOGIC (unchanged) ----------
       const landing = document.getElementById('labLanding');
       const settingsPanel = document.getElementById('labSettings');
       const startBtn = document.getElementById('startBtn');
@@ -616,15 +527,6 @@
       const accentFontSelect = document.getElementById('accentFontSelect');
       const quoteInput = document.getElementById('quoteInput');
 
-      function setAccent(color) {
-        document.documentElement.style.setProperty('--accent', color);
-        const rgb = hexToRgb(color);
-        if (rgb) {
-          document.documentElement.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-          document.documentElement.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
-        }
-      }
-
       function hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
@@ -632,6 +534,17 @@
           g: parseInt(result[2], 16),
           b: parseInt(result[3], 16)
         } : null;
+      }
+
+      function setAccent(color) {
+        document.documentElement.style.setProperty('--accent', color);
+        const rgb = hexToRgb(color);
+        if (rgb) {
+          document.documentElement.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+          document.documentElement.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
+          document.documentElement.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+          document.documentElement.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
+        }
       }
 
       function setAccentFont(fontFamily) {
@@ -642,9 +555,7 @@
         labTitle.textContent = name.toUpperCase();
         labNameInput.value = name;
         const footer = document.querySelector('.lab-footer');
-        if (footer) {
-          footer.textContent = `LAB · ${name.toUpperCase()} · v0.1`;
-        }
+        if (footer) footer.textContent = `LAB · ${name.toUpperCase()} · v0.1`;
       }
 
       function setQuote(quote) {
