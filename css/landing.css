@@ -11,7 +11,6 @@
   letter-spacing: -0.03em;
   line-height: 1.1;
   color: var(--accent);
-  /* Glow only in dark mode — on white it makes the accent look muddy */
   text-shadow: none;
   margin-bottom: 0.5rem;
   transition: color var(--transition), text-shadow var(--transition);
@@ -30,7 +29,7 @@ html[data-theme="dark"] .lab-title {
 .lab-quote {
   font-size: clamp(0.9rem, 2.5vw, 1.4rem);
   font-weight: 400;
-  color: var(--accent-muted);
+  color: var(--text-muted);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-bottom: 3rem;
@@ -38,7 +37,7 @@ html[data-theme="dark"] .lab-title {
   animation: fadeSlideUp 1.2s 0.3s forwards cubic-bezier(0.2, 0.9, 0.4, 1);
   transition: color var(--transition);
   max-width: 80%;
-  border-left: 2px solid var(--accent-dim);
+  border-left: 2px solid var(--text-dim);
   padding-left: 1.5rem;
   text-align: left;
 }
@@ -82,6 +81,6 @@ html[data-theme="dark"] .lab-title {
   transform: translateX(-50%);
   width: 120px;
   height: 1px;
-  background: var(--fg-dim);
+  background: var(--text-dim);
   transition: background var(--theme-transition);
 }
