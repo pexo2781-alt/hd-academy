@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HDA — New Profile</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container" style="max-width: 500px; margin-top: 3rem;">
+    <h1 class="text-center">Create Profile</h1>
+    <p class="subtitle text-center">Slot <span id="slotNum">—</span></p>
+
+    <div class="card">
+      <div class="auth-field">
+        <label>Your Name</label>
+        <input id="nameInput" type="text" maxlength="20" placeholder="Enter your name" autocomplete="off">
+      </div>
+
+      <div class="auth-field">
+        <label>Portrait Color</label>
+        <div class="portrait-picker" id="colorPicker"></div>
+      </div>
+
+      <div class="auth-field">
+        <label>Portrait Emoji</label>
+        <div class="portrait-picker" id="emojiPicker"></div>
+      </div>
+
+      <div class="text-center">
+        <div class="portrait-preview" id="portraitPreview">🎓</div>
+      </div>
+
+      <button class="auth-submit" onclick="next()">Next: Entrance Exam →</button>
+    </div>
+
+    <div class="text-center mt-2">
+      <a href="slots.html" class="btn btn-secondary">← Back</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/slot-manager.js"></script>
+  <script>
+    const slot = parseInt(new URLSearchParams(location.search).get("slot")) || null;
+    if (!slot || slot < 1 || slot > 3) { location.href = "slots.html"; }
+    if (SlotManager.getMeta(slot).exists) { location.href = "slots.html"; }
+
+    document.getElementById("slotNum").textContent = slot;
+
+    const COLORS = ["#c8102e", "#2e7d32", "#1565c0", "#f9a825", "#6a1b9a", "#00838f", "#d84315", "#455a64"];
+    const EMOJIS = ["🎓", "📘", "🎯", "🔥", "⚡", "🌙", "🎨", "🧠"];
+
+    let selectedColor = COLORS[0];
+    let selectedEmoji = EMOJIS[0];
+
+    function renderPickers() {
+      document.getElementById("colorPicker").innerHTML = COLORS.map(c =>
+        `<div class="color-swatch ${c === selectedColor ? 'selected' : ''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+      ).join("");
+      document.getElementById("emojiPicker").innerHTML = EMOJIS.map(e =>
+        `<div class="emoji-swatch ${e === selectedEmoji ? 'selected' : ''}" onclick="pickEmoji('${e}')">${e}</div>`
+      ).join("");
+      const preview = document.getElementById("portraitPreview");
+      preview.textContent = selectedEmoji;
+      preview.style.background = selectedColor;
+    }
+
+    function pickColor(c) { selectedColor = c; renderPickers(); }
+    function pickEmoji(e) { selectedEmoji = e; renderPickers(); }
+
+    function next() {
+      const name = (document.getElementById("nameInput").value || "").trim() || "Student";
+      try {
+        SlotManager.create(slot, { name, portrait: { color: selectedColor, emoji: selectedEmoji } });
+        location.href = `entrance-exam.html?slot=${slot}`;
+      } catch (e) {
+        alert("Error creating profile: " + e.message);
+      }
+    }
+
+    renderPickers();
+  </script>
+</body>
+</html>
