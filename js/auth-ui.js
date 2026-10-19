@@ -1,5 +1,5 @@
 // ============================================
-// auth-ui.js — V5.1: tabbed sign-in/sign-up + polished UI
+// auth-ui.js — V5.2: defensive, always shows something
 // ============================================
 
 (function () {
@@ -15,6 +15,24 @@
   const pullBtn        = document.getElementById("pullBtn");
   const exportBtn      = document.getElementById("exportBtn");
   const importInput    = document.getElementById("importInput");
+
+  // ---- Sanity check ----
+  if (!signedOutEl || !signedInEl) {
+    console.error("[auth-ui] Missing required DOM elements. Check account.html is the new version.");
+    return;
+  }
+
+  // ---- Show signed-out view by DEFAULT ----
+  // (So the page is never empty, even if Supabase fails)
+  signedOutEl.style.display = "";
+  signedInEl.style.display = "none";
+
+  // ---- Check Supabase client ----
+  if (!window.SB) {
+    console.error("[auth-ui] window.SB is missing. supabase-client.js did not load or crashed.");
+    showStatus("⚠️ Supabase failed to load. Check js/supabase-client.js has your real URL and anon key.", "danger");
+    return;
+  }
 
   // ---------- TABS ----------
   document.querySelectorAll(".auth-tab").forEach(tab => {
@@ -35,14 +53,17 @@
 
   // ---------- HELPERS ----------
   function showStatus(msg, type) {
+    if (!statusEl) return;
     statusEl.textContent = msg;
     statusEl.className = "auth-status show " + (type === "safe" ? "safe" : "danger");
   }
   function hideStatus() {
+    if (!statusEl) return;
     statusEl.className = "auth-status";
     statusEl.textContent = "";
   }
   function setBtnLoading(btn, loading, label) {
+    if (!btn) return;
     if (loading) {
       btn.disabled = true;
       btn.dataset.original = btn.textContent;
@@ -55,29 +76,38 @@
 
   // ---------- REFRESH UI ----------
   async function refresh() {
-    const user = await window.SB.getUser();
-    if (user) {
-      signedOutEl.style.display = "none";
-      signedInEl.style.display = "";
-      document.getElementById("userEmail").textContent = user.email;
-      document.getElementById("userInitial").textContent = user.email[0].toUpperCase();
+    try {
+      const user = await window.SB.getUser();
+      if (user) {
+        signedOutEl.style.display = "none";
+        signedInEl.style.display = "";
+        document.getElementById("userEmail").textContent = user.email;
+        document.getElementById("userInitial").textContent = user.email[0].toUpperCase();
 
-      try {
-        const save = await window.SB.loadSave();
-        document.getElementById("saveStatus").textContent = save
-          ? `Last cloud save: ${new Date(save.updated_at).toLocaleString()}`
-          : "No cloud save yet — your progress will upload after your next save.";
-      } catch (e) {
-        document.getElementById("saveStatus").textContent = "Could not load cloud save info.";
+        try {
+          const save = await window.SB.loadSave();
+          document.getElementById("saveStatus").textContent = save
+            ? `Last cloud save: ${new Date(save.updated_at).toLocaleString()}`
+            : "No cloud save yet — will upload after next save.";
+        } catch (e) {
+          document.getElementById("saveStatus").textContent = "Could not load cloud save info.";
+        }
+      } else {
+        // ⭐ Always fall back to signed-out view
+        signedOutEl.style.display = "";
+        signedInEl.style.display = "none";
       }
-    } else {
+    } catch (e) {
+      console.error("[auth-ui] refresh failed:", e);
+      // Show signed-out view so the page isn't blank
       signedOutEl.style.display = "";
       signedInEl.style.display = "none";
+      showStatus("⚠️ Could not check sign-in state. " + e.message, "danger");
     }
   }
 
   // ---------- SIGN IN ----------
-  signInBtn.addEventListener("click", async () => {
+  if (signInBtn) signInBtn.addEventListener("click", async () => {
     const email = document.getElementById("signInEmail").value.trim();
     const password = document.getElementById("signInPassword").value;
     if (!email || !password) return showStatus("Email and password required.", "danger");
@@ -95,7 +125,7 @@
   });
 
   // ---------- SIGN UP ----------
-  signUpBtn.addEventListener("click", async () => {
+  if (signUpBtn) signUpBtn.addEventListener("click", async () => {
     const email = document.getElementById("signUpEmail").value.trim();
     const password = document.getElementById("signUpPassword").value;
     if (!email || !password) return showStatus("Email and password required.", "danger");
@@ -112,7 +142,7 @@
   });
 
   // ---------- SIGN OUT ----------
-  signOutBtn.addEventListener("click", async () => {
+  if (signOutBtn) signOutBtn.addEventListener("click", async () => {
     if (!confirm("Sign out? Your local progress stays on this device.")) return;
     await window.SB.signOut();
     showStatus("Signed out.", "safe");
@@ -120,7 +150,7 @@
   });
 
   // ---------- PUSH ----------
-  pushBtn.addEventListener("click", async () => {
+  if (pushBtn) pushBtn.addEventListener("click", async () => {
     setBtnLoading(pushBtn, true, "Pushing…");
     try {
       const state = JSON.parse(localStorage.getItem("anhs_state") || "{}");
@@ -136,7 +166,7 @@
   });
 
   // ---------- PULL ----------
-  pullBtn.addEventListener("click", async () => {
+  if (pullBtn) pullBtn.addEventListener("click", async () => {
     if (!confirm("Pull cloud save and OVERWRITE local progress? This cannot be undone.")) return;
     setBtnLoading(pullBtn, true, "Pulling…");
     try {
@@ -157,7 +187,7 @@
   });
 
   // ---------- EXPORT ----------
-  exportBtn.addEventListener("click", () => {
+  if (exportBtn) exportBtn.addEventListener("click", () => {
     const state = JSON.parse(localStorage.getItem("anhs_state") || "{}");
     const config = JSON.parse(localStorage.getItem("anhs_config") || "{}");
     window.SB.exportSaveFile(state, config);
@@ -165,7 +195,7 @@
   });
 
   // ---------- IMPORT ----------
-  importInput.addEventListener("change", async (e) => {
+  if (importInput) importInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
@@ -223,5 +253,7 @@
 
   // ---------- INIT ----------
   refresh();
-  window.SB.client.auth.onAuthStateChange(() => refresh());
+  if (window.SB.client && window.SB.client.auth) {
+    window.SB.client.auth.onAuthStateChange(() => refresh());
+  }
 })();
