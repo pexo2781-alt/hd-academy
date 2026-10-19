@@ -42,15 +42,10 @@ function waitFor(predicate, timeout = 5000, interval = 50) {
 }
 
 async function boot() {
-  // ----- 1. Load and apply saved config -----
-  const config = loadConfig();
-   // ----- 1. Load and apply saved config -----
-  const config = loadConfig();
-  // Per spec: always start each page-load session in light mode,
-  // regardless of what was stored. Stored theme is preserved for next session
-  // but not auto-applied here — the user can toggle it live in Settings.
-  config.theme = 'light';
-  applyConfigToDOM(config);
+  // ----- 1. Load saved config, force light for this session -----
+  const cfg = loadConfig();
+  cfg.theme = 'light';           // per spec: every page load starts in light mode
+  applyConfigToDOM(cfg);
   onConfigChange(applyConfigToDOM);
 
   // ----- 2. Background hook -----
@@ -66,7 +61,6 @@ async function boot() {
     await waitFor(() => !!window.SB);
   } catch (e) {
     console.error('[lab] window.SB never became available. Check that supabase-client.js loaded after the Supabase CDN script.');
-    // Fail gracefully — the UI still works, just without auth.
   }
 
   // ----- 5. Init auth module -----
