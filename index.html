@@ -3,146 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HDA — Dashboard</title>
+  <title>HDA</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-  <nav id="nav"></nav>
-
-  <div class="container">
-    <h1 id="siteTitle">Classroom of the Elite</h1>
-<p class="subtitle" id="siteSubtitle">Welcome back, Student. The hierarchy awaits.</p>
-
-    <!-- CLASS + DANGER + PROTECTION -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-        <div>
-          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Current Class</div>
-          <div id="classBadge" class="class-badge">D</div>
-        </div>
-        <div style="flex:1; min-width:220px;">
-          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Class Points</div>
-          <div id="cpValue" style="font-size:1.8rem; font-weight:700;">1000</div>
-          <div class="danger-meter"><div id="dangerFill" class="danger-fill" style="width:0%"></div></div>
-          <div id="dangerLabel" style="font-size:0.8rem; color:var(--anhs-grey); margin-top:0.25rem;">Safe</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-size:0.8rem; color:var(--anhs-grey); text-transform:uppercase; letter-spacing:1px;">Protection</div>
-          <div id="protectionValue" style="font-size:1.8rem; font-weight:700;">1</div>
-        </div>
-      </div>
-
-      <!-- Class progress to next tier -->
-      <div id="classProgressWrap" class="mt-1">
-        <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--anhs-grey); margin-bottom:0.25rem;">
-          <span id="progressLabel">Progress to Class C</span>
-          <span id="progressPct">0%</span>
-        </div>
-        <div class="danger-meter"><div id="progressFill" class="danger-fill" style="width:0%; background:var(--anhs-red);"></div></div>
-      </div>
-    </div>
-
-    <!-- STATS GRID -->
-    <div class="card-grid">
-      <div class="stat-card"><div class="label">Total Score</div><div class="value" id="statScore">0</div></div>
-      <div class="stat-card"><div class="label">Quizzes</div><div class="value" id="statQuizzes">0</div></div>
-      <div class="stat-card"><div class="label">Accuracy</div><div class="value" id="statAccuracy">—</div></div>
-      <div class="stat-card"><div class="label">Best Streak</div><div class="value" id="statStreak">0</div></div>
-    </div>
-
-    <!-- SUBJECT STATS -->
-    <div class="card">
-      <h2>Subject Mastery</h2>
-      <div id="subjectStats"></div>
-    </div>
-
-    <!-- ACTIONS -->
-    <div class="card text-center">
-  <h2>Enter the Arena</h2>
-  <p style="color:var(--anhs-grey); margin-bottom:1rem;">Quizzes, puzzles, and drills — all grant CP.</p>
-  <div style="margin-bottom:1rem;">
-    <a href="quiz.html?subject=math"    class="btn" style="margin:0.25rem;">Math Quiz</a>
-    <a href="quiz.html?subject=science" class="btn" style="margin:0.25rem;">Science Quiz</a>
-    <a href="quiz.html?subject=english" class="btn" style="margin:0.25rem;">English Quiz</a>
+<body class="title-screen">
+  <div class="hda-logo">
+    <div class="chevron"></div>
+    <div class="mono"><span>H</span><span>D</span><span>A</span></div>
+    <div class="underline"></div>
+    <div class="fullname">Human Development Academy</div>
+    <div class="motto" id="siteMotto">Where the capable rise.</div>
   </div>
-  <div>
-    <a href="booklet.html"   class="btn btn-secondary" style="margin:0.25rem;">Booklet Puzzles</a>
-    <a href="whiteroom.html" class="btn btn-secondary" style="margin:0.25rem;">White Room</a>
-    <a href="special-exam.html" class="btn btn-secondary" style="margin:0.25rem;">Special Exam</a>
-  </div>
-</div>
 
-    <div class="text-center mt-2">
-      <button class="btn btn-secondary" onclick="if(confirm('Reset all progress?')){ANHS.resetState(); location.reload();}">Reset Progress</button>
-    </div>
+  <div class="title-actions">
+    <a href="slots.html" class="title-btn">Start</a>
+    <a href="settings.html" class="title-settings">⚙ Settings</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script> 
+  <script src="js/config.js"></script>
   <script src="js/state.js"></script>
-  <script src="js/supabase-client.js"></script> 
-  <script src="js/nav.js"></script>
-  <script src="js/ranking.js"></script>
+  <script src="js/supabase-client.js"></script>
   <script>
-    renderNav("home");
-    document.getElementById("siteTitle").textContent = window.CONFIG.site.title;
-document.getElementById("siteSubtitle").textContent = window.CONFIG.site.subtitle;
-    const state = ANHS.loadState();
-
-    if (state.expelled) {
-      document.body.innerHTML = `
-        <nav id="nav"></nav>
-        <div class="container text-center" style="padding-top:4rem;">
-          <h1 style="color:var(--danger);">EXPELLED</h1>
-          <p class="subtitle">You have been removed from ANHS.</p>
-          <button class="btn" onclick="ANHS.resetState(); location.reload();">Appeal (Reset)</button>
-        </div>`;
-      renderNav("home");
-    } else {
-      document.getElementById("classBadge").textContent = state.classRank;
-      document.getElementById("classBadge").className = "class-badge class-" + state.classRank;
-      document.getElementById("cpValue").textContent = state.classPoints;
-      document.getElementById("protectionValue").textContent = state.protectionPoints;
-
-      // Danger meter
-      const dangerPct = (state.dangerLevel / 3) * 100;
-      document.getElementById("dangerFill").style.width = dangerPct + "%";
-      const labels = ["Safe", "Caution", "Warning", "CRITICAL — Expulsion imminent"];
-      document.getElementById("dangerLabel").textContent = labels[state.dangerLevel];
-      document.getElementById("dangerLabel").style.color = state.dangerLevel >= 2 ? "var(--danger)" : "var(--anhs-grey)";
-
-      // Class progress
-      const prog = Ranking.classProgress(state);
-      if (prog.next) {
-        document.getElementById("progressLabel").textContent = `Progress to Class ${prog.next} (${prog.nextThreshold} CP)`;
-        document.getElementById("progressPct").textContent = prog.progressPct + "%";
-        document.getElementById("progressFill").style.width = prog.progressPct + "%";
-      } else {
-        document.getElementById("progressLabel").textContent = "MAX CLASS — Class A";
-        document.getElementById("progressPct").textContent = "Top";
-        document.getElementById("progressFill").style.width = "100%";
-      }
-
-      document.getElementById("statScore").textContent = state.totalScore;
-      document.getElementById("statQuizzes").textContent = state.quizzesTaken;
-      const acc = state.questionsTotal > 0 ? Math.round((state.correctTotal / state.questionsTotal) * 100) + "%" : "—";
-      document.getElementById("statAccuracy").textContent = acc;
-      document.getElementById("statStreak").textContent = state.bestStreak;
-
-      const subjects = ["math", "science", "english"];
-      document.getElementById("subjectStats").innerHTML = subjects.map(s => {
-        const st = state.subjectStats[s];
-        const pct = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
-        return `
-          <div style="margin-bottom:1rem;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
-              <span style="text-transform:capitalize; font-weight:600;">${s}</span>
-              <span style="color:var(--anhs-grey);">${st.correct}/${st.total} (${pct}%)</span>
-            </div>
-            <div class="danger-meter"><div class="danger-fill" style="width:${pct}%; background:var(--anhs-red);"></div></div>
-          </div>`;
-      }).join("");
-    }
+    // No nav on title screen
+    window.renderNav = function() {};
   </script>
 </body>
 </html>
