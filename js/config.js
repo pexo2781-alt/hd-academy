@@ -1,12 +1,11 @@
-// Central config store for the lab. All persistent user settings flow through here.
-
-const STORAGE_KEY = 'lab_config_v2';
+const STORAGE_KEY = 'lab_config_v3';
 
 export const defaultConfig = {
   labName: 'SUBJECT 001',
   accentColor: '#ffffff',
   accentFont: "'Inter', system-ui, sans-serif",
-  quote: '“The self is the only laboratory that matters.”'
+  quote: '“The self is the only laboratory that matters.”',
+  theme: 'light'   // 'light' | 'dark'  — defaults to light per spec
 };
 
 let currentConfig = { ...defaultConfig };
@@ -25,6 +24,9 @@ export function loadConfig() {
   } catch (e) {
     currentConfig = { ...defaultConfig };
   }
+  // Per spec: on first load of a new session we always start in light mode.
+  // We still respect the *stored* accent color, lab name, font, and quote.
+  // The stored theme value is retained but not applied until the user toggles.
   return getConfig();
 }
 
@@ -47,7 +49,7 @@ export function onConfigChange(fn) {
   return () => listeners.delete(fn);
 }
 
-// ---------- Application helpers ----------
+// ---------- Helpers ----------
 
 export function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -56,6 +58,18 @@ export function hexToRgb(hex) {
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16)
   } : null;
+}
+
+/** Rough luminance — returns 0..1. Used to decide if accent is "light" or "dark". */
+export function accentLuminance(hex) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 1;
+  return (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+}
+
+export function isAccentDefault(hex) {
+  const n = (hex || '').toLowerCase();
+  return n === '#ffffff' || n === '#000000';
 }
 
 export function applyAccent(color) {
@@ -68,22 +82,6 @@ export function applyAccent(color) {
     document.documentElement.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
     document.documentElement.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
   }
-}
 
-export function applyAccentFont(fontFamily) {
-  document.documentElement.style.setProperty('--font-accent', fontFamily);
-}
-
-export function applyConfigToDOM(config) {
-  applyAccent(config.accentColor);
-  applyAccentFont(config.accentFont);
-
-  const titleEl = document.getElementById('labTitle');
-  if (titleEl) titleEl.textContent = config.labName.toUpperCase();
-
-  const quoteEl = document.getElementById('labQuote');
-  if (quoteEl) quoteEl.textContent = config.quote;
-
-  const footerEl = document.getElementById('labFooter');
-  if (footerEl) footerEl.textContent = `LAB · ${config.labName.toUpperCase()} · v0.2`;
-}
+  // Mark whether the accent is inherently light or dark so contrast helpers
+  //
