@@ -759,6 +759,32 @@ body.light-theme .auth-callout strong { color: #1a1a1a; }
    V6.0 — ENTRY FLOW + CAMPUS + DORM
    ============================================ */
 
+/* Inline addition to V6.0 CSS block */
+#qBody {
+  display: block;
+}
+#qBody .answer-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.6rem;
+  text-align: left;
+}
+#qBody input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--anhs-text);
+  margin-bottom: 0.75rem;
+}
+body.light-theme #qBody input[type="text"] {
+  background: #fff;
+  color: #1a1a1a;
+  border-color: #ccc;
+}
+
 /* ---------- HDA Logo ---------- */
 .hda-logo {
   text-align: center;
