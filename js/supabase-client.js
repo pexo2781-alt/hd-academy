@@ -4,10 +4,8 @@
 // ============================================
 
 // ⚠️ REPLACE THESE with your own values from Supabase Dashboard → Settings → API
-const SUPABASE_URL = "https://umhoyvxagsrmxvadfaxd.supabase.co
-";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtaG95dnhhZ3NybXh2YWRmYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDE5NjQsImV4cCI6MjEwNzk3Nzk2NH0.Ep8yOut5Kpvo5hQuNBKuE0fwgjrI-_nu8WSGIVLWKBQ
-";
+const SUPABASE_URL = "https://umhoyvxagsrmxvadfaxd.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtaG95dnhhZ3NybXh2YWRmYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDE5NjQsImV4cCI6MjEwNzk3Nzk2NH0.Ep8yOut5Kpvo5hQuNBKuE0fwgjrI-_nu8WSGIVLWKBQ";
 
 // Loaded via CDN <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 // That exposes a global `supabase` object with `createClient`
