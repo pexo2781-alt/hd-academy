@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="css/lab.css">
 </head>
 <body>
-  <!-- Background layers -->
+  <!-- ========== BACKGROUND LAYERS ========== -->
   <div class="bg-grid"></div>
   <div class="bg-grid-coarse"></div>
   <div class="bg-glow"></div>
@@ -29,7 +29,7 @@
     <section class="lab-view lab-landing is-active" id="view-landing">
       <h1 class="lab-title" id="labTitle">SUBJECT 001</h1>
       <p class="lab-quote" id="labQuote">“The self is the only laboratory that matters.”</p>
-      <button class="lab-start-btn" id="startBtn">Begin</button>
+      <button class="lab-start-btn" id="startBtn" type="button">Begin</button>
       <div class="lab-bottom-line"></div>
     </section>
 
@@ -41,7 +41,7 @@
             <span class="auth-kicker">// ACCESS GATE</span>
             <h2 class="auth-title" id="authTitle">Sign in</h2>
           </div>
-          <button class="lab-close-btn" id="authBackBtn" aria-label="Back">✕</button>
+          <button class="lab-close-btn" id="authBackBtn" type="button" aria-label="Back">✕</button>
         </div>
 
         <div class="auth-tabs">
@@ -81,10 +81,9 @@
       </div>
     </section>
 
-    <!-- ========== LAB (empty workspace) ========== -->
+    <!-- ========== LAB WORKSPACE ========== -->
     <section class="lab-view lab-workspace" id="view-lab">
-      <!-- Settings gear, top-left -->
-      <button class="lab-gear" id="openSettingsBtn" aria-label="Open settings" title="Settings">
+      <button class="lab-gear" id="openSettingsBtn" type="button" aria-label="Open settings" title="Settings">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
              stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -92,22 +91,20 @@
         </svg>
       </button>
 
-      <!-- Center message (empty workspace placeholder) -->
       <div class="lab-empty">
-        <span class="lab-empty-kicker">// LAB // v0.3</span>
+        <span class="lab-empty-kicker">// LAB // v0.32</span>
         <p class="lab-empty-text">Workspace online. Awaiting directives.</p>
       </div>
 
-      <!-- Sign out, top-right -->
-      <button class="lab-signout" id="signOutBtn" title="Sign out">Sign out</button>
+      <button class="lab-signout" id="signOutBtn" type="button" title="Sign out">Sign out</button>
     </section>
 
-    <!-- ========== SETTINGS (overlay) ========== -->
+    <!-- ========== SETTINGS OVERLAY ========== -->
     <div class="settings-overlay" id="settingsOverlay">
       <section class="lab-settings" id="view-settings" role="dialog" aria-modal="true" aria-labelledby="settingsHeading">
         <div class="lab-settings-header">
           <h2 id="settingsHeading">LAB CONFIG</h2>
-          <button class="lab-close-btn" id="closeSettingsBtn" aria-label="Close settings">✕</button>
+          <button class="lab-close-btn" id="closeSettingsBtn" type="button" aria-label="Close settings">✕</button>
         </div>
 
         <div class="settings-group">
@@ -118,6 +115,14 @@
         <div class="settings-group">
           <label for="accentColorInput">Accent color</label>
           <input type="color" id="accentColorInput" value="#ffffff">
+        </div>
+
+        <div class="settings-group">
+          <label for="textColorInput">Text color</label>
+          <div class="text-color-row">
+            <input type="color" id="textColorInput" value="#000000">
+            <button class="text-color-reset" id="resetTextColorBtn" type="button" title="Reset to theme default">Auto</button>
+          </div>
         </div>
 
         <div class="settings-group">
@@ -140,7 +145,6 @@
           <input type="text" id="quoteInput" value="“The self is the only laboratory that matters.”" placeholder="Enter a quote">
         </div>
 
-                <!-- Theme row -->
         <div class="settings-row-theme">
           <span class="theme-label">Theme</span>
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
@@ -152,20 +156,21 @@
         </div>
 
         <div class="settings-actions">
-          <button class="lab-btn" id="applySettingsBtn">Apply</button>
-          <button class="lab-btn secondary" id="resetSettingsBtn">Reset</button>
+          <button class="lab-btn" id="applySettingsBtn" type="button">Apply</button>
+          <button class="lab-btn secondary" id="resetSettingsBtn" type="button">Reset</button>
         </div>
       </section>
     </div>
 
-    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.31</div>
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.32</div>
   </div>
 
-  <!-- Supabase SDK — defer so it's parsed before our client -->
+  <!-- ========== SCRIPTS ========== -->
+  <!-- Supabase SDK — defer so classic scripts below run after it -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Client — also defer; classic scripts execute in order -->
+  <!-- Your client — classic, exposes window.SB -->
   <script defer src="js/supabase-client.js"></script>
-  <!-- App bootstrap -->
+  <!-- App bootstrap — module, runs after the above -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
