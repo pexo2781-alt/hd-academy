@@ -2,8 +2,8 @@
 // supabase-client.js — Clean single-save version
 // ============================================
 
-const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR-ANON-KEY-HERE";
+const SUPABASE_URL = "https://umhoyvxagsrmxvadfaxd.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtaG95dnhhZ3NybXh2YWRmYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDE5NjQsImV4cCI6MjEwNzk3Nzk2NH0.Ep8yOut5Kpvo5hQuNBKuE0fwgjrI-_nu8WSGIVLWKBQ";
 
 const { createClient } = window.supabase;
 const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
