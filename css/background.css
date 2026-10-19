@@ -38,6 +38,7 @@
   100% { background-position: -192px -192px, -192px -192px; }
 }
 
+/* Accent glow — subtle in both themes */
 .bg-glow {
   position: fixed;
   top: 50%;
@@ -49,8 +50,8 @@
   pointer-events: none;
   background: radial-gradient(
     circle,
-    rgba(var(--accent-rgb), 0.10) 0%,
-    rgba(var(--accent-rgb), 0.04) 30%,
+    rgba(var(--accent-rgb), 0.08) 0%,
+    rgba(var(--accent-rgb), 0.03) 30%,
     transparent 65%
   );
   animation: glowPulse 6s ease-in-out infinite alternate;
@@ -71,7 +72,7 @@
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(var(--fg-rgb), 0.012) 3px,
+    rgba(var(--fg-rgb), 0.015) 3px,
     transparent 4px
   );
   animation: scanShift 12s linear infinite;
@@ -84,7 +85,7 @@
   100% { background-position: 0 40px; }
 }
 
-/* Vignette inverts depending on theme */
+/* Vignette — tuned per theme so nothing washes out */
 .bg-vignette {
   position: fixed;
   inset: 0;
@@ -93,30 +94,35 @@
   background: radial-gradient(
     ellipse at center,
     transparent 0%,
-    transparent 40%,
-    rgba(var(--fg-rgb), 0.55) 85%,
-    rgba(var(--fg-rgb), 0.85) 100%
+    transparent 45%,
+    rgba(var(--fg-rgb), 0.10) 80%,
+    rgba(var(--fg-rgb), 0.22) 100%
   );
   transition: background var(--theme-transition);
 }
 
-/* Light theme's vignette should be softer — the black-on-white version is too heavy */
-html:not([data-theme="dark"]) .bg-vignette {
+html[data-theme="dark"] .bg-vignette {
   background: radial-gradient(
     ellipse at center,
     transparent 0%,
-    transparent 45%,
-    rgba(var(--fg-rgb), 0.10) 80%,
-    rgba(var(--fg-rgb), 0.20) 100%
+    transparent 40%,
+    rgba(0, 0, 0, 0.55) 85%,
+    rgba(0, 0, 0, 0.85) 100%
   );
 }
 
+/* Noise — reduced in light so it doesn't look like a smudge */
 .bg-noise {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: overlay;
+  opacity: 0.03;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+html[data-theme="dark"] .bg-noise {
+  opacity: 0.04;
+  mix-blend-mode: overlay;
 }
