@@ -44,6 +44,8 @@ function getDEFAULT_STATE() {
     specialExamsFailed: 0,
     expelled: false,
     aiSkills: {},
+    relationships: {},       // { npcId: { talks: 0, lastTalk: null } }
+    npcState: {},
     entranceExamScore: null,
     lastPlayed: null
   };
