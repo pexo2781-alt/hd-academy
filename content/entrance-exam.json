@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "description": "Entrance exam question pool. 10 per subject. 15 are drawn at random (5 Math / 5 Science / 5 English).",
+    "difficulty": "Year 7"
+  },
+  "questions": [
+    { "type": "written", "subject": "math", "data": { "q": "What is 7 × 8?", "a": ["48", "54", "56", "64"], "c": 2 } },
+    { "type": "written", "subject": "math", "data": { "q": "What is 45 ÷ 5?", "a": ["7", "8", "9", "10"], "c": 2 } },
+    { "type": "written", "subject": "math", "data": { "q": "Which is a prime number?", "a": ["9", "15", "21", "17"], "c": 3 } },
+    { "type": "written", "subject": "math", "data": { "q": "What is 3/4 as a decimal?", "a": ["0.34", "0.43", "0.75", "0.80"], "c": 2 } },
+    { "type": "written", "subject": "math", "data": { "q": "What is 25% of 80?", "a": ["15", "20", "25", "30"], "c": 1 } },
+    { "type": "written", "subject": "math", "data": { "q": "Solve: x + 7 = 15. What is x?", "a": ["6", "7", "8", "9"], "c": 2 } },
+    { "type": "written", "subject": "math", "data": { "q": "How many degrees in a right angle?", "a": ["45°", "90°", "180°", "360°"], "c": 1 } },
+    { "type": "truefalse", "subject": "math", "data": { "q": "The number 1 is a prime number.", "answer": false } },
+    { "type": "fillblank", "subject": "math", "data": { "sentence": "The next number in the sequence 2, 4, 6, 8, ___", "answer": "10", "hint": "Even number." } },
+    { "type": "written", "subject": "math", "data": { "q": "What is 9 × 9?", "a": ["18", "72", "81", "99"], "c": 2 } },
+
+    { "type": "written", "subject": "science", "data": { "q": "What is the chemical symbol for water?", "a": ["H₂O", "O₂", "CO₂", "HO"], "c": 0 } },
+    { "type": "written", "subject": "science", "data": { "q": "Which planet is closest to the Sun?", "a": ["Venus", "Mercury", "Mars", "Earth"], "c": 1 } },
+    { "type": "written", "subject": "science", "data": { "q": "What do plants use to make food?", "a": ["Sunlight", "Wind", "Soil", "Minerals"], "c": 0 } },
+    { "type": "written", "subject": "science", "data": { "q": "What is the powerhouse of the cell?", "a": ["Nucleus", "Ribosome", "Mitochondria", "Golgi"], "c": 2 } },
+    { "type": "written", "subject": "science", "data": { "q": "Which is a noble gas?", "a": ["Oxygen", "Hydrogen", "Helium", "Nitrogen"], "c": 2 } },
+    { "type": "written", "subject": "science", "data": { "q": "Water freezes at what temperature (°C)?", "a": ["-10", "0", "10", "100"], "c": 1 } },
+    { "type": "truefalse", "subject": "science", "data": { "q": "Sound travels faster in water than in air.", "answer": true } },
+    { "type": "truefalse", "subject": "science", "data": { "q": "The Sun is a planet.", "answer": false } },
+    { "type": "fillblank", "subject": "science", "data": { "sentence": "The gas plants breathe in from the air is ___.", "answer": "carbon dioxide", "hint": "CO₂." } },
+    { "type": "written", "subject": "science", "data": { "q": "How many legs does an insect have?", "a": ["4", "6", "8", "10"], "c": 1 } },
+
+    { "type": "written", "subject": "english", "data": { "q": "Choose the correct spelling:", "a": ["Recieve", "Receive", "Receeve", "Receve"], "c": 1 } },
+    { "type": "written", "subject": "english", "data": { "q": "What is the past tense of 'run'?", "a": ["Runned", "Ran", "Runs", "Running"], "c": 1 } },
+    { "type": "written", "subject": "english", "data": { "q": "Which is a synonym for 'happy'?", "a": ["Sad", "Joyful", "Angry", "Tired"], "c": 1 } },
+    { "type": "written", "subject": "english", "data": { "q": "Identify the noun: 'The cat sleeps.'", "a": ["The", "Cat", "Sleeps", "None"], "c": 1 } },
+    { "type": "written", "subject": "english", "data": { "q": "Which is the correct plural of 'child'?", "a": ["Childs", "Childes", "Children", "Child"], "c": 2 } },
+    { "type": "written", "subject": "english", "data": { "q": "What is the opposite of 'ancient'?", "a": ["Old", "Modern", "Historic", "Past"], "c": 1 } },
+    { "type": "truefalse", "subject": "english", "data": { "q": "'Their' and 'There' mean the same thing.", "answer": false } },
+    { "type": "truefalse", "subject": "english", "data": { "q": "An adjective describes a noun.", "answer": true } },
+    { "type": "fillblank", "subject": "english", "data": { "sentence": "The opposite of 'quick' is ___.", "answer": "slow", "hint": "4 letters." } },
+    { "type": "written", "subject": "english", "data": { "q": "Which word is a verb?", "a": ["Quickly", "Run", "Beautiful", "Table"], "c": 1 } }
+  ]
+}
