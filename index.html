@@ -1,32 +1,601 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HDA</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject 001 · lab</title>
+  <!-- Google Fonts for futuristic fallback; accent font will be set via CSS variable -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    /* ----- reset & base ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* ACCENT – default white, but easily overridden by JS or settings */
+      --accent: #ffffff;
+      --accent-muted: rgba(255, 255, 255, 0.6);
+      --accent-dim: rgba(255, 255, 255, 0.1);
+      --bg: #000000;
+      --surface: #0a0a0a;
+      --text-primary: var(--accent);
+      --text-secondary: rgba(255, 255, 255, 0.5);
+      --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-accent: 'Inter', system-ui, sans-serif; /* can be swapped via settings */
+      --transition: 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+      --glow: 0 0 20px var(--accent), 0 0 40px rgba(255, 255, 255, 0.2);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--accent);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: background 0.4s ease;
+      /* subtle grid noise for futuristic feel */
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
+    }
+
+    /* ----- LAB CONTAINER (renamed from app to lab) ----- */
+    .lab {
+      width: 100%;
+      max-width: 1400px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* ----- LANDING VIEW ----- */
+    .lab-landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .lab-landing.hidden {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+      display: none; /* ensures no interaction */
+    }
+
+    /* Title animation */
+    .lab-title {
+      font-family: var(--font-accent);
+      font-size: clamp(3rem, 12vw, 7rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--accent);
+      text-shadow: 0 0 30px var(--accent), 0 0 60px rgba(255, 255, 255, 0.2);
+      animation: titlePulse 4s infinite alternate ease-in-out;
+      margin-bottom: 0.5rem;
+      transition: color var(--transition), text-shadow var(--transition);
+    }
+
+    @keyframes titlePulse {
+      0% { text-shadow: 0 0 20px var(--accent), 0 0 40px rgba(255,255,255,0.1); }
+      100% { text-shadow: 0 0 40px var(--accent), 0 0 80px rgba(255,255,255,0.4); }
+    }
+
+    /* Quote with subtle fade-in and tracking */
+    .lab-quote {
+      font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+      font-weight: 400;
+      color: var(--accent-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeSlideUp 1.2s 0.3s forwards cubic-bezier(0.2, 0.9, 0.4, 1);
+      transition: color var(--transition);
+      max-width: 80%;
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1.5rem;
+      text-align: left;
+    }
+
+    @keyframes fadeSlideUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Start button – minimal, brutal, futuristic */
+    .lab-start-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font-accent);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 1rem 3.5rem;
+      cursor: pointer;
+      position: relative;
+      transition: all var(--transition);
+      box-shadow: 0 0 0 var(--accent), 0 0 0 rgba(255,255,255,0);
+      border-radius: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .lab-start-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      transition: left 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+      z-index: -1;
+    }
+
+    .lab-start-btn:hover {
+      color: #000;
+      box-shadow: 0 0 30px var(--accent), 0 0 60px rgba(255,255,255,0.3);
+      border-color: var(--accent);
+    }
+
+    .lab-start-btn:hover::before {
+      left: 0;
+    }
+
+    .lab-start-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* subtle bottom line of landing */
+    .lab-bottom-line {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 1px;
+      background: var(--accent-dim);
+      transition: background var(--transition);
+    }
+
+    /* ----- SETTINGS VIEW (hidden by default) ----- */
+    .lab-settings {
+      display: none; /* toggled via JS */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 700px;
+      padding: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+      box-shadow: 0 0 60px rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      animation: settingsFadeIn 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+    }
+
+    @keyframes settingsFadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .lab-settings-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .lab-settings-header h2 {
+      font-family: var(--font-accent);
+      font-weight: 500;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transition: color var(--transition);
+    }
+
+    .lab-close-btn {
+      background: none;
+      border: 1px solid var(--accent-dim);
+      color: var(--accent-muted);
+      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      border-radius: 0;
+      font-family: var(--font-main);
+    }
+
+    .lab-close-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .settings-group {
+      width: 100%;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .settings-group label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent-muted);
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .settings-group input,
+    .settings-group select {
+      background: transparent;
+      border: 1px solid var(--accent-dim);
+      padding: 0.9rem 1rem;
+      font-family: var(--font-main);
+      font-size: 1rem;
+      color: var(--accent);
+      outline: none;
+      transition: all var(--transition);
+      border-radius: 0;
+      width: 100%;
+    }
+
+    .settings-group input:focus,
+    .settings-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    .settings-group input[type="color"] {
+      padding: 0.2rem;
+      height: 50px;
+      cursor: pointer;
+    }
+
+    .settings-group select option {
+      background: var(--bg);
+      color: var(--accent);
+    }
+
+    .settings-actions {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .lab-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font-accent);
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.9rem 1.5rem;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all var(--transition);
+      flex: 1;
+      border-radius: 0;
+    }
+
+    .lab-btn:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    .lab-btn.secondary {
+      border-color: var(--accent-muted);
+      color: var(--accent-muted);
+    }
+
+    .lab-btn.secondary:hover {
+      background: var(--accent-muted);
+      color: #000;
+      border-color: var(--accent-muted);
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    }
+
+    /* hide state utility */
+    .hidden {
+      display: none !important;
+    }
+
+    /* footer info for lab */
+    .lab-footer {
+      position: absolute;
+      bottom: 1.5rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent-dim);
+      text-transform: uppercase;
+      transition: color var(--transition);
+    }
+  </style>
 </head>
-<body class="title-screen">
-  <div class="hda-logo">
-    <div class="chevron"></div>
-    <div class="mono"><span>H</span><span>D</span><span>A</span></div>
-    <div class="underline"></div>
-    <div class="fullname">Human Development Academy</div>
-    <div class="motto" id="siteMotto">Where the capable rise.</div>
+<body>
+  <div class="lab">
+    <!-- LANDING SECTION -->
+    <div class="lab-landing" id="labLanding">
+      <h1 class="lab-title" id="labTitle">SUBJECT 001</h1>
+      <p class="lab-quote" id="labQuote">“The self is the only laboratory that matters.”</p>
+      <button class="lab-start-btn" id="startBtn">Begin</button>
+      <div class="lab-bottom-line"></div>
+    </div>
+
+    <!-- SETTINGS SECTION (hidden initially) -->
+    <div class="lab-settings" id="labSettings">
+      <div class="lab-settings-header">
+        <h2>LAB CONFIG</h2>
+        <button class="lab-close-btn" id="closeSettingsBtn">✕</button>
+      </div>
+
+      <div class="settings-group">
+        <label for="labNameInput">Lab name</label>
+        <input type="text" id="labNameInput" value="SUBJECT 001" placeholder="Enter lab title">
+      </div>
+
+      <div class="settings-group">
+        <label for="accentColorInput">Accent color</label>
+        <input type="color" id="accentColorInput" value="#ffffff">
+      </div>
+
+      <div class="settings-group">
+        <label for="accentFontSelect">Accent font</label>
+        <select id="accentFontSelect">
+          <option value="'Inter', system-ui, sans-serif">Inter (default)</option>
+          <option value="'Courier New', monospace">Courier New</option>
+          <option value="'Arial Black', 'Arial Bold', sans-serif">Arial Black</option>
+          <option value="'Georgia', serif">Georgia</option>
+          <option value="'Times New Roman', serif">Times New Roman</option>
+          <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+          <option value="'Verdana', sans-serif">Verdana</option>
+          <option value="'Impact', sans-serif">Impact</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <label for="quoteInput">Landing quote</label>
+        <input type="text" id="quoteInput" value="“The self is the only laboratory that matters.”" placeholder="Enter a quote">
+      </div>
+
+      <div class="settings-actions">
+        <button class="lab-btn" id="applySettingsBtn">Apply</button>
+        <button class="lab-btn secondary" id="resetSettingsBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="lab-footer">LAB · SUBJECT 001 · v0.1</div>
   </div>
 
-  <div class="title-actions">
-    <a href="slots.html" class="title-btn">Start</a>
-    <a href="settings.html" class="title-settings">⚙ Settings</a>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/supabase-client.js"></script>
   <script>
-    // No nav on title screen
-    window.renderNav = function() {};
+    (function() {
+      // ----- DOM refs -----
+      const landing = document.getElementById('labLanding');
+      const settingsPanel = document.getElementById('labSettings');
+      const startBtn = document.getElementById('startBtn');
+      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+      const applySettingsBtn = document.getElementById('applySettingsBtn');
+      const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+
+      const labTitle = document.getElementById('labTitle');
+      const labQuote = document.getElementById('labQuote');
+      const labNameInput = document.getElementById('labNameInput');
+      const accentColorInput = document.getElementById('accentColorInput');
+      const accentFontSelect = document.getElementById('accentFontSelect');
+      const quoteInput = document.getElementById('quoteInput');
+
+      // ----- helper: set CSS variable -----
+      function setAccent(color) {
+        document.documentElement.style.setProperty('--accent', color);
+        // also adjust derived colors for consistency
+        // we'll update muted and dim via rgba from hex
+        const rgb = hexToRgb(color);
+        if (rgb) {
+          document.documentElement.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
+          document.documentElement.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+        }
+      }
+
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+      }
+
+      function setAccentFont(fontFamily) {
+        document.documentElement.style.setProperty('--font-accent', fontFamily);
+      }
+
+      // ----- apply lab name to all instances (only title and footer for now) -----
+      function setLabName(name) {
+        labTitle.textContent = name.toUpperCase(); // brutal uppercase
+        labNameInput.value = name;
+        // also update footer? keep simple
+        const footer = document.querySelector('.lab-footer');
+        if (footer) {
+          footer.textContent = `LAB · ${name.toUpperCase()} · v0.1`;
+        }
+      }
+
+      // ----- apply quote -----
+      function setQuote(quote) {
+        labQuote.textContent = quote;
+        quoteInput.value = quote;
+      }
+
+      // ----- state persistence (localStorage for demo; supabase integration optional) -----
+      const STORAGE_KEY = 'lab_config_v1';
+
+      function saveConfigToLocal(config) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        } catch (e) { /* ignore */ }
+      }
+
+      function loadConfigFromLocal() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          return stored ? JSON.parse(stored) : null;
+        } catch (e) { return null; }
+      }
+
+      // ----- apply config object to UI -----
+      function applyConfig(config) {
+        if (!config) return;
+        if (config.labName) setLabName(config.labName);
+        if (config.accentColor) {
+          setAccent(config.accentColor);
+          accentColorInput.value = config.accentColor;
+        }
+        if (config.accentFont) {
+          setAccentFont(config.accentFont);
+          accentFontSelect.value = config.accentFont;
+        }
+        if (config.quote) setQuote(config.quote);
+      }
+
+      // ----- default config (matches initial HTML) -----
+      const defaultConfig = {
+        labName: 'SUBJECT 001',
+        accentColor: '#ffffff',
+        accentFont: "'Inter', system-ui, sans-serif",
+        quote: '“The self is the only laboratory that matters.”'
+      };
+
+      // ----- on page load: load from local storage or use defaults -----
+      (function init() {
+        const stored = loadConfigFromLocal();
+        if (stored) {
+          applyConfig(stored);
+        } else {
+          // apply defaults but also set the UI inputs
+          setLabName(defaultConfig.labName);
+          setAccent(defaultConfig.accentColor);
+          setAccentFont(defaultConfig.accentFont);
+          setQuote(defaultConfig.quote);
+          accentColorInput.value = defaultConfig.accentColor;
+          accentFontSelect.value = defaultConfig.accentFont;
+          saveConfigToLocal(defaultConfig);
+        }
+        // ensure title shows lab name uppercase
+        labTitle.textContent = labTitle.textContent.toUpperCase();
+      })();
+
+      // ----- LANDING → SETTINGS transition -----
+      startBtn.addEventListener('click', () => {
+        landing.classList.add('hidden');
+        settingsPanel.style.display = 'flex';
+      });
+
+      closeSettingsBtn.addEventListener('click', () => {
+        settingsPanel.style.display = 'none';
+        landing.classList.remove('hidden');
+      });
+
+      // ----- APPLY SETTINGS -----
+      applySettingsBtn.addEventListener('click', () => {
+        const newName = labNameInput.value.trim() || 'LAB';
+        const newColor = accentColorInput.value;
+        const newFont = accentFontSelect.value;
+        const newQuote = quoteInput.value.trim() || '“The self is the only laboratory that matters.”';
+
+        // Apply to DOM
+        setLabName(newName);
+        setAccent(newColor);
+        setAccentFont(newFont);
+        setQuote(newQuote);
+
+        // Persist
+        const config = {
+          labName: newName,
+          accentColor: newColor,
+          accentFont: newFont,
+          quote: newQuote
+        };
+        saveConfigToLocal(config);
+
+        // Also update the accent input values (already set)
+        // Close settings and show landing again
+        settingsPanel.style.display = 'none';
+        landing.classList.remove('hidden');
+      });
+
+      // ----- RESET to defaults -----
+      resetSettingsBtn.addEventListener('click', () => {
+        // Set inputs to default
+        labNameInput.value = defaultConfig.labName;
+        accentColorInput.value = defaultConfig.accentColor;
+        accentFontSelect.value = defaultConfig.accentFont;
+        quoteInput.value = defaultConfig.quote;
+
+        // Apply immediately
+        setLabName(defaultConfig.labName);
+        setAccent(defaultConfig.accentColor);
+        setAccentFont(defaultConfig.accentFont);
+        setQuote(defaultConfig.quote);
+
+        // Save default
+        saveConfigToLocal(defaultConfig);
+      });
+
+      // ----- extra: if accent color changes via input preview (optional live update) -----
+      // We'll keep it simple: only apply on button click, but update color preview if needed
+      // No live preview to keep clean, but you can uncomment below if desired:
+      /*
+      accentColorInput.addEventListener('input', (e) => {
+        // could set accent live, but might be distracting
+      });
+      */
+
+      // ----- Ensure the 'lab' terminology is used (already in HTML/classes) -----
+      // No further changes needed.
+
+      // ----- If we want to sync with supabase later, we'd call the module, 
+      // but currently supabase-client.js is not loaded because it's not linked.
+      // To keep the page functional as a standalone landing/settings, we skip.
+      // The repo has js/supabase-client.js but we are not including it here to 
+      // avoid network calls for the demo. The user can add it later.
+
+      console.log('Lab ready — Subject 001');
+    })();
   </script>
 </body>
 </html>
