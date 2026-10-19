@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HDA — Class Standings</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav id="nav"></nav>
+  <div class="container">
+    <h1 class="text-center">Class Standings</h1>
+    <p class="subtitle text-center">The hierarchy of the Academy.</p>
+
+    <div id="standingsMount" class="mt-2"></div>
+
+    <div class="card mt-2">
+      <h2>Rival Classes</h2>
+      <p style="color:var(--anhs-grey); font-size:0.9rem; margin-bottom:1rem;">Explore the other classes (view only for now).</p>
+      <div class="tab-row">
+        <button class="tab-btn active" data-c="A" onclick="showClass('A')">Class A</button>
+        <button class="tab-btn" data-c="B" onclick="showClass('B')">Class B</button>
+        <button class="tab-btn" data-c="C" onclick="showClass('C')">Class C</button>
+        <button class="tab-btn" data-c="D" onclick="showClass('D')">Class D</button>
+      </div>
+      <div id="rivalRosterMount" class="mt-1"></div>
+    </div>
+
+    <div class="text-center mt-2">
+      <a href="campus.html" class="btn btn-secondary">← Return to Campus</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/slot-manager.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/npc-data.js"></script>
+  <script src="js/npc-generator.js"></script>
+  <script src="js/npc-talk.js"></script>
+  <script src="js/class-roster.js"></script>
+  <script>
+    window.renderNav("standings");
+
+    const slot = window.ANHS.getActiveSlotId();
+    if (!slot) location.href = "slots.html";
+    const st = window.ANHS.loadState();
+
+    // Fake class CPs (V6.2 will make these real)
+    const classCPs = {
+      A: 1850,
+      B: 1620,
+      C: 1280,
+      D: st.classPoints
+    };
+
+    const sorted = Object.entries(classCPs).sort((a, b) => b[1] - a[1]);
+
+    document.getElementById("standingsMount").innerHTML = sorted.map(([cls, cp], i) => `
+      <div class="standing-row ${cls === st.classRank ? 'yours' : ''}">
+        <div class="standing-rank">#${i + 1}</div>
+        <div class="class-badge class-${cls}" style="min-width:70px;">${cls}</div>
+        <div class="standing-cp">${cp} CP</div>
+        ${cls === st.classRank ? '<div class="standing-yours-label">Your class</div>' : ''}
+      </div>
+    `).join("");
+
+    function showClass(cls) {
+      document.querySelectorAll("[data-c]").forEach(b => b.classList.toggle("active", b.dataset.c === cls));
+      window.ClassRoster.renderRoster(document.getElementById("rivalRosterMount"), cls);
+    }
+
+    showClass("A");
+  </script>
+</body>
+</html>
