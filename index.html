@@ -1,1 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject 001 · lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/background.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+  <!-- Background layers -->
+  <div class="bg-grid"></div>
+  <div class="bg-grid-coarse"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-scanlines"></div>
+  <div class="bg-vignette"></div>
+  <div class="bg-noise"></div>
+
+  <div class="lab">
+    <!-- ========== LANDING ========== -->
+    <section class="lab-view lab-landing is-active" id="view-landing">
+      <h1 class="lab-title" id="labTitle">SUBJECT 001</h1>
+      <p class="lab-quote" id="labQuote">“The self is the only laboratory that matters.”</p>
+      <button class="lab-start-btn" id="startBtn">Begin</button>
+      <div class="lab-bottom-line"></div>
+    </section>
+
+    <!-- ========== AUTH ========== -->
+    <section class="lab-view lab-auth" id="view-auth">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-header-left">
+            <span class="auth-kicker">// ACCESS GATE</span>
+            <h2 class="auth-title" id="authTitle">Sign in</h2>
+          </div>
+          <button class="lab-close-btn" id="authBackBtn" aria-label="Back">✕</button>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-mode="login">Login</button>
+          <button class="auth-tab" data-mode="signup">Sign up</button>
+          <span class="auth-tab-indicator" id="authTabIndicator"></span>
+        </div>
+
+        <form class="auth-form" id="authForm" autocomplete="off">
+          <div class="auth-field">
+            <label for="authEmail">Email</label>
+            <input type="email" id="authEmail" placeholder="operator@lab.io" required autocomplete="email">
+          </div>
+
+          <div class="auth-field">
+            <label for="authPassword">Password</label>
+            <input type="password" id="authPassword" placeholder="••••••••" required minlength="6" autocomplete="current-password">
+          </div>
+
+          <div class="auth-field auth-field-confirm" id="confirmField" hidden>
+            <label for="authPasswordConfirm">Confirm password</label>
+            <input type="password" id="authPasswordConfirm" placeholder="••••••••" autocomplete="new-password">
+          </div>
+
+          <div class="auth-message" id="authMessage" role="status"></div>
+
+          <button type="submit" class="lab-btn auth-submit" id="authSubmitBtn">
+            <span class="auth-submit-label">Authenticate</span>
+            <span class="auth-submit-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <span class="auth-footer-dot"></span>
+          <span id="authFooterText">STATUS // AWAITING CREDENTIALS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SETTINGS ========== -->
+    <section class="lab-view lab-settings" id="view-settings">
+      <div class="lab-settings-header">
+        <h2>LAB CONFIG</h2>
+        <button class="lab-close-btn" id="closeSettingsBtn">✕</button>
+      </div>
+
+      <div class="settings-group">
+        <label for="labNameInput">Lab name</label>
+        <input type="text" id="labNameInput" value="SUBJECT 001" placeholder="Enter lab title">
+      </div>
+
+      <div class="settings-group">
+        <label for="accentColorInput">Accent color</label>
+        <input type="color" id="accentColorInput" value="#ffffff">
+      </div>
+
+      <div class="settings-group">
+        <label for="accentFontSelect">Accent font</label>
+        <select id="accentFontSelect">
+          <option value="'Inter', system-ui, sans-serif">Inter (default)</option>
+          <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+          <option value="'Courier New', monospace">Courier New</option>
+          <option value="'Arial Black', 'Arial Bold', sans-serif">Arial Black</option>
+          <option value="'Georgia', serif">Georgia</option>
+          <option value="'Times New Roman', serif">Times New Roman</option>
+          <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+          <option value="'Verdana', sans-serif">Verdana</option>
+          <option value="'Impact', sans-serif">Impact</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <label for="quoteInput">Landing quote</label>
+        <input type="text" id="quoteInput" value="“The self is the only laboratory that matters.”" placeholder="Enter a quote">
+      </div>
+
+      <div class="settings-actions">
+        <button class="lab-btn" id="applySettingsBtn">Apply</button>
+        <button class="lab-btn secondary" id="resetSettingsBtn">Reset</button>
+      </div>
+    </section>
+
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.2</div>
+  </div>
+
+  <!-- Supabase SDK via CDN (matches typical supabase-client.js usage) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
