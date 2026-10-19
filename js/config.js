@@ -261,8 +261,33 @@ function resetConfigSection(section) {
 // ---------- THEME APPLICATION ----------
 function applyTheme(cfg) {
   const root = document.documentElement;
-  root.style.setProperty("--anhs-red", cfg.site.accentColor);
-  root.style.setProperty("--anhs-text", cfg.site.textColor || "#f5f5f5");
+  const accent = cfg.site.accentColor || "#c8102e";
+  const text = cfg.site.textColor || "#f5f5f5";
+
+  root.style.setProperty("--anhs-red", accent);
+  root.style.setProperty("--anhs-text", text);
+  root.style.setProperty("--anhs-red-hover", darkenHex(accent, 15));
+
+  // NEW: RGB triplet for shadow/overlay use in CSS
+  const rgb = hexToRgb(accent);
+  if (rgb) root.style.setProperty("--anhs-red-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+
+  document.body.classList.toggle("light-theme", cfg.site.theme === "light");
+  document.title = cfg.site.browserTitle || "HDA";
+}
+
+// Helper: hex → {r,g,b}
+function hexToRgb(hex) {
+  try {
+    const h = hex.replace("#", "");
+    if (h.length !== 6) return null;
+    return {
+      r: parseInt(h.substring(0, 2), 16),
+      g: parseInt(h.substring(2, 4), 16),
+      b: parseInt(h.substring(4, 6), 16)
+    };
+  } catch { return null; }
+}
 
   // Derive a hover color: darken accent by 15%
   const hover = darkenHex(cfg.site.accentColor, 15);
@@ -303,6 +328,7 @@ window.CONFIG_API = {
   applyTheme,
   migrateQuestions,
   darkenHex
+  hexToRgb 
 };
 
 applyTheme(window.CONFIG);
