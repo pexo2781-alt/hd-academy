@@ -1,6 +1,6 @@
 // ============================================
 // config.js — Central configuration, defaults, load/save
-// V3: per-subject question types + text color + browser title
+// V6.0: added motto + browserTitle, motto injection
 // ============================================
 
 // ---- Per-subject defaults ----
@@ -138,7 +138,7 @@ const DEFAULT_AI = [
 ];
 
 const DEFAULT_CONFIG = {
-    site: {
+  site: {
     title: "Human Development Academy",
     subtitle: "Where the capable rise.",
     motto: "Where the capable rise.",
@@ -180,12 +180,12 @@ const DEFAULT_CONFIG = {
     whiteRoomTier3: 20,
     whiteRoomFail: -80
   },
-  questions: DEFAULT_QUESTIONS,    // ⬅ NEW SCHEMA
+  questions: DEFAULT_QUESTIONS,
   aiStudents: DEFAULT_AI,
   admin: false
 };
 
-// ---------- MIGRATION: convert old flat-array schema → new per-type schema ----------
+// ---------- MIGRATION: old flat-array schema → new per-type schema ----------
 function migrateQuestions(q) {
   if (!q) return JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
   const out = {};
@@ -193,7 +193,6 @@ function migrateQuestions(q) {
     const old = q[sub];
     if (!old) { out[sub] = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS[sub])); continue; }
 
-    // Already new schema?
     if (!Array.isArray(old) && typeof old === "object") {
       out[sub] = {
         written:   old.written   || [],
@@ -202,7 +201,6 @@ function migrateQuestions(q) {
         logic:     old.logic     || []
       };
     } else if (Array.isArray(old)) {
-      // Old flat MCQ array → goes into "written"
       out[sub] = {
         written:   old,
         fillblank: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS[sub].fillblank)),
@@ -227,15 +225,14 @@ function deepMerge(base, override) {
 
 function loadConfig() {
   try {
-    const raw = localStorage.getItem("anhs_config");
+    // Try new key first, then legacy
+    const raw = localStorage.getItem("hda_config") || localStorage.getItem("anhs_config");
     if (!raw) return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
     const parsed = JSON.parse(raw);
-    // Migrate questions to new schema
     parsed.questions = migrateQuestions(parsed.questions);
-    // Also migrate old top-level `booklet` field if present
     if (parsed.booklet) delete parsed.booklet;
     const merged = deepMerge(DEFAULT_CONFIG, parsed);
-    merged.questions = migrateQuestions(merged.questions);  // in case merge did weird things
+    merged.questions = migrateQuestions(merged.questions);
     return merged;
   } catch (e) {
     console.warn("Config load failed, using default.", e);
@@ -244,10 +241,15 @@ function loadConfig() {
 }
 
 function saveConfig(cfg) {
-  localStorage.setItem("anhs_config", JSON.stringify(cfg));
+  localStorage.setItem("hda_config", JSON.stringify(cfg));
+  if (window.ANHS && window.ANHS.saveState) {
+    const st = window.ANHS.loadState();
+    if (st.slotId) window.ANHS.saveState(st);
+  }
 }
 
 function resetConfig() {
+  localStorage.removeItem("hda_config");
   localStorage.removeItem("anhs_config");
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
@@ -269,41 +271,21 @@ function applyTheme(cfg) {
   root.style.setProperty("--anhs-text", text);
   root.style.setProperty("--anhs-red-hover", darkenHex(accent, 15));
 
-    // Update motto (if any element has id="siteMotto")
-  const mottoEl = document.getElementById("siteMotto");
-  if (mottoEl) mottoEl.textContent = cfg.site.motto || cfg.site.subtitle || "";
-
-  // NEW: RGB triplet for shadow/overlay use in CSS
   const rgb = hexToRgb(accent);
   if (rgb) root.style.setProperty("--anhs-red-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
 
   document.body.classList.toggle("light-theme", cfg.site.theme === "light");
   document.title = cfg.site.browserTitle || "HDA";
-}
 
-// Helper: hex → {r,g,b}
-function hexToRgb(hex) {
-  try {
-    const h = hex.replace("#", "");
-    if (h.length !== 6) return null;
-    return {
-      r: parseInt(h.substring(0, 2), 16),
-      g: parseInt(h.substring(2, 4), 16),
-      b: parseInt(h.substring(4, 6), 16)
-    };
-  } catch { return null; }
-}
+  // Motto injection
+  const mottoEl = document.getElementById("siteMotto");
+  if (mottoEl) mottoEl.textContent = cfg.site.motto || cfg.site.subtitle || "";
 
-  // Derive a hover color: darken accent by 15%
-  const hover = darkenHex(cfg.site.accentColor, 15);
-  root.style.setProperty("--anhs-red-hover", hover);
-
-  document.body.classList.toggle("light-theme", cfg.site.theme === "light");
-  document.title = cfg.site.browserTitle || "HDL";
-
-  // Update meta title if present
-  const titleMeta = document.querySelector('meta[name="app-title"]');
-  if (titleMeta) titleMeta.setAttribute("content", cfg.site.browserTitle || "HDL");
+  // Title injection (if page has siteTitle element)
+  const titleEl = document.getElementById("siteTitle");
+  if (titleEl) titleEl.textContent = cfg.site.title || "";
+  const subtitleEl = document.getElementById("siteSubtitle");
+  if (subtitleEl) subtitleEl.textContent = cfg.site.subtitle || "";
 }
 
 // Simple hex darken
@@ -321,6 +303,18 @@ function darkenHex(hex, pct) {
   } catch { return hex; }
 }
 
+function hexToRgb(hex) {
+  try {
+    const h = hex.replace("#", "");
+    if (h.length !== 6) return null;
+    return {
+      r: parseInt(h.substring(0, 2), 16),
+      g: parseInt(h.substring(2, 4), 16),
+      b: parseInt(h.substring(4, 6), 16)
+    };
+  } catch { return null; }
+}
+
 // Load and expose
 window.CONFIG = loadConfig();
 
@@ -332,8 +326,8 @@ window.CONFIG_API = {
   defaults: DEFAULT_CONFIG,
   applyTheme,
   migrateQuestions,
-  darkenHex
-  hexToRgb 
+  darkenHex,
+  hexToRgb
 };
 
 applyTheme(window.CONFIG);
