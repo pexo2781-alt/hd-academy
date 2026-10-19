@@ -44,6 +44,12 @@ function waitFor(predicate, timeout = 5000, interval = 50) {
 async function boot() {
   // ----- 1. Load and apply saved config -----
   const config = loadConfig();
+   // ----- 1. Load and apply saved config -----
+  const config = loadConfig();
+  // Per spec: always start each page-load session in light mode,
+  // regardless of what was stored. Stored theme is preserved for next session
+  // but not auto-applied here — the user can toggle it live in Settings.
+  config.theme = 'light';
   applyConfigToDOM(config);
   onConfigChange(applyConfigToDOM);
 
