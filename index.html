@@ -126,9 +126,11 @@
     <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.2</div>
   </div>
 
-  <!-- Supabase SDK via CDN (matches typical supabase-client.js usage) -->
+    <!-- Supabase SDK via CDN (needed by supabase-client.js) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <!-- Your existing client — classic script, exposes window.SB -->
+  <script src="js/supabase-client.js"></script>
+  <!-- App bootstrap — module, runs after the above -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
