@@ -1,7 +1,3 @@
-// ============================================
-// nav.js — Shared navigation injection
-// ============================================
-
 window.renderNav = function(activePage) {
   const pages = [
     { id: "home",          label: "Dashboard",     href: "index.html" },
@@ -11,7 +7,8 @@ window.renderNav = function(activePage) {
     { id: "classroom",     label: "Classroom",     href: "classroom.html" },
     { id: "exam",          label: "Special Exam",  href: "special-exam.html" },
     { id: "question-bank", label: "Question Bank", href: "question-bank.html" },
-    { id: "settings",      label: "Settings",      href: "settings.html" }
+    { id: "settings",      label: "Settings",      href: "settings.html" },
+    { id: "account",       label: "Account",       href: "account.html" }
   ];
   const nav = document.getElementById("nav");
   if (!nav) return;
