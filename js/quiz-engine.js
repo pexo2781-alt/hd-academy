@@ -15,6 +15,13 @@ window.QuizEngine = (function () {
     return a;
   }
 
+   // Ensure we're in a slot
+    if (!window.ANHS.getActiveSlotId()) {
+      alert("No active save. Please log in.");
+      location.href = "slots.html";
+      return;
+    }
+
   function start(subject) {
     const cfg = window.CONFIG.gameplay;
    const bank = (window.CONFIG.questions[subject] && window.CONFIG.questions[subject].written) || [];
@@ -133,6 +140,8 @@ window.QuizEngine = (function () {
     const g = window.CONFIG.gameplay;
     const cpDelta = state.correct * g.cpPerCorrect + (state.questions.length - state.correct) * g.cpPerWrong;
     window.ANHS.applyCPChange(st, cpDelta);
+        // V6.0: personal points earn 25% of CP delta (roughly)
+    st.personalPoints = (st.personalPoints || 0) + Math.max(0, Math.round(cpDelta * 0.25));
     const events = window.Ranking.evaluate(st);
 
     const reactions = window.AI_STUDENTS.map(ai => {
