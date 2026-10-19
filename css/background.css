@@ -4,8 +4,8 @@
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, var(--fg-faint) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--fg-faint) 1px, transparent 1px);
+    linear-gradient(to right, var(--text-faint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--text-faint) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
   -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
@@ -24,8 +24,8 @@
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, var(--fg-dim) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--fg-dim) 1px, transparent 1px);
+    linear-gradient(to right, var(--text-dim) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--text-dim) 1px, transparent 1px);
   background-size: 192px 192px;
   mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
   -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
@@ -38,7 +38,6 @@
   100% { background-position: -192px -192px, -192px -192px; }
 }
 
-/* Accent glow — subtle in both themes */
 .bg-glow {
   position: fixed;
   top: 50%;
@@ -72,7 +71,7 @@
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(var(--fg-rgb), 0.015) 3px,
+    rgba(var(--text-rgb), 0.015) 3px,
     transparent 4px
   );
   animation: scanShift 12s linear infinite;
@@ -85,7 +84,6 @@
   100% { background-position: 0 40px; }
 }
 
-/* Vignette — tuned per theme so nothing washes out */
 .bg-vignette {
   position: fixed;
   inset: 0;
@@ -95,8 +93,8 @@
     ellipse at center,
     transparent 0%,
     transparent 45%,
-    rgba(var(--fg-rgb), 0.10) 80%,
-    rgba(var(--fg-rgb), 0.22) 100%
+    rgba(var(--text-rgb), 0.10) 80%,
+    rgba(var(--text-rgb), 0.22) 100%
   );
   transition: background var(--theme-transition);
 }
@@ -111,7 +109,6 @@ html[data-theme="dark"] .bg-vignette {
   );
 }
 
-/* Noise — reduced in light so it doesn't look like a smudge */
 .bg-noise {
   position: fixed;
   inset: 0;
