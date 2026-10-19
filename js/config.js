@@ -138,12 +138,13 @@ const DEFAULT_AI = [
 ];
 
 const DEFAULT_CONFIG = {
-  site: {
-    title: "Classroom of the Elite",
-    subtitle: "Welcome back, Student. The hierarchy awaits.",
-    browserTitle: "HDL",           // ⬅ NEW: what shows in browser tab
+    site: {
+    title: "Human Development Academy",
+    subtitle: "Where the capable rise.",
+    motto: "Where the capable rise.",
+    browserTitle: "HDA",
     accentColor: "#c8102e",
-    textColor: "#f5f5f5",          // ⬅ NEW: main text color
+    textColor: "#f5f5f5",
     theme: "dark"
   },
   gameplay: {
