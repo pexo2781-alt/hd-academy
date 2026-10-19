@@ -84,4 +84,31 @@ export function applyAccent(color) {
   }
 
   // Mark whether the accent is inherently light or dark so contrast helpers
-  //
+  // (--on-accent) resolve to a readable foreground.
+  const lum = accentLuminance(color);
+  document.documentElement.setAttribute('data-accent', lum > 0.55 ? 'light' : 'dark');
+}
+
+export function applyAccentFont(fontFamily) {
+  document.documentElement.style.setProperty('--font-accent', fontFamily);
+}
+
+export function applyTheme(theme) {
+  const t = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+}
+
+export function applyConfigToDOM(config) {
+  applyAccent(config.accentColor);
+  applyAccentFont(config.accentFont);
+  applyTheme(config.theme);
+
+  const titleEl = document.getElementById('labTitle');
+  if (titleEl) titleEl.textContent = config.labName.toUpperCase();
+
+  const quoteEl = document.getElementById('labQuote');
+  if (quoteEl) quoteEl.textContent = config.quote;
+
+  const footerEl = document.getElementById('labFooter');
+  if (footerEl) footerEl.textContent = `LAB · ${config.labName.toUpperCase()} · v0.31`;
+}
