@@ -1,19 +1,35 @@
+// ============================================
+// nav.js — V6.0: minimal top bar (profile chip + logout)
+// ============================================
+
+// The old renderNav() is kept as a stub so old pages (quiz.html etc.) don't crash.
 window.renderNav = function(activePage) {
-  const pages = [
-    { id: "home",          label: "Dashboard",     href: "index.html" },
-    { id: "quiz",          label: "Quiz Arena",    href: "quiz.html" },
-    { id: "booklet",       label: "Booklet",       href: "booklet.html" },
-    { id: "whiteroom",     label: "White Room",    href: "whiteroom.html" },
-    { id: "classroom",     label: "Classroom",     href: "classroom.html" },
-    { id: "exam",          label: "Special Exam",  href: "special-exam.html" },
-    { id: "question-bank", label: "Question Bank", href: "question-bank.html" },
-    { id: "settings",      label: "Settings",      href: "settings.html" },
-    { id: "account",       label: "Account",       href: "account.html" }
-  ];
+  // Old pages had <nav id="nav">. We keep it functional but simplified.
   const nav = document.getElementById("nav");
   if (!nav) return;
-  nav.className = "nav";
-  nav.innerHTML = pages.map(p =>
-    `<a href="${p.href}" class="${p.id === activePage ? 'active' : ''}">${p.label}</a>`
-  ).join("");
+  const slot = window.ANHS.getActiveSlotId();
+  if (!slot) { nav.style.display = "none"; return; }
+  const st = window.ANHS.loadState();
+  nav.className = "topbar";
+  nav.innerHTML = `
+    <div class="topbar-left">
+      <a href="campus.html" class="topbar-brand">HDA</a>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-profile">
+        <span class="topbar-emoji" style="background:${st.portrait.color}">${st.portrait.emoji}</span>
+        <span class="topbar-name">${st.name}</span>
+        <span class="topbar-class class-${st.classRank}">${st.classRank}</span>
+      </div>
+      <a href="dorm.html" class="topbar-btn" title="Dorm">🏠</a>
+      <a href="settings.html" class="topbar-btn" title="Settings">⚙</a>
+      <button class="topbar-btn" onclick="logoutFromCampus()" title="Log out">⎋</button>
+    </div>
+  `;
+};
+
+window.logoutFromCampus = function () {
+  if (!confirm("Log out? Your progress is saved.")) return;
+  localStorage.removeItem("hda_active_slot");
+  location.href = "index.html";
 };
