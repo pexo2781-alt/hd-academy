@@ -1,14 +1,9 @@
-import { supabase } from './supabase-client.js';
-
 /**
- * auth.js — handles all login/signup UI and Supabase auth flow.
- *
- * Expects supabase-client.js to export a configured `supabase` client.
- * Adjust the import path / export name if your existing file differs.
+ * auth.js — handles all login/signup UI and the Supabase auth flow.
+ * Uses window.SB (exposed by supabase-client.js as a classic script).
  */
 
-let currentMode = 'login'; // 'login' | 'signup'
-
+let currentMode = 'login';
 const els = {};
 
 export function initAuth({ onSuccess } = {}) {
@@ -21,7 +16,7 @@ export function initAuth({ onSuccess } = {}) {
     confirmField: document.getElementById('confirmField'),
     message: document.getElementById('authMessage'),
     submitBtn: document.getElementById('authSubmitBtn'),
-    submitLabel: els.submitLabel || document.querySelector('.auth-submit-label'),
+    submitLabel: document.querySelector('.auth-submit-label'),
     title: document.getElementById('authTitle'),
     footerText: document.getElementById('authFooterText'),
     backBtn: document.getElementById('authBackBtn'),
@@ -37,17 +32,11 @@ export function initAuth({ onSuccess } = {}) {
 
   els.form.addEventListener('submit', handleSubmit);
 
-  // Keep footer status in sync with inputs
   [els.email, els.password, els.passwordConfirm].forEach(input => {
     input.addEventListener('input', updateFooterStatus);
   });
 
   setMode('login');
-  initPasswordToggle();
-}
-
-function initPasswordToggle() {
-  // Nothing fancy — the brutalist aesthetic favors visibility over hidden state.
 }
 
 function setMode(mode) {
@@ -56,18 +45,15 @@ function setMode(mode) {
 
   els.tabs.forEach(t => t.classList.toggle('is-active', t.dataset.mode === mode));
 
-  // Move indicator
   if (els.indicator) {
     els.indicator.style.transform = mode === 'signup' ? 'translateX(100%)' : 'translateX(0)';
   }
 
-  // Toggle confirm field
   if (els.confirmField) {
     els.confirmField.hidden = mode !== 'signup';
     els.passwordConfirm.required = mode === 'signup';
   }
 
-  // Update labels
   if (els.title) els.title.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
   if (els.submitLabel) {
     els.submitLabel.textContent = mode === 'signup' ? 'Create operator' : 'Authenticate';
@@ -142,14 +128,11 @@ async function handleSubmit(e) {
 
   try {
     if (currentMode === 'login') {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const data = await window.SB.signIn(email, password);
       showMessage('Access granted. Initializing lab…', 'success');
       await handleAuthSuccess(data.session);
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-
+      const data = await window.SB.signUp(email, password);
       if (data.session) {
         showMessage('Operator registered. Entering lab…', 'success');
         await handleAuthSuccess(data.session);
@@ -172,7 +155,7 @@ async function handleAuthSuccess(session) {
     return;
   }
 
-  // Small delay so the success message is readable — feels like a boot sequence
+  // Small delay so the success message reads like a boot sequence
   await new Promise(r => setTimeout(r, 600));
 
   if (typeof els._onSuccess === 'function') {
