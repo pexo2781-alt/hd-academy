@@ -74,7 +74,7 @@
 }
 
 .lab-start-btn:hover {
-  color: #000;
+  color: var(--on-accent);
   box-shadow: 0 0 30px var(--accent), 0 0 60px rgba(var(--accent-rgb), 0.3);
 }
 
@@ -88,6 +88,6 @@
   transform: translateX(-50%);
   width: 120px;
   height: 1px;
-  background: var(--accent-dim);
-  transition: background var(--transition);
+  background: var(--fg-dim);
+  transition: background var(--theme-transition);
 }
