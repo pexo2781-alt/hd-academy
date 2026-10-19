@@ -4,8 +4,8 @@
   max-width: 700px;
   padding: 2rem;
   background: var(--panel-bg);
-  border: 1px solid var(--fg-dim);
-  box-shadow: 0 0 60px rgba(var(--fg-rgb), 0.05);
+  border: 1px solid var(--text-dim);
+  box-shadow: 0 0 60px rgba(var(--text-rgb), 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: settingsFadeIn 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
@@ -31,7 +31,7 @@
   font-size: 1.5rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fg);
+  color: var(--text);
   transition: color var(--theme-transition);
 }
 
@@ -48,7 +48,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--fg-muted);
+  color: var(--text-muted);
   font-weight: 500;
   transition: color var(--theme-transition);
 }
@@ -57,11 +57,11 @@
 .settings-group input[type="color"],
 .settings-group select {
   background: transparent;
-  border: 1px solid var(--fg-dim);
+  border: 1px solid var(--text-dim);
   padding: 0.9rem 1rem;
   font-family: var(--font-main);
   font-size: 1rem;
-  color: var(--fg);
+  color: var(--text);
   outline: none;
   transition: all var(--transition);
   border-radius: 0;
@@ -82,18 +82,17 @@
 
 .settings-group select option {
   background: var(--bg);
-  color: var(--fg);
+  color: var(--text);
 }
 
-/* ----- Theme row ----- */
 .settings-row-theme {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   padding: 0.9rem 0;
-  border-top: 1px dashed var(--fg-dim);
-  border-bottom: 1px dashed var(--fg-dim);
+  border-top: 1px dashed var(--text-dim);
+  border-bottom: 1px dashed var(--text-dim);
   margin-bottom: 1.75rem;
   transition: border-color var(--theme-transition);
 }
@@ -103,7 +102,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--fg-muted);
+  color: var(--text-muted);
   transition: color var(--theme-transition);
 }
 
@@ -115,7 +114,7 @@
   user-select: none;
   background: none;
   border: none;
-  color: var(--fg);
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.2em;
@@ -127,8 +126,8 @@
   position: relative;
   width: 44px;
   height: 22px;
-  border: 1px solid var(--fg-dim);
-  background: rgba(var(--fg-rgb), 0.04);
+  border: 1px solid var(--text-dim);
+  background: rgba(var(--text-rgb), 0.04);
   transition: background var(--theme-transition), border-color var(--theme-transition);
 }
 
@@ -148,7 +147,7 @@ html[data-theme="dark"] .theme-toggle-thumb {
 }
 
 .theme-toggle-label {
-  color: var(--fg-muted);
+  color: var(--text-muted);
   transition: color var(--theme-transition);
 }
 
@@ -157,4 +156,35 @@ html[data-theme="dark"] .theme-toggle-thumb {
   gap: 1rem;
   width: 100%;
   margin-top: 1rem;
+}
+
+/* Preset text-color swatch row */
+.text-color-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.text-color-row input[type="color"] {
+  flex: 1;
+}
+
+.text-color-reset {
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0 1rem;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all var(--transition);
+}
+
+.text-color-reset:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
