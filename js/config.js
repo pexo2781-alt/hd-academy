@@ -269,6 +269,10 @@ function applyTheme(cfg) {
   root.style.setProperty("--anhs-text", text);
   root.style.setProperty("--anhs-red-hover", darkenHex(accent, 15));
 
+    // Update motto (if any element has id="siteMotto")
+  const mottoEl = document.getElementById("siteMotto");
+  if (mottoEl) mottoEl.textContent = cfg.site.motto || cfg.site.subtitle || "";
+
   // NEW: RGB triplet for shadow/overlay use in CSS
   const rgb = hexToRgb(accent);
   if (rgb) root.style.setProperty("--anhs-red-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
