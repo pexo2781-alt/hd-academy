@@ -1,8 +1,7 @@
-import { loadConfig, applyConfigToDOM, onConfigChange, getConfig } from './config.js';
+import { loadConfig, applyConfigToDOM, onConfigChange } from './config.js';
 import { initBackground } from './background.js';
 import { initAuth, resetAuthForm } from './auth.js';
 import { initSettings } from './settings.js';
-import { supabase } from './supabase-client.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -17,6 +16,12 @@ function showView(name) {
 }
 
 async function boot() {
+  // Wait until the classic script has installed window.SB
+  if (!window.SB) {
+    console.error('[lab] window.SB not available — check supabase-client.js load order.');
+    return;
+  }
+
   // ----- 1. Load and apply saved config -----
   const config = loadConfig();
   applyConfigToDOM(config);
@@ -33,23 +38,23 @@ async function boot() {
   // ----- 4. Init auth module -----
   initAuth({
     onSuccess: async (session) => {
-      // Placeholder for next phase: once signed in,
-      // this is where the lab (training UI) will mount.
-      // For now we just route to settings so the v0.2 flow is demonstrable.
+      // Future phase: mount the lab training UI here.
+      // For v0.2 we route to settings so the flow is demonstrable.
       console.log('[lab] authenticated as', session.user?.email);
       showView('settings');
     }
   });
 
-  // ----- 5. Wire landing button -----
+  // ----- 5. Wire landing button (session-aware) -----
   const startBtn = document.getElementById('startBtn');
   startBtn.addEventListener('click', async () => {
-    // If we already have a session, skip straight to the lab.
-    const { data } = await supabase.auth.getSession();
-    if (data?.session) {
-      showView('settings'); // future: showView('lab')
-      return;
-    }
+    try {
+      const session = await window.SB.getSession();
+      if (session) {
+        showView('settings'); // future: showView('lab')
+        return;
+      }
+    } catch (e) { /* fall through to auth */ }
     showView('auth');
   });
 
@@ -60,14 +65,7 @@ async function boot() {
     showView('landing');
   });
 
-  // ----- 7. Deep link handling: if returning from email confirmation -----
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session && views.auth.classList.contains('is-active')) {
-      showView('settings'); // future: showView('lab')
-    }
-  });
-
-  // ----- 8. Initial view -----
+  // ----- 7. Initial view -----
   showView('landing');
 }
 
