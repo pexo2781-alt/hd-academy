@@ -1,0 +1,109 @@
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--accent-faint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--accent-faint) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
+  animation: gridDrift 40s linear infinite;
+  transition: background-image var(--transition);
+}
+
+@keyframes gridDrift {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 48px 48px, 48px 48px; }
+}
+
+.bg-grid-coarse {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--accent-dim) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--accent-dim) 1px, transparent 1px);
+  background-size: 192px 192px;
+  mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
+  -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
+  animation: gridDriftCoarse 60s linear infinite;
+  transition: background-image var(--transition);
+}
+
+@keyframes gridDriftCoarse {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: -192px -192px, -192px -192px; }
+}
+
+.bg-glow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-rgb), 0.08) 0%,
+    rgba(var(--accent-rgb), 0.03) 30%,
+    transparent 65%
+  );
+  animation: glowPulse 6s ease-in-out infinite alternate;
+  transition: background var(--transition);
+}
+
+@keyframes glowPulse {
+  0%   { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.bg-scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(var(--accent-rgb), 0.012) 3px,
+    transparent 4px
+  );
+  animation: scanShift 12s linear infinite;
+  opacity: 0.9;
+  transition: background-image var(--transition);
+}
+
+@keyframes scanShift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 40px; }
+}
+
+.bg-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.55) 85%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+.bg-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
