@@ -5,28 +5,19 @@ export const defaultConfig = {
   accentColor: '#ffffff',
   accentFont: "'Inter', system-ui, sans-serif",
   quote: '“The self is the only laboratory that matters.”',
-  theme: 'light'   // 'light' | 'dark'  — defaults to light per spec
+  theme: 'light'
 };
 
 let currentConfig = { ...defaultConfig };
 const listeners = new Set();
 
-export function getConfig() {
-  return { ...currentConfig };
-}
+export function getConfig() { return { ...currentConfig }; }
 
 export function loadConfig() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      currentConfig = { ...defaultConfig, ...JSON.parse(stored) };
-    }
-  } catch (e) {
-    currentConfig = { ...defaultConfig };
-  }
-  // Per spec: on first load of a new session we always start in light mode.
-  // We still respect the *stored* accent color, lab name, font, and quote.
-  // The stored theme value is retained but not applied until the user toggles.
+    if (stored) currentConfig = { ...defaultConfig, ...JSON.parse(stored) };
+  } catch (e) { currentConfig = { ...defaultConfig }; }
   return getConfig();
 }
 
@@ -60,33 +51,58 @@ export function hexToRgb(hex) {
   } : null;
 }
 
-/** Rough luminance — returns 0..1. Used to decide if accent is "light" or "dark". */
 export function accentLuminance(hex) {
   const rgb = hexToRgb(hex);
   if (!rgb) return 1;
   return (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
 }
 
+/** True when the stored accent is the default sentinel — theme will resolve it. */
 export function isAccentDefault(hex) {
   const n = (hex || '').toLowerCase();
-  return n === '#ffffff' || n === '#000000';
+  return n === '#ffffff' || n === '';
 }
 
+/**
+ * Applies accent to the document.
+ *
+ * If accent is default (#ffffff sentinel) → we DON'T write --accent directly.
+ * Instead we tag data-accent-default="1" and let CSS resolve --accent from theme
+ * (black in light, white in dark).
+ *
+ * If accent is custom → we write it inline and tag data-accent-default="0",
+ * plus data-accent="light"|"dark" for contrast helpers (--on-accent).
+ */
 export function applyAccent(color) {
-  document.documentElement.style.setProperty('--accent', color);
-  const rgb = hexToRgb(color);
-  if (rgb) {
-    document.documentElement.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-    document.documentElement.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-    document.documentElement.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
-    document.documentElement.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
-    document.documentElement.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
+  const root = document.documentElement;
+
+  if (isAccentDefault(color)) {
+    root.setAttribute('data-accent-default', '1');
+    root.removeAttribute('data-accent');
+    // Clear any inline overrides — let CSS drive it.
+    root.style.removeProperty('--accent');
+    root.style.removeProperty('--accent-rgb');
+    root.style.removeProperty('--accent-muted');
+    root.style.removeProperty('--accent-dim');
+    root.style.removeProperty('--accent-faint');
+    root.style.removeProperty('--accent-glow');
+    return;
   }
 
-  // Mark whether the accent is inherently light or dark so contrast helpers
-  // (--on-accent) resolve to a readable foreground.
+  root.setAttribute('data-accent-default', '0');
+
+  const rgb = hexToRgb(color);
+  if (!rgb) return;
+
+  root.style.setProperty('--accent', color);
+  root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+  root.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
+  root.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+  root.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
+  root.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
+
   const lum = accentLuminance(color);
-  document.documentElement.setAttribute('data-accent', lum > 0.55 ? 'light' : 'dark');
+  root.setAttribute('data-accent', lum > 0.55 ? 'light' : 'dark');
 }
 
 export function applyAccentFont(fontFamily) {
@@ -99,9 +115,10 @@ export function applyTheme(theme) {
 }
 
 export function applyConfigToDOM(config) {
+  // Order matters: theme first so accent-default resolution sees the right theme.
+  applyTheme(config.theme);
   applyAccent(config.accentColor);
   applyAccentFont(config.accentFont);
-  applyTheme(config.theme);
 
   const titleEl = document.getElementById('labTitle');
   if (titleEl) titleEl.textContent = config.labName.toUpperCase();
