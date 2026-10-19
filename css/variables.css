@@ -1,14 +1,6 @@
 :root {
-  /* ---------- ACCENT (user-controlled, never touched by theme) ---------- */
-  --accent: #ffffff;
-  --accent-rgb: 255, 255, 255;
-  --accent-muted: rgba(var(--accent-rgb), 0.6);
-  --accent-dim: rgba(var(--accent-rgb), 0.1);
-  --accent-faint: rgba(var(--accent-rgb), 0.04);
-  --accent-glow: rgba(var(--accent-rgb), 0.25);
-
-  /* ---------- THEME NEUTRALS (flipped by light/dark toggle) ---------- */
-  /* Default = LIGHT (bg is white, foreground is black) */
+  /* ---------- THEME NEUTRALS ---------- */
+  /* Default = LIGHT */
   --bg: #ffffff;
   --surface: #f4f4f4;
   --overlay-bg: rgba(255, 255, 255, 0.55);
@@ -20,10 +12,18 @@
   --fg-dim: rgba(var(--fg-rgb), 0.15);
   --fg-faint: rgba(var(--fg-rgb), 0.05);
 
-  /* A subtle inversion of accent-on-neutral so accent stays readable */
+  /* ---------- ACCENT ---------- */
+  /* Resolved accent. JS overwrites these when a custom accent is set. */
+  --accent: #000000;
+  --accent-rgb: 0, 0, 0;
+  --accent-muted: rgba(var(--accent-rgb), 0.6);
+  --accent-dim: rgba(var(--accent-rgb), 0.1);
+  --accent-faint: rgba(var(--accent-rgb), 0.04);
+  --accent-glow: rgba(var(--accent-rgb), 0.25);
+
+  /* Foreground that sits on top of an accent fill */
   --on-accent: #ffffff;
 
-  /* ---------- TYPOGRAPHY ---------- */
   --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-accent: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
@@ -32,11 +32,11 @@
   --theme-transition: 0.4s ease;
 }
 
-/* Dark theme — flips neutrals back to the classic black lab */
+/* ---------- DARK THEME ---------- */
 html[data-theme="dark"] {
   --bg: #000000;
   --surface: #0a0a0a;
-  --overlay-bg: rgba(0, 0, 0, 0.55);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
   --panel-bg: rgba(10, 10, 10, 0.9);
 
   --fg: #ffffff;
@@ -44,22 +44,34 @@ html[data-theme="dark"] {
   --fg-muted: rgba(var(--fg-rgb), 0.6);
   --fg-dim: rgba(var(--fg-rgb), 0.15);
   --fg-faint: rgba(var(--fg-rgb), 0.05);
-
-  --on-accent: #000000;
 }
 
-/* If the accent itself is white, it won't show on a white background in light mode.
-   In that case the app auto-swaps the button/label "on-accent" to keep contrast.
-   We tag the <html> with data-accent="light" or data-accent="dark" from JS. */
-html[data-accent="light"] {
-  --on-accent: #000000;
-}
-html[data-accent="light"][data-theme="dark"] {
-  --on-accent: #000000;
-}
-html[data-accent="dark"] {
+/* When the accent is default (sentinel), invert it with the theme.
+   JS tags <html> with data-accent-default="1" when accent is #ffffff (default). */
+html[data-accent-default="1"] {
+  --accent: #000000;
+  --accent-rgb: 0, 0, 0;
+  --accent-muted: rgba(var(--accent-rgb), 0.6);
+  --accent-dim: rgba(var(--accent-rgb), 0.1);
+  --accent-faint: rgba(var(--accent-rgb), 0.04);
+  --accent-glow: rgba(var(--accent-rgb), 0.25);
   --on-accent: #ffffff;
 }
+
+html[data-accent-default="1"][data-theme="dark"] {
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+  --accent-muted: rgba(var(--accent-rgb), 0.6);
+  --accent-dim: rgba(var(--accent-rgb), 0.1);
+  --accent-faint: rgba(var(--accent-rgb), 0.04);
+  --accent-glow: rgba(var(--accent-rgb), 0.25);
+  --on-accent: #000000;
+}
+
+/* For custom accents, JS sets data-accent="light"|"dark" based on luminance.
+   --on-accent becomes readable contrast. */
+html[data-accent-default="0"][data-accent="light"] { --on-accent: #000000; }
+html[data-accent-default="0"][data-accent="dark"]  { --on-accent: #ffffff; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -101,12 +113,11 @@ body {
   letter-spacing: 0.15em;
   color: var(--fg-dim);
   text-transform: uppercase;
-  transition: color var(--transition);
+  transition: color var(--theme-transition);
   z-index: 2;
   font-family: var(--font-mono);
 }
 
-/* ---------- Shared buttons ---------- */
 .lab-btn {
   background: transparent;
   border: 1px solid var(--accent);
@@ -162,13 +173,10 @@ body {
   background: var(--accent-dim);
 }
 
-/* ---------- View system ---------- */
 .lab-view {
   display: none;
   width: 100%;
   align-items: center;
   justify-content: center;
 }
-.lab-view.is-active {
-  display: flex;
-}
+.lab-view.is-active { display: flex; }
