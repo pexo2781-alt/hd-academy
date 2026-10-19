@@ -7,15 +7,19 @@
   if (!slot) { location.href = "slots.html"; return; }
 
   const st = window.ANHS.loadState();
-  document.getElementById("topbarMount").innerHTML = "";
+
+  // Render topbar (uses the <nav id="nav"> in campus.html)
   window.renderNav("campus");
 
   // Stats bar
-  document.getElementById("statCP").textContent = st.classPoints;
-  document.getElementById("statPP").textContent = st.personalPoints || 0;
-  document.getElementById("statDay").textContent = st.day;
+  const cpEl = document.getElementById("statCP");
+  const ppEl = document.getElementById("statPP");
+  const dayEl = document.getElementById("statDay");
+  if (cpEl) cpEl.textContent = st.classPoints;
+  if (ppEl) ppEl.textContent = st.personalPoints || 0;
+  if (dayEl) dayEl.textContent = st.day;
 
-  // Buildings — clickable
+  // Buildings — clickable (locked ones have no data-href)
   document.querySelectorAll(".building[data-href]").forEach(card => {
     card.addEventListener("click", () => {
       const href = card.dataset.href;
