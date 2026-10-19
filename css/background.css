@@ -4,13 +4,13 @@
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, var(--accent-faint) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--accent-faint) 1px, transparent 1px);
+    linear-gradient(to right, var(--fg-faint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--fg-faint) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
   -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 90%);
   animation: gridDrift 40s linear infinite;
-  transition: background-image var(--transition);
+  transition: background-image var(--theme-transition);
 }
 
 @keyframes gridDrift {
@@ -24,13 +24,13 @@
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, var(--accent-dim) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--accent-dim) 1px, transparent 1px);
+    linear-gradient(to right, var(--fg-dim) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--fg-dim) 1px, transparent 1px);
   background-size: 192px 192px;
   mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
   -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 85%);
   animation: gridDriftCoarse 60s linear infinite;
-  transition: background-image var(--transition);
+  transition: background-image var(--theme-transition);
 }
 
 @keyframes gridDriftCoarse {
@@ -49,8 +49,8 @@
   pointer-events: none;
   background: radial-gradient(
     circle,
-    rgba(var(--accent-rgb), 0.08) 0%,
-    rgba(var(--accent-rgb), 0.03) 30%,
+    rgba(var(--accent-rgb), 0.10) 0%,
+    rgba(var(--accent-rgb), 0.04) 30%,
     transparent 65%
   );
   animation: glowPulse 6s ease-in-out infinite alternate;
@@ -71,12 +71,12 @@
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(var(--accent-rgb), 0.012) 3px,
+    rgba(var(--fg-rgb), 0.012) 3px,
     transparent 4px
   );
   animation: scanShift 12s linear infinite;
   opacity: 0.9;
-  transition: background-image var(--transition);
+  transition: background-image var(--theme-transition);
 }
 
 @keyframes scanShift {
@@ -84,6 +84,7 @@
   100% { background-position: 0 40px; }
 }
 
+/* Vignette inverts depending on theme */
 .bg-vignette {
   position: fixed;
   inset: 0;
@@ -93,8 +94,20 @@
     ellipse at center,
     transparent 0%,
     transparent 40%,
-    rgba(0, 0, 0, 0.55) 85%,
-    rgba(0, 0, 0, 0.85) 100%
+    rgba(var(--fg-rgb), 0.55) 85%,
+    rgba(var(--fg-rgb), 0.85) 100%
+  );
+  transition: background var(--theme-transition);
+}
+
+/* Light theme's vignette should be softer — the black-on-white version is too heavy */
+html:not([data-theme="dark"]) .bg-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 45%,
+    rgba(var(--fg-rgb), 0.10) 80%,
+    rgba(var(--fg-rgb), 0.20) 100%
   );
 }
 
