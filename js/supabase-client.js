@@ -44,34 +44,59 @@ window.SB = {
   },
 
   // ---------- CLOUD SAVE ----------
-  async loadSave() {
+   async loadSave(slot) {
     const user = await this.getUser();
     if (!user) return null;
+    const s = slot || window.ANHS.getActiveSlotId() || 1;
     const { data, error } = await client
       .from("saves")
-      .select("state, config, updated_at")
+      .select("state, config, updated_at, slot")
       .eq("user_id", user.id)
+      .eq("slot", s)
       .maybeSingle();
     if (error) throw error;
     return data;
   },
 
-  async saveCloud(state, config) {
+  async saveCloud(state, config, slot) {
     const user = await this.getUser();
     if (!user) throw new Error("Not signed in");
-
-    // Upsert: insert if new, update if exists
+    const s = slot || (state && state.slotId) || window.ANHS.getActiveSlotId() || 1;
     const { error } = await client
       .from("saves")
       .upsert(
         {
           user_id: user.id,
+          slot: s,
           state,
           config,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "user_id" }
+        { onConflict: "user_id,slot" }
       );
+    if (error) throw error;
+  },
+
+  async loadAllSlotsMeta() {
+    const user = await this.getUser();
+    if (!user) return [];
+    const { data, error } = await client
+      .from("saves")
+      .select("slot, state, updated_at")
+      .eq("user_id", user.id)
+      .order("slot");
+    if (error) throw error;
+    return data || [];
+  },
+
+  async deleteCloudSlot(slot) {
+    const user = await this.getUser();
+    if (!user) return;
+    const { error } = await client
+      .from("saves")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("slot", slot);
     if (error) throw error;
   },
 
