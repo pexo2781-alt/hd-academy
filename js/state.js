@@ -1,6 +1,6 @@
 // ============================================
 // state.js — Player state, CP, class, save/load
-// Now reads thresholds/starting values from CONFIG
+// V5: auto-sync to cloud on save (if signed in)
 // ============================================
 
 function getDEFAULT_STATE() {
@@ -48,9 +48,28 @@ function loadState() {
   }
 }
 
+// Debounced cloud sync
+let _syncTimer = null;
+function scheduleCloudSync() {
+  if (!window.SB) return; // Supabase not loaded on this page
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(async () => {
+    try {
+      const user = await window.SB.getUser();
+      if (!user) return; // Not signed in
+      const state = JSON.parse(localStorage.getItem("anhs_state") || "{}");
+      const config = JSON.parse(localStorage.getItem("anhs_config") || "{}");
+      await window.SB.saveCloud(state, config);
+    } catch (e) {
+      console.warn("Cloud sync failed:", e.message);
+    }
+  }, 1500); // 1.5s debounce
+}
+
 function saveState(state) {
   state.lastPlayed = new Date().toISOString();
   localStorage.setItem("anhs_state", JSON.stringify(state));
+  scheduleCloudSync();
 }
 
 function resetState() {
@@ -74,7 +93,6 @@ function computeDanger(state) {
   const t2 = r.startingDangerTier2 ?? 600;
   const t3 = r.startingDangerTier3 ?? 400;
   const failT3 = r.examsFailedForDanger3 ?? 2;
-
   let danger = 0;
   if (state.classPoints < t1) danger = 1;
   if (state.classPoints < t2) danger = 2;
@@ -86,7 +104,6 @@ function applyCPChange(state, delta) {
   state.classPoints = Math.max(0, state.classPoints + delta);
   state.classRank = computeClass(state.classPoints);
   state.dangerLevel = computeDanger(state);
-
   const r = (window.CONFIG && window.CONFIG.ranking) || {};
   const expelLimit = r.examsFailedForExpulsion ?? 3;
 
