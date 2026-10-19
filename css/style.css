@@ -375,8 +375,15 @@ body.light-theme .modal .form-row textarea {
 .add-row-btn:hover { background: rgba(200, 16, 46, 0.1); }
 
 /* ============================================
-   V5.1 — AUTH UI POLISH
+   V5.1 — AUTH UI POLISH (accent-aware)
    ============================================ */
+
+/* Accent-aware shadow helper:
+   --anhs-red-rgb is derived in config.js applyTheme()
+   (if not set, falls back to the default red) */
+:root {
+  --anhs-red-rgb: 200, 16, 46;
+}
 
 /* --- Auth page layout --- */
 .auth-page {
@@ -402,12 +409,13 @@ body.light-theme .modal .form-row textarea {
   font-weight: 900;
   letter-spacing: -1px;
   margin-bottom: 1rem;
-  box-shadow: 0 8px 24px rgba(200, 16, 46, 0.35);
+  box-shadow: 0 8px 24px rgba(var(--anhs-red-rgb), 0.35);
 }
 .auth-hero h1 {
   font-size: 1.8rem;
   margin-bottom: 0.4rem;
   letter-spacing: 1px;
+  color: var(--anhs-text);
 }
 .auth-hero p {
   color: var(--anhs-grey);
@@ -423,6 +431,7 @@ body.light-theme .modal .form-row textarea {
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  color: var(--anhs-text);
 }
 body.light-theme .auth-card {
   background: #fff;
@@ -461,7 +470,7 @@ body.light-theme .auth-tabs {
 .auth-tab.active {
   background: var(--anhs-red);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(200, 16, 46, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--anhs-red-rgb), 0.3);
 }
 body.light-theme .auth-tab:not(.active) {
   color: #666;
@@ -492,7 +501,7 @@ body.light-theme .auth-tab.active {
   color: var(--anhs-text);
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 body.light-theme .auth-field input {
   background: #f9f9f9;
@@ -503,7 +512,7 @@ body.light-theme .auth-field input {
   outline: none;
   border-color: var(--anhs-red);
   background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--anhs-red-rgb), 0.15);
 }
 body.light-theme .auth-field input:focus {
   background: #fff;
@@ -537,7 +546,7 @@ body.light-theme .auth-field input:focus {
 .auth-submit:hover {
   background: var(--anhs-red-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(200, 16, 46, 0.35);
+  box-shadow: 0 6px 20px rgba(var(--anhs-red-rgb), 0.35);
 }
 .auth-submit:active {
   transform: translateY(0);
@@ -618,7 +627,7 @@ body.light-theme .profile-header {
   font-size: 1.6rem;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--anhs-red-rgb), 0.3);
 }
 .profile-info { flex: 1; min-width: 0; }
 .profile-label {
@@ -631,6 +640,7 @@ body.light-theme .profile-header {
 .profile-email {
   font-weight: 600;
   font-size: 1rem;
+  color: var(--anhs-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -713,7 +723,7 @@ body.light-theme .action-btn.danger {
 /* --- Info callout --- */
 .auth-callout {
   padding: 0.9rem 1rem;
-  background: rgba(200, 16, 46, 0.08);
+  background: rgba(var(--anhs-red-rgb), 0.08);
   border-left: 3px solid var(--anhs-red);
   border-radius: 6px;
   font-size: 0.85rem;
