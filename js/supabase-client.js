@@ -3,14 +3,6 @@
 // V5: cloud saves via Supabase
 // ============================================
 
-
-if (!window.supabase) {
-  console.error("Supabase CDN not loaded. Check script order in account.html.");
-}
-if (SUPABASE_URL.includes("YOUR-PROJECT") || SUPABASE_ANON_KEY.includes("YOUR-ANON-KEY")) {
-  console.error("Supabase credentials not configured in supabase-client.js");
-}
-
 // ⚠️ REPLACE THESE with your own values from Supabase Dashboard → Settings → API
 const SUPABASE_URL = "https://umhoyvxagsrmxvadfaxd.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtaG95dnhhZ3NybXh2YWRmYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDE5NjQsImV4cCI6MjEwNzk3Nzk2NH0.Ep8yOut5Kpvo5hQuNBKuE0fwgjrI-_nu8WSGIVLWKBQ";
