@@ -54,55 +54,64 @@ export function hexToRgb(hex) {
 export function accentLuminance(hex) {
   const rgb = hexToRgb(hex);
   if (!rgb) return 1;
-  return (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+  // WCAG-style relative luminance (linearized channels)
+  const ch = v => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * ch(rgb.r) + 0.7152 * ch(rgb.g) + 0.0722 * ch(rgb.b);
 }
 
-/** True when the stored accent is the default sentinel — theme will resolve it. */
+/** True when the stored accent is the default sentinel. */
 export function isAccentDefault(hex) {
   const n = (hex || '').toLowerCase();
   return n === '#ffffff' || n === '';
 }
 
 /**
- * Applies accent to the document.
- *
- * If accent is default (#ffffff sentinel) → we DON'T write --accent directly.
- * Instead we tag data-accent-default="1" and let CSS resolve --accent from theme
- * (black in light, white in dark).
- *
- * If accent is custom → we write it inline and tag data-accent-default="0",
- * plus data-accent="light"|"dark" for contrast helpers (--on-accent).
+ * Resolves the accent that will actually be *rendered* given the current
+ * theme + stored accent. This is what --on-accent must be computed from.
  */
+export function resolveRenderedAccent(storedAccent, theme) {
+  if (isAccentDefault(storedAccent)) {
+    // Default sentinel: black in light, white in dark
+    return theme === 'dark' ? '#ffffff' : '#000000';
+  }
+  return storedAccent;
+}
+
 export function applyAccent(color) {
   const root = document.documentElement;
+  const theme = root.getAttribute('data-theme') || 'light';
+  const rendered = resolveRenderedAccent(color, theme);
 
   if (isAccentDefault(color)) {
     root.setAttribute('data-accent-default', '1');
     root.removeAttribute('data-accent');
-    // Clear any inline overrides — let CSS drive it.
+    // Clear inline overrides — CSS resolves --accent from theme
     root.style.removeProperty('--accent');
     root.style.removeProperty('--accent-rgb');
     root.style.removeProperty('--accent-muted');
     root.style.removeProperty('--accent-dim');
     root.style.removeProperty('--accent-faint');
     root.style.removeProperty('--accent-glow');
-    return;
+  } else {
+    root.setAttribute('data-accent-default', '0');
+    const rgb = hexToRgb(color);
+    if (rgb) {
+      root.style.setProperty('--accent', color);
+      root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+      root.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.75)`);
+      root.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.16)`);
+      root.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.06)`);
+      root.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
+    }
   }
 
-  root.setAttribute('data-accent-default', '0');
-
-  const rgb = hexToRgb(color);
-  if (!rgb) return;
-
-  root.style.setProperty('--accent', color);
-  root.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-  root.style.setProperty('--accent-muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-  root.style.setProperty('--accent-dim', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
-  root.style.setProperty('--accent-faint', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
-  root.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
-
-  const lum = accentLuminance(color);
-  root.setAttribute('data-accent', lum > 0.55 ? 'light' : 'dark');
+  // Compute contrast foreground from the *rendered* accent
+  const lum = accentLuminance(rendered);
+  // Threshold ~0.55 keeps mid-bright colors readable
+  root.setAttribute('data-on-accent', lum > 0.55 ? 'dark' : 'light');
 }
 
 export function applyAccentFont(fontFamily) {
@@ -115,7 +124,7 @@ export function applyTheme(theme) {
 }
 
 export function applyConfigToDOM(config) {
-  // Order matters: theme first so accent-default resolution sees the right theme.
+  // Theme first — accent resolution depends on it
   applyTheme(config.theme);
   applyAccent(config.accentColor);
   applyAccentFont(config.accentFont);
