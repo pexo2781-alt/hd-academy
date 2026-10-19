@@ -15,8 +15,8 @@
   align-items: center;
   justify-content: center;
   background: var(--panel-bg);
-  border: 1px solid var(--fg-dim);
-  color: var(--fg-muted);
+  border: 1px solid var(--text-dim);
+  color: var(--text-muted);
   cursor: pointer;
   border-radius: 0;
   backdrop-filter: blur(8px);
@@ -40,8 +40,8 @@
   top: 1.25rem;
   right: 1.25rem;
   background: transparent;
-  border: 1px solid var(--fg-dim);
-  color: var(--fg-muted);
+  border: 1px solid var(--text-dim);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.25em;
@@ -75,7 +75,7 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.3em;
-  color: var(--fg-muted);
+  color: var(--text-muted);
   text-transform: uppercase;
   transition: color var(--theme-transition);
 }
@@ -85,9 +85,9 @@
   font-size: clamp(1.1rem, 2.5vw, 1.6rem);
   font-weight: 400;
   letter-spacing: 0.05em;
-  color: var(--fg);
+  color: var(--text);
   opacity: 0.75;
-  text-shadow: 0 0 20px rgba(var(--fg-rgb), 0.3);
+  text-shadow: 0 0 20px rgba(var(--text-rgb), 0.3);
   transition: color var(--theme-transition);
 }
 
@@ -106,9 +106,7 @@
   transition: background var(--theme-transition);
 }
 
-.settings-overlay.is-open {
-  display: flex;
-}
+.settings-overlay.is-open { display: flex; }
 
 @keyframes overlayFadeIn {
   from { opacity: 0; }
