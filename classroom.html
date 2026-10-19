@@ -8,22 +8,64 @@
 </head>
 <body>
   <nav id="nav"></nav>
+
   <div class="container">
     <h1>Classroom</h1>
-    <p class="subtitle">Your classmates. Their eyes are on you.</p>
-    <div id="classmatesGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;"></div>
-    <div class="text-center mt-2">
-      <a href="index.html" class="btn">Back to Dashboard</a>
+    <p class="subtitle" id="classroomSubtitle">School Time · Day 0</p>
+
+    <!-- Subject picker -->
+    <div id="subjectSelect" class="card text-center">
+      <h2>Choose today's lesson</h2>
+      <div class="mt-1">
+        <button class="btn" onclick="startQuiz('math')" style="margin:0.25rem;">Mathematics</button>
+        <button class="btn" onclick="startQuiz('science')" style="margin:0.25rem;">Science</button>
+        <button class="btn" onclick="startQuiz('english')" style="margin:0.25rem;">English</button>
+      </div>
+      <div class="mt-2">
+        <a href="campus.html" class="btn btn-secondary">← Return to Campus</a>
+      </div>
     </div>
+
+    <!-- Quiz screen (reused) -->
+    <div id="quizScreen" class="card hidden">
+      <div class="quiz-header">
+        <span id="quizProgress" style="color:var(--anhs-grey);"></span>
+        <span id="timer" class="timer">15s</span>
+      </div>
+      <div class="quiz-header">
+        <span>Score: <strong id="scoreDisplay">0</strong></span>
+        <span>Streak: <strong id="streakDisplay">0</strong></span>
+      </div>
+      <div id="questionText" class="question-text"></div>
+      <div id="answers" class="answers"></div>
+      <div id="scoreboard" class="scoreboard"></div>
+    </div>
+
+    <div id="resultScreen" class="hidden"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
-  <script src="js/config.js"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/supabase-client.js"></script>
+  <script src="js/slot-manager.js"></script>
   <script src="js/nav.js"></script>
+  <script src="js/ranking.js"></script>
   <script src="js/ai-students.js"></script>
-  <script src="js/classroom.js"></script>
-  <script>renderNav("classroom");</script>
+  <script src="js/quiz-engine.js"></script>
+  <script>
+    window.renderNav("classroom");
+
+    const slot = window.ANHS.getActiveSlotId();
+    if (!slot) location.href = "slots.html";
+    const st = window.ANHS.loadState();
+    document.getElementById("classroomSubtitle").textContent = `School Time · Day ${st.day}`;
+
+    function startQuiz(subject) {
+      document.getElementById("subjectSelect").classList.add("hidden");
+      document.getElementById("quizScreen").classList.remove("hidden");
+      QuizEngine.start(subject);
+    }
+  </script>
 </body>
 </html>
