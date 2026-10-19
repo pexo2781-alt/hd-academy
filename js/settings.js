@@ -15,23 +15,39 @@ export function initSettings({ onClose } = {}) {
   const applyBtn = document.getElementById('applySettingsBtn');
   const resetBtn = document.getElementById('resetSettingsBtn');
   const closeBtn = document.getElementById('closeSettingsBtn');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeLabel = document.getElementById('themeToggleLabel');
 
   function syncInputs(config) {
     if (labNameInput) labNameInput.value = config.labName;
     if (accentColorInput) accentColorInput.value = config.accentColor;
     if (accentFontSelect) accentFontSelect.value = config.accentFont;
     if (quoteInput) quoteInput.value = config.quote;
+    if (themeLabel) themeLabel.textContent = config.theme === 'dark' ? 'Dark' : 'Light';
   }
 
   // Populate from stored config
   syncInputs(loadConfig());
 
+  // Live theme toggle — applies immediately, no need to press Apply.
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const cfg = getConfig();
+      const next = cfg.theme === 'dark' ? 'light' : 'dark';
+      saveConfig({ theme: next });
+      applyConfigToDOM(getConfig());
+      if (themeLabel) themeLabel.textContent = next === 'dark' ? 'Dark' : 'Light';
+    });
+  }
+
   applyBtn.addEventListener('click', () => {
+    const cfg = getConfig();
     const next = {
       labName: (labNameInput.value.trim() || 'LAB'),
       accentColor: accentColorInput.value,
       accentFont: accentFontSelect.value,
-      quote: (quoteInput.value.trim() || defaultConfig.quote)
+      quote: (quoteInput.value.trim() || defaultConfig.quote),
+      theme: cfg.theme // preserve whatever the toggle currently set
     };
     saveConfig(next);
     applyConfigToDOM(getConfig());
