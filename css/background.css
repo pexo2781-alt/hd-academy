@@ -38,7 +38,7 @@
   100% { background-position: -192px -192px, -192px -192px; }
 }
 
-/* Accent glow — dark mode only. Fully removed in light mode. */
+/* Accent glow — dark mode only. Fully absent in light mode. */
 .bg-glow {
   display: none;
 }
