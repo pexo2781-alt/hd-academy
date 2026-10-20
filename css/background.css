@@ -38,7 +38,13 @@
   100% { background-position: -192px -192px, -192px -192px; }
 }
 
+/* Accent glow — dark mode only. Fully removed in light mode. */
 .bg-glow {
+  display: none;
+}
+
+html[data-theme="dark"] .bg-glow {
+  display: block;
   position: fixed;
   top: 50%;
   left: 50%;
