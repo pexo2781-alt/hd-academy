@@ -1,95 +1,191 @@
-import {
-  getConfig,
-  saveConfig,
-  resetConfig,
-  loadConfig,
-  applyConfigToDOM,
-  defaultConfig
-} from './config.js';
+.lab-settings {
+  flex-direction: column;
+  width: 100%;
+  max-width: 700px;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  padding: 2rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--text-dim);
+  box-shadow: 0 0 60px rgba(var(--text-rgb), 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: settingsFadeIn 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+  transition: background var(--theme-transition), border-color var(--theme-transition), box-shadow var(--theme-transition);
+}
 
-export function initSettings({ onClose } = {}) {
-  const labNameInput     = document.getElementById('labNameInput');
-  const accentColorInput = document.getElementById('accentColorInput');
-  const textColorInput   = document.getElementById('textColorInput');
-  const resetTextBtn     = document.getElementById('resetTextColorBtn');
-  const accentFontSelect = document.getElementById('accentFontSelect');
-  const quoteInput       = document.getElementById('quoteInput');
-  const applyBtn         = document.getElementById('applySettingsBtn');
-  const resetBtn         = document.getElementById('resetSettingsBtn');
-  const closeBtn         = document.getElementById('closeSettingsBtn');
-  const themeToggle      = document.getElementById('themeToggle');
-  const themeLabel       = document.getElementById('themeToggleLabel');
+@keyframes settingsFadeIn {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 
-  function isSentinel(hex) {
-    const n = (hex || '').toLowerCase();
-    return n === '#ffffff' || n === '';
-  }
+.lab-settings-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
 
-  function resolvedTextFor(config) {
-    if (!isSentinel(config.textColor)) return config.textColor;
-    return config.theme === 'dark' ? '#ffffff' : '#000000';
-  }
+.lab-settings-header h2 {
+  font-family: var(--font-accent);
+  font-weight: 500;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  transition: color var(--theme-transition);
+}
 
-  function syncInputs(config) {
-    if (labNameInput)     labNameInput.value = config.labName;
-    if (accentColorInput) accentColorInput.value = config.accentColor;
-    if (accentFontSelect) accentFontSelect.value = config.accentFont;
-    if (quoteInput)       quoteInput.value = config.quote;
-    if (themeLabel)       themeLabel.textContent = config.theme === 'dark' ? 'Dark' : 'Light';
+.settings-group {
+  width: 100%;
+  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
 
-    // Text input: show the theme-resolved color when sentinel, otherwise the custom color
-    if (textColorInput) {
-      textColorInput.value = resolvedTextFor(config);
-    }
-  }
+.settings-group label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: color var(--theme-transition);
+}
 
-  syncInputs(loadConfig());
+.settings-group input[type="text"],
+.settings-group input[type="color"],
+.settings-group select {
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  padding: 0.9rem 1rem;
+  font-family: var(--font-main);
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: all var(--transition);
+  border-radius: 0;
+  width: 100%;
+}
 
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const cfg = getConfig();
-      const next = cfg.theme === 'dark' ? 'light' : 'dark';
-      saveConfig({ theme: next });
-      applyConfigToDOM(getConfig());
-      if (themeLabel) themeLabel.textContent = next === 'dark' ? 'Dark' : 'Light';
-      syncInputs(getConfig());
-    });
-  }
+.settings-group input:focus,
+.settings-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.1);
+}
 
-  if (resetTextBtn) {
-    resetTextBtn.addEventListener('click', () => {
-      saveConfig({ textColor: '#ffffff' });
-      applyConfigToDOM(getConfig());
-      syncInputs(getConfig());
-    });
-  }
+.settings-group input[type="color"] {
+  padding: 0.2rem;
+  height: 50px;
+  cursor: pointer;
+}
 
-  applyBtn.addEventListener('click', () => {
-    const cfg = getConfig();
-    const resolved = resolvedTextFor(cfg);
-    const isTextSameAsResolved = textColorInput.value.toLowerCase() === resolved.toLowerCase();
+.settings-group select option {
+  background: var(--bg);
+  color: var(--text);
+}
 
-    const next = {
-      labName: (labNameInput.value.trim() || 'LAB'),
-      accentColor: accentColorInput.value,
-      textColor: isTextSameAsResolved ? '#ffffff' : textColorInput.value,
-      accentFont: accentFontSelect.value,
-      quote: (quoteInput.value.trim() || defaultConfig.quote),
-      theme: cfg.theme
-    };
-    saveConfig(next);
-    applyConfigToDOM(getConfig());
-    syncInputs(getConfig());
-    if (typeof onClose === 'function') onClose();
-  });
+.settings-row-theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.9rem 0;
+  border-top: 1px dashed var(--text-dim);
+  border-bottom: 1px dashed var(--text-dim);
+  margin-bottom: 1.75rem;
+  transition: border-color var(--theme-transition);
+}
 
-  resetBtn.addEventListener('click', () => {
-    const next = resetConfig();
-    syncInputs(next);
-    applyConfigToDOM(next);
-  });
+.settings-row-theme .theme-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color var(--theme-transition);
+}
 
-  closeBtn.addEventListener('click', () => {
-    if (typeof onClose === 'function') onClose();
-  });
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color var(--theme-transition);
+}
+
+.theme-toggle-track {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  border: 1px solid var(--text-dim);
+  background: rgba(var(--text-rgb), 0.04);
+  transition: background var(--theme-transition), border-color var(--theme-transition);
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  transition: transform var(--theme-transition), background var(--theme-transition);
+}
+
+html[data-theme="dark"] .theme-toggle-thumb {
+  transform: translateX(22px);
+}
+
+.theme-toggle-label {
+  color: var(--text-muted);
+  transition: color var(--theme-transition);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.text-color-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.text-color-row input[type="color"] {
+  flex: 1;
+}
+
+.text-color-reset {
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0 1rem;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all var(--transition);
+}
+
+.text-color-reset:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
