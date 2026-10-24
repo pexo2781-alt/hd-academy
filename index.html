@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/settings.css">
   <link rel="stylesheet" href="css/lab.css">
   <link rel="stylesheet" href="css/domain.css">
+  <link rel="stylesheet" href="css/number-memory.css">
 </head>
 <body>
   <!-- Background layers -->
@@ -82,7 +83,7 @@
       </div>
     </section>
 
-    <!-- ========== LAB (workspace) ========== -->
+    <!-- ========== LAB ========== -->
     <section class="lab-view lab-workspace" id="view-lab">
       <button class="lab-gear" id="openSettingsBtn" aria-label="Open settings" title="Settings">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
@@ -94,7 +95,6 @@
 
       <button class="lab-signout" id="signOutBtn" title="Sign out">Sign out</button>
 
-      <!-- Domain navigation strip -->
       <nav class="domain-nav" id="domainNav">
         <button class="domain-tab is-active" data-domain="select" type="button">
           <span class="domain-tab-label">Domain</span>
@@ -102,7 +102,7 @@
         </button>
       </nav>
 
-      <!-- Domain: picker (default) -->
+      <!-- Domain picker -->
       <div class="domain-picker is-active" id="domainPicker">
         <div class="domain-picker-inner">
           <span class="domain-kicker">// SELECT DOMAIN</span>
@@ -115,9 +115,9 @@
               <span class="domain-choice-name">Academic</span>
               <span class="domain-choice-tag">N/A</span>
             </button>
-            <button class="domain-choice" data-domain="mental" type="button">
+            <button class="domain-choice" data-domain="cognitive" type="button">
               <span class="domain-choice-num">02</span>
-              <span class="domain-choice-name">Mental</span>
+              <span class="domain-choice-name">Cognitive</span>
               <span class="domain-choice-tag">Ready</span>
             </button>
             <button class="domain-choice" data-domain="physical" type="button">
@@ -129,11 +129,11 @@
         </div>
       </div>
 
-      <!-- Domain: mental drills -->
-      <div class="domain-drills" id="domainDrills" data-domain-panel="mental">
+      <!-- Domain drills -->
+      <div class="domain-drills" id="domainDrills" data-domain-panel="cognitive">
         <div class="domain-drills-header">
           <button class="domain-back" id="domainBackBtn" type="button">← Back</button>
-          <span class="domain-drills-kicker">// MENTAL // DRILLS</span>
+          <span class="domain-drills-kicker">// COGNITIVE // DRILLS</span>
         </div>
 
         <div class="drill-grid">
@@ -167,14 +167,109 @@
         </div>
       </div>
 
-      <!-- Drill: number memory (stub for v0.34) -->
+      <!-- ========== NUMBER MEMORY ========== -->
       <div class="drill-view" id="drillNumberMemory" data-drill-view="number-memory">
-        <div class="drill-view-inner">
-          <span class="domain-kicker">// DRILL // NUMBER MEMORY</span>
-          <h2 class="drill-view-title">Coming online.</h2>
-          <p class="drill-view-sub">This drill is scheduled for the next build. Return to the Mental drills to continue.</p>
-          <button class="lab-btn" id="drillBackBtn" type="button" style="max-width: 240px; margin: 0 auto;">Back to drills</button>
+
+        <!-- Intro -->
+        <div class="nm-stage is-active" id="nmStageIntro">
+          <div class="nm-intro">
+            <div class="nm-logo" aria-hidden="true">
+              <span>1</span><span>2</span><span>3</span>
+            </div>
+            <p class="nm-quote">The average person can remember 7 numbers at once. Can you do more?</p>
+            <button class="lab-btn nm-start-btn" id="nmStartBtn" type="button">Start</button>
+          </div>
         </div>
+
+        <!-- Display -->
+        <div class="nm-stage" id="nmStageDisplay">
+          <div class="nm-display">
+            <span class="nm-kicker">// LEVEL <span id="nmLevelDisplay">1</span></span>
+            <div class="nm-digit" id="nmDigitDisplay">0</div>
+            <div class="nm-timer-track">
+              <div class="nm-timer-fill" id="nmTimerFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Answer -->
+        <div class="nm-stage" id="nmStageAnswer">
+          <div class="nm-answer">
+            <span class="nm-kicker">// LEVEL <span id="nmLevelAnswer">1</span></span>
+            <h2 class="nm-question">What was the number?</h2>
+            <p class="nm-hint">Please enter to submit.</p>
+            <form class="nm-form" id="nmAnswerForm" autocomplete="off">
+              <input
+                type="text"
+                id="nmAnswerInput"
+                class="nm-answer-input"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="1"
+                placeholder=""
+                aria-label="Your answer"
+              >
+              <button type="submit" class="lab-btn nm-submit-btn" id="nmSubmitBtn">Submit</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="nm-stage" id="nmStageResult">
+          <div class="nm-result">
+            <span class="nm-kicker">// LEVEL <span id="nmLevelResult">1</span></span>
+
+            <div class="nm-result-rows">
+              <div class="nm-result-row">
+                <span class="nm-result-label">Number</span>
+                <span class="nm-result-value" id="nmResultNumber">0</span>
+              </div>
+              <div class="nm-result-row">
+                <span class="nm-result-label">Your answer</span>
+                <span class="nm-result-value" id="nmResultAnswer">0</span>
+              </div>
+            </div>
+
+            <button class="lab-btn nm-next-btn" id="nmNextBtn" type="button">Next</button>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="nm-stage" id="nmStageStats">
+          <div class="nm-stats">
+            <span class="nm-kicker">// SESSION COMPLETE</span>
+            <h2 class="nm-stats-title">Result.</h2>
+
+            <div class="nm-stats-grid">
+              <div class="nm-stat">
+                <span class="nm-stat-label">Level reached</span>
+                <span class="nm-stat-value" id="nmStatLevel">0</span>
+              </div>
+              <div class="nm-stat">
+                <span class="nm-stat-label">Accuracy</span>
+                <span class="nm-stat-value" id="nmStatAccuracy">0%</span>
+              </div>
+              <div class="nm-stat">
+                <span class="nm-stat-label">Avg response</span>
+                <span class="nm-stat-value" id="nmStatAvg">0.00s</span>
+              </div>
+              <div class="nm-stat">
+                <span class="nm-stat-label">Total time</span>
+                <span class="nm-stat-value" id="nmStatTotal">0.0s</span>
+              </div>
+              <div class="nm-stat nm-stat-wide">
+                <span class="nm-stat-label">Best level (all time)</span>
+                <span class="nm-stat-value" id="nmStatBest">0</span>
+              </div>
+            </div>
+
+            <div class="nm-stats-actions">
+              <button class="lab-btn" id="nmRetryBtn" type="button">Retry</button>
+              <button class="lab-btn secondary" id="nmExitBtn" type="button">Exit</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -241,7 +336,7 @@
       </section>
     </div>
 
-    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.33</div>
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.34</div>
   </div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
