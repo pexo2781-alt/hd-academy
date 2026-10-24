@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/number-memory.css">
   <link rel="stylesheet" href="css/sequence-memory.css">
   <link rel="stylesheet" href="css/visual-memory.css">
+  <link rel="stylesheet" href="css/chimp-test.css">
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -147,11 +148,11 @@
               <span class="drill-card-desc">Memorise the squares.</span>
               <span class="drill-card-status">Ready</span>
             </button>
-            <button class="drill-card is-locked" type="button" disabled>
+            <button class="drill-card is-ready" data-drill="chimp-test" type="button">
               <span class="drill-card-num">04</span>
-              <span class="drill-card-name">Reaction Grid</span>
-              <span class="drill-card-desc">—</span>
-              <span class="drill-card-status">N/A</span>
+              <span class="drill-card-name">Chimp Test</span>
+              <span class="drill-card-desc">Are you smarter than a chimpanzee?</span>
+              <span class="drill-card-status">Ready</span>
             </button>
           </div>
         </div>
@@ -294,6 +295,62 @@
             </div>
           </div>
         </div>
+
+        <!-- ========== CHIMP TEST ========== -->
+        <div class="drill-view" id="drillChimpTest" data-drill-view="chimp-test">
+          <div class="ct-stage is-active" id="ctStageIntro">
+            <div class="ct-intro">
+              <div class="ct-logo" aria-hidden="true">
+                <!-- Simple CSS monkey face -->
+                <div class="ct-monkey">
+                  <div class="ct-ear left"></div>
+                  <div class="ct-ear right"></div>
+                  <div class="ct-face">
+                    <div class="ct-eye left"></div>
+                    <div class="ct-eye right"></div>
+                    <div class="ct-nose"></div>
+                  </div>
+                </div>
+              </div>
+              <h2 class="ct-title">Are you smarter than a chimpanzee?</h2>
+              <p class="ct-quote">This is a test of working memory, made famous by a study that found that chimpanzees consistently outperform humans on this task. In the study, some chimps were able to remember 9 digits over 90% of the time.</p>
+              <button class="lab-btn nm-start-btn" id="ctStartBtn" type="button">Start</button>
+            </div>
+          </div>
+
+          <div class="ct-stage" id="ctStagePlay">
+            <div class="ct-play">
+              <div class="ct-header">
+                <span class="vm-kicker">// LEVEL <span id="ctLevelDisplay">1</span></span>
+                <div class="ct-lives" id="ctLivesDisplay">
+                  <span class="ct-bolt">⚡</span>
+                  <span class="ct-bolt">⚡</span>
+                  <span class="ct-bolt">⚡</span>
+                </div>
+              </div>
+              <div class="ct-grid-container" id="ctGridContainer">
+                <div class="ct-grid" id="ctGrid"></div>
+              </div>
+              <p class="ct-status" id="ctStatus">Click in order.</p>
+            </div>
+          </div>
+
+          <div class="ct-stage" id="ctStageStats">
+            <div class="nm-stats">
+              <span class="nm-kicker">// SESSION COMPLETE</span>
+              <h2 class="nm-stats-title">Result.</h2>
+              <div class="nm-stats-grid">
+                <div class="nm-stat"><span class="nm-stat-label">Level reached</span><span class="nm-stat-value" id="ctStatLevel">0</span></div>
+                <div class="nm-stat"><span class="nm-stat-label">Best level (all time)</span><span class="nm-stat-value" id="ctStatBest">0</span></div>
+              </div>
+              <div class="nm-stats-actions">
+                <button class="lab-btn" id="ctRetryBtn" type="button">Retry</button>
+                <button class="lab-btn secondary" id="ctExitBtn" type="button">Exit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -351,7 +408,7 @@
       </section>
     </div>
 
-    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.37</div>
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.38</div>
   </div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
