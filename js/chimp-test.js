@@ -103,7 +103,6 @@ function buildBoard(count) {
   state.tiles = [];
   
   // Determine a grid size that can fit N elements comfortably
-  // We want an NxN grid where N*N >= count
   let gridDim = Math.ceil(Math.sqrt(count));
   // Add a little extra padding so it's not cramped if it exactly fits
   if (gridDim * gridDim === count) gridDim++; 
