@@ -73,26 +73,23 @@ async function boot() {
     startBtn.addEventListener('click', async () => {
       console.log('[lab] Begin clicked.');
       
-      // Safety timeout in case Supabase hangs
       let session = null;
       try {
         if (window.SB) {
-          const sessionPromise = window.SB.getSession();
-          // Race the network call against a 1-second timeout
-          session = await Promise.race([
-            sessionPromise,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1000))
-          ]);
+          // Properly await the Supabase session check (no artificial timeout)
+          session = await window.SB.getSession();
         }
       } catch (e) {
-        console.warn('[lab] getSession failed or timed out:', e);
+        console.warn('[lab] getSession failed:', e);
       }
       
-      // If we got a session, go to lab. If not, go to auth.
+      // If session exists, skip login and go to lab. Otherwise, show login.
       if (session) { 
+        console.log('[lab] Valid session found, entering lab.');
         showView('lab'); 
         showDomainView();
       } else {
+        console.log('[lab] No session found, routing to auth.');
         showView('auth');
       }
     });
