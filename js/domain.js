@@ -79,10 +79,13 @@ function openDrill(id) {
     if (typeof window.__smReset === 'function') window.__smReset();
     const view = document.querySelector('[data-drill-view="sequence-memory"]');
     if (view) view.classList.add('is-active');
+  } else if (id === 'visual-memory') {
+    if (typeof window.__vmReset === 'function') window.__vmReset();
+    const view = document.querySelector('[data-drill-view="visual-memory"]');
+    if (view) view.classList.add('is-active');
   }
 }
 
-// FIXED: Added 'export' to this function
 export function closeDrill() {
   state.drill = null;
   document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
