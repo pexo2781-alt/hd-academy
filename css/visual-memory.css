@@ -148,16 +148,17 @@
   transform-style: preserve-3d;
 }
 
-/* The little circle in the center of every tile */
-.vm-btn::after {
+/* The little circle in the center of every tile — ONLY WHEN LIT OR MATCHED */
+.vm-btn.is-lit::after,
+.vm-btn.is-matched::after {
   content: '';
   width: 10%;
   height: 10%;
   min-width: 4px;
   min-height: 4px;
   border-radius: 50%;
-  background: var(--text-muted);
-  opacity: 0.3;
+  background: var(--bg);
+  opacity: 1;
   transition: all var(--transition);
 }
 
@@ -169,15 +170,15 @@
   transform: rotateX(180deg);
 }
 
-.vm-btn.is-lit::after {
-  background: var(--bg);
-  opacity: 1;
-}
-
 .vm-btn.is-matched {
   background: var(--accent-dim);
   border-color: var(--accent);
   cursor: default;
+  transform: rotateX(180deg);
+}
+
+.vm-btn.is-matched::after {
+  background: var(--accent);
 }
 
 .vm-btn.is-wrong {
@@ -196,13 +197,14 @@
   width: auto;
   height: auto;
   opacity: 1;
+  transform: rotateX(180deg); /* keep the cross facing forward if the tile is flipped */
 }
 
 @keyframes vmShake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
+  10%, 90% { transform: translate3d(-1px, 0, 0) rotateX(180deg); }
+  20%, 80% { transform: translate3d(2px, 0, 0) rotateX(180deg); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotateX(180deg); }
+  40%, 60% { transform: translate3d(4px, 0, 0) rotateX(180deg); }
 }
 
 .vm-status {
