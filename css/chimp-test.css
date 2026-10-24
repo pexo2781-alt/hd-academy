@@ -1,0 +1,215 @@
+/* ============================================================
+   Chimp Test drill
+   ============================================================ */
+
+.drill-view[data-drill-view="chimp-test"] {
+  padding: 1rem;
+}
+
+.ct-stage {
+  display: none !important;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  animation: nmFadeIn 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+.ct-stage.is-active {
+  display: flex !important;
+}
+
+/* ---------- Intro ---------- */
+.ct-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.ct-logo {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* CSS Monkey */
+.ct-monkey {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.ct-ear {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent);
+  top: 20px;
+}
+.ct-ear.left { left: -10px; }
+.ct-ear.right { right: -10px; }
+
+.ct-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  z-index: 2;
+}
+
+.ct-eye {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  top: 35px;
+}
+.ct-eye.left { left: 25px; }
+.ct-eye.right { right: 25px; }
+
+.ct-nose {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ct-title {
+  font-family: var(--font-accent);
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.ct-quote {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 44ch;
+}
+
+/* ---------- Play ---------- */
+.ct-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.ct-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ct-lives {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 1.2rem;
+  color: var(--text-dim);
+}
+
+.ct-bolt {
+  transition: color var(--transition), transform var(--transition);
+}
+
+.ct-bolt.is-active {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+}
+
+.ct-grid-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.ct-grid {
+  position: relative;
+  /* Width/Height dynamically set by JS */
+}
+
+.ct-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1.5px solid var(--text-dim);
+  color: var(--text);
+  font-family: var(--font-accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.ct-btn:hover {
+  border-color: var(--accent);
+}
+
+.ct-btn.is-hidden {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: transparent; /* Hide the number */
+  pointer-events: none;
+}
+
+.ct-btn.is-correct {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: transparent;
+  pointer-events: none;
+}
+
+.ct-btn.is-wrong {
+  background: #ff3333;
+  border-color: #ff3333;
+  color: transparent;
+}
+
+.ct-btn.is-wrong::after {
+  content: '✕';
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.ct-status {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  min-height: 1.5rem;
+}
