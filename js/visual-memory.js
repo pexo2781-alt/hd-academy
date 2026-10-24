@@ -170,8 +170,8 @@ async function playTargets() {
     if (btn) btn.classList.add('is-lit');
   }
 
-  // 2. Wait for 4 seconds
-  await sleep(4000);
+  // 2. Wait for 2 seconds
+  await sleep(2000);
 
   if (!state.running) return;
 
