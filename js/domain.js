@@ -1,10 +1,10 @@
 /**
  * domain.js — Domain navigation + drill grid.
- * Owns the domain picker, the Cognitive drills grid, and the stub drill view.
+ * Owns the domain picker, the mental drills grid, and the stub drill view.
  */
 
 const state = {
-  domain: 'select',   // 'select' | 'cognitive'
+  domain: 'select',   // 'select' | 'mental'
   drill: null         // null | 'number-memory'
 };
 
@@ -60,7 +60,7 @@ function setDomain(domain) {
   state.drill = null;
 
   els.picker.classList.toggle('is-active', domain === 'select');
-  els.drills.classList.toggle('is-active', domain === 'cognitive');
+  els.drills.classList.toggle('is-active', domain === 'mental');
   els.drillView.classList.remove('is-active');
 
   els.tab.classList.toggle('is-active', domain !== 'select');
