@@ -33,6 +33,29 @@
 
 .ct-logo {
   margin-bottom: 0.5rem;
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+/* SVG Classes */
+.monkey-logo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.outline {
+  fill: var(--text);
+}
+
+.face {
+  fill: var(--bg);
+}
+
+.eye,
+.nose {
+  fill: var(--text);
 }
 
 .ct-title {
@@ -126,14 +149,12 @@
   border-color: var(--accent);
 }
 
-/* Base hidden state */
 .ct-btn.is-hidden {
   background: var(--accent);
   border-color: var(--accent);
   color: transparent; 
 }
 
-/* Matched squares become semi-transparent accent */
 .ct-btn.is-correct {
   background: var(--accent-dim);
   border-color: var(--accent);
