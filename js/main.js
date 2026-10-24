@@ -49,7 +49,6 @@ async function boot() {
 
   initNumberMemory({
     onExit: () => {
-      // domain.js handles showing the drills grid
       const evt = new CustomEvent('nm:exit');
       window.dispatchEvent(evt);
     }
