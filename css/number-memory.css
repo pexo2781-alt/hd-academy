@@ -4,7 +4,6 @@
    ============================================================ */
 
 .drill-view[data-drill-view="number-memory"] {
-  /* Inherits .drill-view from domain.css — just resets padding for full-screen feel */
   padding: 1rem;
 }
 
