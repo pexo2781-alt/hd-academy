@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/lab.css">
   <link rel="stylesheet" href="css/domain.css">
   <link rel="stylesheet" href="css/number-memory.css">
+  <link rel="stylesheet" href="css/sequence-memory.css">
 </head>
 <body>
   <!-- Background layers -->
@@ -86,7 +87,6 @@
     <!-- ========== LAB ========== -->
     <section class="lab-view lab-workspace" id="view-lab">
       
-      <!-- Top Bar (Gear, Nav, Sign out) -->
       <div class="lab-topbar" id="labTopbar">
         <button class="lab-gear" id="openSettingsBtn" aria-label="Open settings" title="Settings">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
@@ -106,7 +106,6 @@
         <button class="lab-signout" id="signOutBtn" title="Sign out">Sign out</button>
       </div>
 
-      <!-- Workspace Content Area -->
       <div class="lab-content">
 
         <!-- Domain picker -->
@@ -151,11 +150,11 @@
               <span class="drill-card-status">Ready</span>
             </button>
 
-            <button class="drill-card is-locked" type="button" disabled>
+            <button class="drill-card is-ready" data-drill="sequence-memory" type="button">
               <span class="drill-card-num">02</span>
-              <span class="drill-card-name">Pattern Lock</span>
-              <span class="drill-card-desc">—</span>
-              <span class="drill-card-status">N/A</span>
+              <span class="drill-card-name">Sequence Memory</span>
+              <span class="drill-card-desc">Memorize the sequence of buttons that light up.</span>
+              <span class="drill-card-status">Ready</span>
             </button>
 
             <button class="drill-card is-locked" type="button" disabled>
@@ -176,8 +175,6 @@
 
         <!-- ========== NUMBER MEMORY ========== -->
         <div class="drill-view" id="drillNumberMemory" data-drill-view="number-memory">
-
-          <!-- Intro -->
           <div class="nm-stage is-active" id="nmStageIntro">
             <div class="nm-intro">
               <div class="nm-logo" aria-hidden="true">
@@ -187,8 +184,6 @@
               <button class="lab-btn nm-start-btn" id="nmStartBtn" type="button">Start</button>
             </div>
           </div>
-
-          <!-- Display -->
           <div class="nm-stage" id="nmStageDisplay">
             <div class="nm-display">
               <span class="nm-kicker">// LEVEL <span id="nmLevelDisplay">1</span></span>
@@ -198,33 +193,20 @@
               </div>
             </div>
           </div>
-
-          <!-- Answer -->
           <div class="nm-stage" id="nmStageAnswer">
             <div class="nm-answer">
               <span class="nm-kicker">// LEVEL <span id="nmLevelAnswer">1</span></span>
               <h2 class="nm-question">What was the number?</h2>
               <p class="nm-hint">Please enter to submit.</p>
               <form class="nm-form" id="nmAnswerForm" autocomplete="off">
-                <input
-                  type="text"
-                  id="nmAnswerInput"
-                  class="nm-answer-input"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  placeholder=""
-                  aria-label="Your answer"
-                >
+                <input type="text" id="nmAnswerInput" class="nm-answer-input" inputmode="numeric" pattern="[0-9]*" placeholder="" aria-label="Your answer">
                 <button type="submit" class="lab-btn nm-submit-btn" id="nmSubmitBtn">Submit</button>
               </form>
             </div>
           </div>
-
-          <!-- Result -->
           <div class="nm-stage" id="nmStageResult">
             <div class="nm-result">
               <span class="nm-kicker">// LEVEL <span id="nmLevelResult">1</span></span>
-
               <div class="nm-result-rows">
                 <div class="nm-result-row">
                   <span class="nm-result-label">Number</span>
@@ -235,17 +217,13 @@
                   <span class="nm-result-value" id="nmResultAnswer">0</span>
                 </div>
               </div>
-
               <button class="lab-btn nm-next-btn" id="nmNextBtn" type="button">Next</button>
             </div>
           </div>
-
-          <!-- Analytics -->
           <div class="nm-stage" id="nmStageStats">
             <div class="nm-stats">
               <span class="nm-kicker">// SESSION COMPLETE</span>
               <h2 class="nm-stats-title">Result.</h2>
-
               <div class="nm-stats-grid">
                 <div class="nm-stat">
                   <span class="nm-stat-label">Level reached</span>
@@ -268,15 +246,67 @@
                   <span class="nm-stat-value" id="nmStatBest">0</span>
                 </div>
               </div>
-
               <div class="nm-stats-actions">
                 <button class="lab-btn" id="nmRetryBtn" type="button">Retry</button>
                 <button class="lab-btn secondary" id="nmExitBtn" type="button">Exit</button>
               </div>
             </div>
           </div>
-
         </div>
+
+        <!-- ========== SEQUENCE MEMORY ========== -->
+        <div class="drill-view" id="drillSequenceMemory" data-drill-view="sequence-memory">
+          <!-- Intro -->
+          <div class="sm-stage is-active" id="smStageIntro">
+            <div class="sm-intro">
+              <div class="sm-logo" aria-hidden="true">
+                <div class="sm-logo-box is-lit"></div>
+                <div class="sm-logo-box is-lit"></div>
+                <div class="sm-logo-box is-lit"></div>
+                <div class="sm-logo-box"></div>
+              </div>
+              <p class="sm-quote">Memorise the pattern.</p>
+              <button class="lab-btn nm-start-btn" id="smStartBtn" type="button">Start</button>
+            </div>
+          </div>
+
+          <!-- Play -->
+          <div class="sm-stage" id="smStagePlay">
+            <div class="sm-play">
+              <span class="sm-kicker">// LEVEL <span id="smLevelDisplay">1</span></span>
+              <div class="sm-grid" id="smGrid">
+                <button class="sm-btn" data-index="0" type="button" aria-label="Top Left"></button>
+                <button class="sm-btn" data-index="1" type="button" aria-label="Top Right"></button>
+                <button class="sm-btn" data-index="2" type="button" aria-label="Bottom Left"></button>
+                <button class="sm-btn" data-index="3" type="button" aria-label="Bottom Right"></button>
+              </div>
+              <p class="sm-status" id="smStatus">Watch the pattern.</p>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="sm-stage" id="smStageStats">
+            <div class="nm-stats">
+              <span class="nm-kicker">// SESSION COMPLETE</span>
+              <h2 class="nm-stats-title">Result.</h2>
+              <div class="nm-stats-grid">
+                <div class="nm-stat">
+                  <span class="nm-stat-label">Level reached</span>
+                  <span class="nm-stat-value" id="smStatLevel">0</span>
+                </div>
+                <div class="nm-stat">
+                  <span class="nm-stat-label">Best level (all time)</span>
+                  <span class="nm-stat-value" id="smStatBest">0</span>
+                </div>
+              </div>
+              <div class="nm-stats-actions">
+                <button class="lab-btn" id="smRetryBtn" type="button">Retry</button>
+                <button class="lab-btn secondary" id="smExitBtn" type="button">Exit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -343,7 +373,7 @@
       </section>
     </div>
 
-    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.35</div>
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.36</div>
   </div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
