@@ -2,6 +2,7 @@ import { loadConfig, applyConfigToDOM, onConfigChange } from './config.js';
 import { initBackground } from './background.js';
 import { initAuth, resetAuthForm } from './auth.js';
 import { initSettings } from './settings.js';
+import { initDomain } from './domain.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -20,15 +21,9 @@ function showView(name) {
   });
 }
 
-function openSettings() {
-  settingsOverlay.classList.add('is-open');
-}
+function openSettings()  { settingsOverlay.classList.add('is-open'); }
+function closeSettings() { settingsOverlay.classList.remove('is-open'); }
 
-function closeSettings() {
-  settingsOverlay.classList.remove('is-open');
-}
-
-/** Wait until a predicate is true, polling up to `timeout` ms. */
 function waitFor(predicate, timeout = 5000, interval = 50) {
   return new Promise((resolve, reject) => {
     const start = Date.now();
@@ -44,26 +39,27 @@ function waitFor(predicate, timeout = 5000, interval = 50) {
 async function boot() {
   // ----- 1. Load saved config, force light for this session -----
   const cfg = loadConfig();
-  cfg.theme = 'light';           // per spec: every page load starts in light mode
+  cfg.theme = 'light';
   applyConfigToDOM(cfg);
   onConfigChange(applyConfigToDOM);
 
   // ----- 2. Background hook -----
   initBackground();
 
-  // ----- 3. Settings module (overlay) -----
-  initSettings({
-    onClose: () => closeSettings()
-  });
+  // ----- 3. Settings module -----
+  initSettings({ onClose: () => closeSettings() });
 
-  // ----- 4. Wait for Supabase client to be ready -----
+  // ----- 4. Domain module -----
+  initDomain();
+
+  // ----- 5. Wait for Supabase client -----
   try {
     await waitFor(() => !!window.SB);
   } catch (e) {
-    console.error('[lab] window.SB never became available. Check that supabase-client.js loaded after the Supabase CDN script.');
+    console.error('[lab] window.SB never became available.');
   }
 
-  // ----- 5. Init auth module -----
+  // ----- 6. Auth module -----
   initAuth({
     onSuccess: (session) => {
       console.log('[lab] authenticated as', session?.user?.email);
@@ -72,25 +68,22 @@ async function boot() {
     }
   });
 
-  // ----- 6. Landing → auth (or straight to lab if already signed in) -----
+  // ----- 7. Landing → auth (or straight to lab if signed in) -----
   document.getElementById('startBtn').addEventListener('click', async () => {
     try {
       const session = window.SB ? await window.SB.getSession() : null;
-      if (session) {
-        showView('lab');
-        return;
-      }
-    } catch (e) { /* fall through to auth */ }
+      if (session) { showView('lab'); return; }
+    } catch (e) { /* fall through */ }
     showView('auth');
   });
 
-  // ----- 7. Auth back button -----
+  // ----- 8. Auth back -----
   document.getElementById('authBackBtn').addEventListener('click', () => {
     resetAuthForm();
     showView('landing');
   });
 
-  // ----- 8. Settings overlay controls -----
+  // ----- 9. Settings overlay controls -----
   openSettingsBtn.addEventListener('click', openSettings);
   closeSettingsBtn.addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', (e) => {
@@ -102,19 +95,17 @@ async function boot() {
     }
   });
 
-  // ----- 9. Sign out -----
+  // ----- 10. Sign out -----
   signOutBtn.addEventListener('click', async () => {
-    try {
-      if (window.SB) await window.SB.signOut();
-    } catch (e) {
-      console.warn('[lab] sign out failed:', e);
-    }
+    try { if (window.SB) await window.SB.signOut(); }
+    catch (e) { console.warn('[lab] sign out failed:', e); }
     closeSettings();
     showView('landing');
   });
 
-  // ----- 10. Initial view -----
+  // ----- 11. Initial view -----
   showView('landing');
+  console.log('[lab] booted · v0.33');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
