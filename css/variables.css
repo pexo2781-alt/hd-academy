@@ -5,7 +5,6 @@
   --panel-bg: rgba(255, 255, 255, 0.9);
 
   /* ---------- TEXT ---------- */
-  /* Default sentinel resolves to black in light, white in dark */
   --text: #000000;
   --text-rgb: 0, 0, 0;
   --text-muted: rgba(var(--text-rgb), 0.6);
@@ -20,7 +19,6 @@
   --accent-faint: rgba(var(--accent-rgb), 0.06);
   --accent-glow: rgba(var(--accent-rgb), 0.25);
 
-  /* Foreground that sits on top of an accent fill */
   --on-accent: #ffffff;
 
   --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -38,7 +36,6 @@ html[data-theme="dark"] {
   --panel-bg: rgba(10, 10, 10, 0.9);
 }
 
-/* ---------- DEFAULT TEXT SENTINEL (theme-driven) ---------- */
 html[data-text-default="1"] {
   --text: #000000;
   --text-rgb: 0, 0, 0;
@@ -55,7 +52,6 @@ html[data-text-default="1"][data-theme="dark"] {
   --text-faint: rgba(var(--text-rgb), 0.05);
 }
 
-/* ---------- DEFAULT ACCENT SENTINEL (theme-driven) ---------- */
 html[data-accent-default="1"] {
   --accent: #000000;
   --accent-rgb: 0, 0, 0;
@@ -74,7 +70,6 @@ html[data-accent-default="1"][data-theme="dark"] {
   --accent-glow: rgba(var(--accent-rgb), 0.25);
 }
 
-/* Contrast foreground on accent fills — driven by JS */
 html[data-on-accent="light"] { --on-accent: #ffffff; }
 html[data-on-accent="dark"]  { --on-accent: #000000; }
 
@@ -178,10 +173,24 @@ body {
   background: var(--accent-dim);
 }
 
+/* =========================================
+   CRITICAL VIEW ROUTING FIX
+   ========================================= */
 .lab-view {
-  display: none;
+  display: none !important;
   width: 100%;
+  height: 100%;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.lab-view.is-active { display: flex; }
+
+.lab-view.is-active {
+  display: flex !important;
+  animation: viewFadeIn 0.4s ease;
+}
+
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
