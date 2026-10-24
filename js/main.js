@@ -18,7 +18,6 @@ const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const signOutBtn = document.getElementById('signOutBtn');
 
 function showView(name) {
-  console.log('[lab] switching view to:', name);
   Object.entries(views).forEach(([key, el]) => {
     if (el) el.classList.toggle('is-active', key === name);
   });
@@ -67,34 +66,43 @@ async function boot() {
     }
   });
 
-  // --- START BUTTON ---
+  // --- SMART START BUTTON ---
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', async () => {
-      console.log('[lab] Begin clicked.');
-      
+      // Visually change button to indicate loading
+      const originalText = startBtn.textContent;
+      startBtn.textContent = 'Checking...';
+      startBtn.disabled = true;
+
       let session = null;
       try {
         if (window.SB) {
-          // Properly await the Supabase session check (no artificial timeout)
-          session = await window.SB.getSession();
+          // Race the Supabase check against a 2.5 second timeout
+          const sessionPromise = window.SB.getSession();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('timeout')), 2500)
+          );
+          session = await Promise.race([sessionPromise, timeoutPromise]);
         }
       } catch (e) {
-        console.warn('[lab] getSession failed:', e);
+        console.warn('[lab] Session check timed out or failed. Assuming no session.');
+      } finally {
+        // Reset button state
+        startBtn.textContent = originalText;
+        startBtn.disabled = false;
       }
-      
-      // If session exists, skip login and go to lab. Otherwise, show login.
+
+      // Route based on result
       if (session) { 
-        console.log('[lab] Valid session found, entering lab.');
+        console.log('[lab] Valid session found, skipping login.');
         showView('lab'); 
         showDomainView();
       } else {
-        console.log('[lab] No session found, routing to auth.');
+        console.log('[lab] No valid session, showing login.');
         showView('auth');
       }
     });
-  } else {
-    console.error('[lab] Could not find #startBtn in the DOM.');
   }
 
   // --- AUTH BACK BUTTON ---
