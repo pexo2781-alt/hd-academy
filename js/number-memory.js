@@ -1,24 +1,17 @@
+import { closeDrill } from './domain.js';
+
 /**
  * number-memory.js — Number Memory drill.
- *
- * Flow: intro → (display → answer → result) × N → stats
- *
- * Rules:
- *  - One digit (0–9) per level.
- *  - Display duration: 5s + (level × 1s).  [level 1 = 6s, level 5 = 10s, level 10 = 15s]
- *  - Answer window: unlimited, submits on Enter or Submit button.
- *  - Wrong answer ends the session.
- *  - Best level persisted to localStorage.
  */
 
 const BEST_KEY = 'lab_nm_best';
 const BASE_MS = 5000;
-const PER_LEVEL_MS = 1000;
+const PER_LEVEL_MS = 2000; // Gives extra time as numbers get longer
 
 const state = {
   running: false,
   level: 1,
-  currentDigit: null,
+  currentNumber: '',
   displayDurationMs: 0,
   displayStartedAt: 0,
   answerStartedAt: 0,
@@ -30,7 +23,7 @@ const state = {
 
 const els = {};
 
-export function initNumberMemory({ onExit } = {}) {
+export function initNumberMemory() {
   Object.assign(els, {
     view: document.getElementById('drillNumberMemory'),
     stageIntro: document.getElementById('nmStageIntro'),
@@ -64,16 +57,18 @@ export function initNumberMemory({ onExit } = {}) {
     statBest: document.getElementById('nmStatBest')
   });
 
-  els._onExit = onExit;
-
   els.startBtn.addEventListener('click', startSession);
   els.form.addEventListener('submit', handleSubmit);
   els.nextBtn.addEventListener('click', advanceLevel);
   els.retryBtn.addEventListener('click', startSession);
-  els.exitBtn.addEventListener('click', exitToDrills);
+  els.exitBtn.addEventListener('click', () => {
+    closeDrill();
+    resetToIntro();
+  });
 
+  // Allow full numbers
   els.answerInput.addEventListener('input', () => {
-    const v = els.answerInput.value.replace(/\D/g, '').slice(0, 1);
+    const v = els.answerInput.value.replace(/\D/g, '');
     if (v !== els.answerInput.value) els.answerInput.value = v;
   });
 
@@ -85,7 +80,7 @@ export function resetToIntro() {
   state.running = false;
   state.level = 1;
   state.history = [];
-  state.currentDigit = null;
+  state.currentNumber = '';
   state.displayDurationMs = 0;
   state.answerInputLocked = false;
   showStage('intro');
@@ -118,10 +113,15 @@ function beginDisplayStage() {
   els.levelAnswer.textContent = lvl;
   els.levelResult.textContent = lvl;
 
-  state.currentDigit = String(Math.floor(Math.random() * 10));
-  els.digitDisplay.textContent = state.currentDigit;
+  // Generate N numbers
+  let numStr = '';
+  for (let i = 0; i < lvl; i++) {
+    numStr += Math.floor(Math.random() * 10);
+  }
+  state.currentNumber = numStr;
+  els.digitDisplay.textContent = state.currentNumber;
 
-  // 5s + N seconds  →  5000ms + (level × 1000ms)
+  // 5s base + (N * 2s)
   const totalMs = BASE_MS + (lvl * PER_LEVEL_MS);
   state.displayDurationMs = totalMs;
 
@@ -183,11 +183,11 @@ function handleSubmit(e) {
   els.submitBtn.disabled = true;
 
   const responseMs = performance.now() - state.answerStartedAt;
-  const correct = answer === state.currentDigit;
+  const correct = answer === state.currentNumber;
 
   state.history.push({
     level: state.level,
-    digit: state.currentDigit,
+    number: state.currentNumber,
     answer,
     correct,
     responseMs,
@@ -195,7 +195,7 @@ function handleSubmit(e) {
   });
 
   if (correct) {
-    els.resultNumber.textContent = state.currentDigit;
+    els.resultNumber.textContent = state.currentNumber;
     els.resultAnswer.textContent = answer;
     showStage('result');
   } else {
@@ -225,6 +225,7 @@ function showStats() {
   const totalAnswerMs = state.history.reduce((s, h) => s + h.responseMs, 0);
   const totalSec = ((totalDisplayMs + totalAnswerMs) / 1000).toFixed(1);
 
+  // Best level = how many digits they successfully got
   const highestCorrect = state.history.filter(h => h.correct).reduce(
     (m, h) => Math.max(m, h.level),
     0
@@ -243,12 +244,6 @@ function showStats() {
   els.statBest.textContent = newBest;
 
   showStage('stats');
-}
-
-function exitToDrills() {
-  cancelTimers();
-  resetToIntro();
-  if (typeof els._onExit === 'function') els._onExit();
 }
 
 function cancelTimers() {
