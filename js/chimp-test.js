@@ -94,6 +94,7 @@ function setupLevel() {
 function buildBoard(count) {
   els.grid.innerHTML = '';
   
+  // Calculate dynamic container size (decently big)
   const containerRect = els.gridContainer.getBoundingClientRect();
   const boardSize = Math.min(containerRect.width, containerRect.height) * 0.85;
   
@@ -102,15 +103,12 @@ function buildBoard(count) {
 
   state.tiles = [];
   
-  // Determine a grid size that can fit N elements comfortably
-  let gridDim = Math.ceil(Math.sqrt(count));
-  // Add a little extra padding so it's not cramped if it exactly fits
-  if (gridDim * gridDim === count) gridDim++; 
-  
+  // Pre-defined 8x8 grid
+  const gridDim = 8;
   const cellSize = boardSize / gridDim;
-  const tileSize = Math.max(30, cellSize * 0.8); // Leave 20% gap
+  const tileSize = cellSize * 0.8; // 20% gap between tiles
 
-  // Create all possible cells
+  // Create all 64 possible cells
   const cells = [];
   for (let r = 0; r < gridDim; r++) {
     for (let c = 0; c < gridDim; c++) {
