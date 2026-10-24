@@ -12,14 +12,13 @@ const els = {};
 export function initDomain({ onExit } = {}) {
   Object.assign(els, {
     nav: document.getElementById('domainNav'),
+    topbar: document.getElementById('labTopbar'),
     tab: document.querySelector('.domain-tab'),
     picker: document.getElementById('domainPicker'),
     drills: document.getElementById('domainDrills'),
     backBtn: document.getElementById('domainBackBtn'),
     choices: Array.from(document.querySelectorAll('.domain-choice')),
     drillCards: Array.from(document.querySelectorAll('.drill-card')),
-    nmView: document.getElementById('drillNumberMemory'),
-    nmBackBtn: document.getElementById('drillBackBtn')
   });
 
   els.tab.addEventListener('click', () => setDomain('select'));
@@ -42,11 +41,11 @@ export function initDomain({ onExit } = {}) {
     });
   });
 
-  // Number Memory back button
-  if (els.nmBackBtn) {
-    els.nmBackBtn.addEventListener('click', () => closeDrill());
-  }
+  setDomain('select');
+}
 
+export function showDomainView() {
+  els.topbar.style.display = 'flex';
   setDomain('select');
 }
 
@@ -54,10 +53,14 @@ function setDomain(domain) {
   state.domain = domain;
   state.drill = null;
 
-  els.picker.classList.toggle('is-active', domain === 'select');
-  els.drills.classList.toggle('is-active', domain === 'cognitive');
+  // Show topbar
+  els.topbar.style.display = 'flex';
 
-  // Hide all drill views
+  // Toggle picker and drills
+  els.picker.classList.toggle('is-active', domain === 'select');
+  els.drills.classList.toggle('is-active', domain === 'mental');
+
+  // Hide all drills
   document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
 
   els.tab.classList.toggle('is-active', domain !== 'select');
@@ -68,19 +71,23 @@ function setDomain(domain) {
 
 function openDrill(id) {
   state.drill = id;
+  
+  // Hide topbar, grid, picker
+  els.topbar.style.display = 'none';
   els.drills.classList.remove('is-active');
+  els.picker.classList.remove('is-active');
 
   if (id === 'number-memory') {
-    // Reset the drill state and show its intro
     if (typeof window.__nmReset === 'function') window.__nmReset();
     const view = document.querySelector('[data-drill-view="number-memory"]');
     if (view) view.classList.add('is-active');
   }
 }
 
-function closeDrill() {
+export function closeDrill() {
   state.drill = null;
   document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
+  els.topbar.style.display = 'flex';
   els.drills.classList.add('is-active');
 }
 
