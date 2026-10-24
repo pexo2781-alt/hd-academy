@@ -1,0 +1,355 @@
+/* ============================================================
+   Number Memory drill
+   All colors via --accent-* / --text-* tokens.
+   ============================================================ */
+
+.drill-view[data-drill-view="number-memory"] {
+  /* Inherits .drill-view from domain.css — just resets padding for full-screen feel */
+  padding: 1rem;
+}
+
+.nm-stage {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  animation: nmFadeIn 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+.nm-stage.is-active { display: flex; }
+
+@keyframes nmFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nm-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Intro ---------- */
+.nm-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.nm-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.nm-logo span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-accent);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition: all var(--transition);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0);
+}
+
+.nm-logo span:hover {
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.05);
+}
+
+.nm-quote {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 40ch;
+  letter-spacing: 0.01em;
+}
+
+.nm-start-btn {
+  padding: 1rem 3.5rem !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.3em !important;
+  flex: none !important;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Display ---------- */
+.nm-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+.nm-digit {
+  font-family: var(--font-accent);
+  font-size: clamp(8rem, 28vw, 18rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.25);
+  transition: color var(--transition);
+  animation: nmDigitIn 0.35s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+@keyframes nmDigitIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.nm-timer-track {
+  width: min(520px, 80vw);
+  height: 4px;
+  background: var(--text-dim);
+  overflow: hidden;
+  position: relative;
+}
+
+.nm-timer-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform-origin: right center;
+  transition: transform 0.1s linear, background var(--transition);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4);
+}
+
+.nm-timer-fill.is-danger {
+  animation: nmDangerPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes nmDangerPulse {
+  0%   { box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4); }
+  100% { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.8); }
+}
+
+/* ---------- Answer ---------- */
+.nm-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  max-width: 480px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.nm-question {
+  font-family: var(--font-accent);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.nm-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.nm-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+}
+
+.nm-answer-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--text-dim);
+  padding: 1.25rem 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-accent);
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-weight: 700;
+  color: var(--accent);
+  outline: none;
+  letter-spacing: 0.05em;
+  caret-color: var(--accent);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.nm-answer-input:focus {
+  border-bottom-color: var(--accent);
+}
+
+.nm-answer-input::placeholder { color: transparent; }
+
+.nm-submit-btn {
+  flex: none !important;
+  padding: 0.9rem 2rem !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.3em !important;
+}
+
+/* ---------- Result ---------- */
+.nm-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.nm-result-rows {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0;
+  border-top: 1px solid var(--text-dim);
+  border-bottom: 1px solid var(--text-dim);
+}
+
+.nm-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 0;
+  border-bottom: 1px dashed var(--text-dim);
+}
+
+.nm-result-row:last-child { border-bottom: none; }
+
+.nm-result-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.nm-result-value {
+  font-family: var(--font-accent);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.nm-next-btn {
+  flex: none !important;
+  padding: 1rem 3rem !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.3em !important;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Stats ---------- */
+.nm-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 640px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.nm-stats-title {
+  font-family: var(--font-accent);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+}
+
+.nm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  background: var(--text-dim);
+  border: 1px solid var(--text-dim);
+}
+
+.nm-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1rem 1.15rem;
+  background: var(--bg);
+  text-align: left;
+}
+
+.nm-stat-wide {
+  grid-column: 1 / -1;
+}
+
+.nm-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.nm-stat-value {
+  font-family: var(--font-accent);
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.nm-stats-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.nm-stats-actions .lab-btn {
+  flex: 1;
+  padding: 0.9rem 1rem !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .nm-logo span {
+    width: 52px;
+    height: 52px;
+    font-size: 1.35rem;
+  }
+  .nm-stats-grid { grid-template-columns: 1fr; }
+  .nm-stats-actions { flex-direction: column; }
+}
