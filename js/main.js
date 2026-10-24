@@ -2,7 +2,7 @@ import { loadConfig, applyConfigToDOM, onConfigChange } from './config.js';
 import { initBackground } from './background.js';
 import { initAuth, resetAuthForm } from './auth.js';
 import { initSettings } from './settings.js';
-import { initDomain } from './domain.js';
+import { initDomain, showDomainView } from './domain.js';
 import { initNumberMemory } from './number-memory.js';
 
 const views = {
@@ -47,12 +47,7 @@ async function boot() {
   initSettings({ onClose: () => closeSettings() });
   initDomain();
 
-  initNumberMemory({
-    onExit: () => {
-      const evt = new CustomEvent('nm:exit');
-      window.dispatchEvent(evt);
-    }
-  });
+  initNumberMemory();
 
   try {
     await waitFor(() => !!window.SB);
@@ -64,6 +59,7 @@ async function boot() {
     onSuccess: (session) => {
       console.log('[lab] authenticated as', session?.user?.email);
       closeSettings();
+      showDomainView(); // Reset to domain picker
       showView('lab');
     }
   });
@@ -71,7 +67,11 @@ async function boot() {
   document.getElementById('startBtn').addEventListener('click', async () => {
     try {
       const session = window.SB ? await window.SB.getSession() : null;
-      if (session) { showView('lab'); return; }
+      if (session) { 
+        showDomainView();
+        showView('lab'); 
+        return; 
+      }
     } catch (e) { /* fall through */ }
     showView('auth');
   });
@@ -100,7 +100,7 @@ async function boot() {
   });
 
   showView('landing');
-  console.log('[lab] booted · v0.34');
+  console.log('[lab] booted · v0.35');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
