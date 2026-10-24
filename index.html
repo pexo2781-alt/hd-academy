@@ -302,19 +302,43 @@
             <div class="ct-intro">
               <div class="ct-logo" aria-hidden="true">
                 <!-- Mathematically precise monkey SVG matching the reference -->
-                <svg viewBox="0 0 100 100" width="140" height="140">
-                  <circle cx="16" cy="55" r="10" fill="var(--text)" />
-                  <circle cx="84" cy="55" r="10" fill="var(--text)" />
-                  <circle cx="50" cy="50" r="38" fill="var(--text)" />
-                  <!-- The white face with the M-shaped hairline -->
-                  <path d="M 22 55 A 28 28 0 0 1 78 55 A 26 26 0 0 1 22 55 Z" fill="var(--bg)" />
-                  <path d="M 50 32 C 65 32 78 42 78 55 C 78 65 65 72 50 72 C 35 72 22 65 22 55 C 22 42 35 32 50 32 Z" fill="var(--bg)" />
-                  <!-- The M hairline cutout -->
-                  <path d="M 50 42 C 45 42 38 38 30 32 C 25 35 20 45 22 55 C 35 50 45 45 50 45 C 55 45 65 50 78 55 C 80 45 75 35 70 32 C 62 38 55 42 50 42 Z" fill="var(--bg)"/>
-                  <!-- Eyes and Nose -->
-                  <circle cx="36" cy="50" r="6" fill="var(--text)" />
-                  <circle cx="64" cy="50" r="6" fill="var(--text)" />
-                  <ellipse cx="50" cy="63" rx="7" ry="4.5" fill="var(--text)" />
+                <svg class="monkey-logo" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg" aria-label="Monkey logo" role="img">
+                  <!-- Ears -->
+                  <circle class="outline" cx="115" cy="180" r="27"/>
+                  <circle class="outline" cx="245" cy="180" r="27"/>
+
+                  <!-- Inner ears -->
+                  <circle cx="115" cy="180" r="15" fill="var(--bg)"/>
+                  <circle cx="245" cy="180" r="15" fill="var(--bg)"/>
+
+                  <!-- Main head -->
+                  <circle class="outline" cx="180" cy="180" r="64"/>
+
+                  <!-- Face and muzzle -->
+                  <path
+                    class="face"
+                    d="
+                      M 180 158
+                      C 173 147, 164 143, 155 146
+                      C 142 150, 134 161, 134 174
+                      C 134 186, 141 195, 150 201
+                      C 149 216, 162 228, 180 228
+                      C 198 228, 211 216, 210 201
+                      C 219 195, 226 186, 226 174
+                      C 226 161, 218 150, 205 146
+                      C 196 143, 187 147, 180 158
+                      Z
+                    "
+                  />
+
+                  <!-- Left eye -->
+                  <circle class="eye" cx="159" cy="174" r="11"/>
+
+                  <!-- Right eye -->
+                  <circle class="eye" cx="201" cy="174" r="11"/>
+
+                  <!-- Nose -->
+                  <ellipse class="nose" cx="180" cy="194" rx="10" ry="5"/>
                 </svg>
               </div>
               <h2 class="ct-title">Are you smarter than a chimpanzee?</h2>
