@@ -32,30 +32,27 @@
 }
 
 .ct-logo {
+  margin-top: 2.5rem; /* Pushes it slightly downward */
   margin-bottom: 0.5rem;
-  width: 140px;
-  height: 140px;
+  width: 200px;       /* Increased size */
+  height: 200px;
   display: block;
 }
 
-/* SVG Classes */
 .monkey-logo {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-.outline {
+/* The dark parts of the monkey follow the text colour */
+.outline, .eye, .nose {
   fill: var(--text);
 }
 
+/* The light parts follow the background colour */
 .face {
   fill: var(--bg);
-}
-
-.eye,
-.nose {
-  fill: var(--text);
 }
 
 .ct-title {
@@ -149,16 +146,16 @@
   border-color: var(--accent);
 }
 
+/* Base hidden state - accent filled, no text */
 .ct-btn.is-hidden {
   background: var(--accent);
   border-color: var(--accent);
   color: transparent; 
 }
 
+/* Matched squares disappear completely */
 .ct-btn.is-correct {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  color: transparent;
+  opacity: 0;
   pointer-events: none;
 }
 
