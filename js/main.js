@@ -6,6 +6,7 @@ import { initDomain, showDomainView } from './domain.js';
 import { initNumberMemory } from './number-memory.js';
 import { initSequenceMemory } from './sequence-memory.js';
 import { initVisualMemory } from './visual-memory.js';
+import { initChimpTest } from './chimp-test.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -51,6 +52,7 @@ async function boot() {
   initNumberMemory();
   initSequenceMemory();
   initVisualMemory();
+  initChimpTest();
 
   try {
     await waitFor(() => !!window.SB);
@@ -148,7 +150,7 @@ async function boot() {
   }
 
   showView('landing');
-  console.log('[lab] booted · v0.37');
+  console.log('[lab] booted · v0.38');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
