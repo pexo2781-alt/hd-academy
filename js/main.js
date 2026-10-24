@@ -70,28 +70,46 @@ async function boot() {
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', async () => {
-      // Visually change button to indicate loading
       const originalText = startBtn.textContent;
       startBtn.textContent = 'Checking...';
       startBtn.disabled = true;
 
       let session = null;
+      let connectionFailed = false;
+
       try {
         if (window.SB) {
-          // Race the Supabase check against a 2.5 second timeout
           const sessionPromise = window.SB.getSession();
+          // 3 second timeout to handle Supabase outages
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('timeout')), 2500)
+            setTimeout(() => reject(new Error('timeout')), 3000)
           );
           session = await Promise.race([sessionPromise, timeoutPromise]);
         }
       } catch (e) {
-        console.warn('[lab] Session check timed out or failed. Assuming no session.');
-      } finally {
-        // Reset button state
-        startBtn.textContent = originalText;
-        startBtn.disabled = false;
+        console.warn('[lab] Session check failed or timed out:', e);
+        connectionFailed = true;
       }
+
+      // If the server timed out, show a warning on the button before routing
+      if (connectionFailed) {
+        startBtn.textContent = 'Server Unavailable';
+        startBtn.style.color = '#ff5555';
+        startBtn.style.borderColor = '#ff5555';
+        
+        setTimeout(() => {
+          startBtn.textContent = originalText;
+          startBtn.style.color = '';
+          startBtn.style.borderColor = '';
+          startBtn.disabled = false;
+          showView('auth');
+        }, 1000);
+        return;
+      }
+
+      // If no error, reset button normally
+      startBtn.textContent = originalText;
+      startBtn.disabled = false;
 
       // Route based on result
       if (session) { 
