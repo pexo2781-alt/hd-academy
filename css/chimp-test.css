@@ -126,12 +126,14 @@
   border-color: var(--accent);
 }
 
+/* Base hidden state */
 .ct-btn.is-hidden {
   background: var(--accent);
   border-color: var(--accent);
-  color: transparent; /* Hide the number */
+  color: transparent; 
 }
 
+/* Matched squares become semi-transparent accent */
 .ct-btn.is-correct {
   background: var(--accent-dim);
   border-color: var(--accent);
