@@ -83,28 +83,27 @@ function startSession() {
   setupLevel();
 }
 
-// Maps level to grid size and target count based on the prompt
 function getLevelData(level) {
   if (level === 1) return { gridSize: 3, targetCount: 3 };
   if (level === 2) return { gridSize: 3, targetCount: 4 };
   
   if (level >= 3 && level <= 5) {
-    return { gridSize: 4, targetCount: 4 + (level - 2) }; // 5, 6, 7
+    return { gridSize: 4, targetCount: 4 + (level - 2) };
   }
   if (level >= 6 && level <= 8) {
-    return { gridSize: 5, targetCount: 5 + (level - 3) }; // 8, 9, 10
+    return { gridSize: 5, targetCount: 5 + (level - 3) };
   }
   if (level >= 9 && level <= 13) {
-    return { gridSize: 6, targetCount: 6 + (level - 4) }; // 11, 12, 13, 14, 15
+    return { gridSize: 6, targetCount: 6 + (level - 4) };
   }
   if (level >= 14 && level <= 18) {
-    return { gridSize: 7, targetCount: 10 + level };      // 16, 17, 18, 19, 20
+    return { gridSize: 7, targetCount: 10 + level };
   }
   if (level >= 19) {
-    return { gridSize: 8, targetCount: 10 + level };      // 21, 22, 23...
+    return { gridSize: 8, targetCount: 10 + level };
   }
   
-  return { gridSize: 3, targetCount: 3 }; // fallback
+  return { gridSize: 3, targetCount: 3 };
 }
 
 function setupLevel() {
@@ -123,7 +122,6 @@ function setupLevel() {
   buildGrid(state.gridSize);
   pickTargets(state.targetCount);
   
-  // Play animation
   playTargets();
 }
 
@@ -132,7 +130,6 @@ function buildGrid(size) {
   els.grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
   els.grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
   
-  // Dynamically resize grid to fit the container while staying square
   const containerRect = els.gridContainer.getBoundingClientRect();
   const maxDim = Math.min(containerRect.width, containerRect.height) * 0.9;
   
@@ -162,15 +159,16 @@ function pickTargets(count) {
 }
 
 async function playTargets() {
-  await sleep(600); // Initial pause
+  // Short pause before the squares flip up
+  await sleep(400); 
 
-  // 1. Light up ALL target squares at once
+  // 1. Flip ALL target squares up at once
   for (const idx of state.targetIndices) {
     const btn = els.grid.querySelector(`[data-index="${idx}"]`);
     if (btn) btn.classList.add('is-lit');
   }
 
-  // 2. Wait for 2.5 seconds
+  // 2. HOLD THEM UP FOR 2.5 SECONDS (Change 2500 to adjust time)
   await sleep(2500);
 
   if (!state.running) return;
@@ -189,10 +187,8 @@ async function playTargets() {
 function handleTileClick(index) {
   if (!state.acceptingInput) return;
   if (state.targetIndices.includes(index)) {
-    // Correct
-    if (state.matchedCount === state.targetCount) return; // already done
+    if (state.matchedCount === state.targetCount) return;
     
-    // Check if already matched to avoid double clicks
     const btn = els.grid.querySelector(`[data-index="${index}"]`);
     if (btn.classList.contains('is-matched')) return;
 
@@ -200,7 +196,6 @@ function handleTileClick(index) {
     state.matchedCount++;
 
     if (state.matchedCount === state.targetCount) {
-      // Level complete
       state.acceptingInput = false;
       els.statusText.textContent = 'Level complete.';
       setTimeout(() => {
@@ -209,14 +204,13 @@ function handleTileClick(index) {
       }, 800);
     }
   } else {
-    // Wrong
     handleStrike(index);
   }
 }
 
 function handleStrike(index) {
   state.strikes++;
-  state.acceptingInput = false; // brief lockout
+  state.acceptingInput = false;
   
   const btn = els.grid.querySelector(`[data-index="${index}"]`);
   btn.classList.add('is-wrong');
@@ -225,19 +219,16 @@ function handleStrike(index) {
     btn.classList.remove('is-wrong');
     
     if (state.strikes >= 3) {
-      // Lose a life
       state.lives--;
       updateLives();
       
       if (state.lives <= 0) {
         showStats();
       } else {
-        // Restart level
         els.statusText.textContent = 'Life lost. Restarting level.';
         setTimeout(() => setupLevel(), 1000);
       }
     } else {
-      // Just a strike, keep going
       els.statusText.textContent = `Misses: ${state.strikes}/3`;
       state.acceptingInput = true;
     }
@@ -255,7 +246,6 @@ function showStats() {
   cancelTimers();
   state.running = false;
 
-  // Level reached is how far they got before dying
   const levelReached = state.level;
   
   els.statLevel.textContent = levelReached;
