@@ -11,9 +11,9 @@ const state = {
   running: false,
   level: 1,
   strikes: 0,
-  numbers: [],      // e.g., [1, 2, 3, 4]
+  numbers: [],
   nextTarget: 1,
-  tiles: [],        // { id, number, element }
+  tiles: [],
   acceptingInput: false,
   timer: null
 };
@@ -87,7 +87,6 @@ function setupLevel() {
   els.levelDisplay.textContent = state.level;
   els.statusText.textContent = 'Click in order.';
 
-  // Determine how many numbers for this level
   const count = state.level + 3; // Level 1 = 4, Level 2 = 5, etc.
   buildBoard(count);
 }
@@ -95,9 +94,7 @@ function setupLevel() {
 function buildBoard(count) {
   els.grid.innerHTML = '';
   
-  // Calculate dynamic container size
   const containerRect = els.gridContainer.getBoundingClientRect();
-  // Use up to 80% of the smallest dimension to ensure it fits and leaves room
   const boardSize = Math.min(containerRect.width, containerRect.height) * 0.85;
   
   els.grid.style.width = `${boardSize}px`;
@@ -105,57 +102,51 @@ function buildBoard(count) {
 
   state.tiles = [];
   
-  // Create an array of numbers 1 to N
-  const numbers = Array.from({ length: count }, (_, i) => i + 1);
+  // Determine a grid size that can fit N elements comfortably
+  // We want an NxN grid where N*N >= count
+  let gridDim = Math.ceil(Math.sqrt(count));
+  // Add a little extra padding so it's not cramped if it exactly fits
+  if (gridDim * gridDim === count) gridDim++; 
+  
+  const cellSize = boardSize / gridDim;
+  const tileSize = Math.max(30, cellSize * 0.8); // Leave 20% gap
 
-  // Generate random non-overlapping positions
-  const positions = [];
-  const tileSize = Math.max(30, boardSize / 6); // Scale tile size based on board
-  const maxAttempts = 1000;
-  let attempts = 0;
-
-  for (let i = 0; i < count; i++) {
-    let placed = false;
-    while (!placed && attempts < maxAttempts) {
-      // Ensure tiles don't spawn right on the edges
-      const padding = 10;
-      const x = Math.random() * (boardSize - tileSize - padding * 2) + padding;
-      const y = Math.random() * (boardSize - tileSize - padding * 2) + padding;
-
-      // Check collision with existing tiles
-      let overlaps = false;
-      for (const pos of positions) {
-        const dist = Math.hypot(x - pos.x, y - pos.y);
-        if (dist < tileSize * 1.2) { // Add some gap
-          overlaps = true;
-          break;
-        }
-      }
-
-      if (!overlaps) {
-        positions.push({ x, y });
-        placed = true;
-      }
-      attempts++;
+  // Create all possible cells
+  const cells = [];
+  for (let r = 0; r < gridDim; r++) {
+    for (let c = 0; c < gridDim; c++) {
+      cells.push({ r, c });
     }
   }
 
-  // Shuffle numbers so they don't appear in sequence
+  // Shuffle cells and pick `count` of them
+  cells.sort(() => Math.random() - 0.5);
+  const selectedCells = cells.slice(0, count);
+
+  // Create numbers 1..count and shuffle them
+  const numbers = Array.from({ length: count }, (_, i) => i + 1);
   numbers.sort(() => Math.random() - 0.5);
 
   // Build DOM elements
   for (let i = 0; i < count; i++) {
     const num = numbers[i];
-    const pos = positions[i];
+    const cell = selectedCells[i];
     
+    // Center the tile in its grid cell
+    const centerX = (cell.c * cellSize) + (cellSize / 2);
+    const centerY = (cell.r * cellSize) + (cellSize / 2);
+    
+    const x = centerX - (tileSize / 2);
+    const y = centerY - (tileSize / 2);
+
     const btn = document.createElement('button');
     btn.className = 'ct-btn';
     btn.type = 'button';
     btn.textContent = num;
     btn.style.width = `${tileSize}px`;
     btn.style.height = `${tileSize}px`;
-    btn.style.left = `${pos.x}px`;
-    btn.style.top = `${pos.y}px`;
+    btn.style.left = `${x}px`;
+    btn.style.top = `${y}px`;
     btn.dataset.number = num;
 
     btn.addEventListener('click', () => handleTileClick(num, btn));
@@ -172,8 +163,8 @@ function handleTileClick(num, btn) {
     // Correct
     btn.classList.add('is-correct');
     
-    // If they clicked 1, hide all remaining visible numbers
-    if (state.nextTarget === 1) {
+    // If they clicked 1 AND it's level 2+, hide all remaining visible numbers
+    if (state.nextTarget === 1 && state.level > 1) {
       state.tiles.forEach(t => {
         if (!t.element.classList.contains('is-correct')) {
           t.element.classList.add('is-hidden');
