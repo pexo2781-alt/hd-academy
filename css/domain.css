@@ -1,399 +1,86 @@
-/* ============================================================
-   Domain system — navigation, picker, drills grid
-   All colors flow through --accent / --text tokens.
-   ============================================================ */
+/**
+ * domain.js — Domain navigation + drill grid.
+ */
 
-/* ---------- Top strip ---------- */
-.domain-nav {
-  position: absolute;
-  top: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 5;
-}
+const state = {
+  domain: 'select',
+  drill: null
+};
 
-.domain-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--panel-bg);
-  border: 1px solid var(--text-dim);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  border-radius: 0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: all var(--transition);
-}
+const els = {};
 
-.domain-tab:hover,
-.domain-tab.is-active {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+export function initDomain({ onExit } = {}) {
+  Object.assign(els, {
+    nav: document.getElementById('domainNav'),
+    tab: document.querySelector('.domain-tab'),
+    picker: document.getElementById('domainPicker'),
+    drills: document.getElementById('domainDrills'),
+    backBtn: document.getElementById('domainBackBtn'),
+    choices: Array.from(document.querySelectorAll('.domain-choice')),
+    drillCards: Array.from(document.querySelectorAll('.drill-card')),
+    nmView: document.getElementById('drillNumberMemory'),
+    nmBackBtn: document.getElementById('drillBackBtn')
+  });
 
-.domain-tab-caret {
-  font-size: 0.65rem;
-  opacity: 0.7;
-  transition: transform var(--transition);
-}
+  els.tab.addEventListener('click', () => setDomain('select'));
 
-.domain-tab.is-open .domain-tab-caret {
-  transform: rotate(180deg);
-}
+  els.choices.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset.domain;
+      if (btn.disabled || d === 'academic' || d === 'physical') return;
+      setDomain(d);
+    });
+  });
 
-/* ---------- Picker view ---------- */
-.domain-picker {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  width: 100%;
-  padding: 4rem 1rem 2rem;
-  animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1);
-}
+  els.backBtn.addEventListener('click', () => setDomain('select'));
 
-.domain-picker.is-active { display: flex; }
+  els.drillCards.forEach(card => {
+    card.addEventListener('click', () => {
+      if (card.classList.contains('is-locked')) return;
+      const id = card.dataset.drill;
+      if (id) openDrill(id);
+    });
+  });
 
-.domain-picker-inner {
-  width: 100%;
-  max-width: 620px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.domain-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.domain-heading {
-  font-family: var(--font-accent);
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-}
-
-.domain-sub {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-  max-width: 48ch;
-}
-
-.domain-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.domain-choice {
-  display: grid;
-  grid-template-columns: 3rem 1fr auto;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  background: transparent;
-  border: 1px solid var(--text-dim);
-  color: var(--text);
-  font-family: var(--font-accent);
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  padding: 1.1rem 1.25rem;
-  cursor: pointer;
-  border-radius: 0;
-  text-align: left;
-  transition: all var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.domain-choice::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity var(--transition);
-  z-index: 0;
-}
-
-.domain-choice > * {
-  position: relative;
-  z-index: 1;
-  transition: color var(--transition);
-}
-
-.domain-choice:hover {
-  border-color: var(--accent);
-}
-
-.domain-choice:hover::before {
-  opacity: 0.06;
-}
-
-.domain-choice-num {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
-  transition: color var(--transition);
-}
-
-.domain-choice:hover .domain-choice-num {
-  color: var(--accent);
-}
-
-.domain-choice-name {
-  font-weight: 600;
-}
-
-.domain-choice-tag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  border: 1px solid var(--text-dim);
-  padding: 0.3rem 0.6rem;
-  transition: all var(--transition);
-}
-
-.domain-choice[data-domain="cognitive"] .domain-choice-tag {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.domain-choice:hover .domain-choice-tag {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.domain-choice:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.domain-choice:disabled:hover::before { opacity: 0; }
-.domain-choice:disabled:hover { border-color: var(--text-dim); }
-
-/* ---------- Drills view ---------- */
-.domain-drills {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  max-width: 1000px;
-  padding: 5rem 1rem 2rem;
-  animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
-}
-
-.domain-drills.is-active { display: flex; }
-
-.domain-drills-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 1rem;
-}
-
-.domain-back {
-  background: transparent;
-  border: 1px solid var(--text-dim);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  padding: 0.5rem 0.9rem;
-  cursor: pointer;
-  border-radius: 0;
-  transition: all var(--transition);
-}
-
-.domain-back:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.domain-drills-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.drill-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  flex: 1;
-  min-height: 0;
-}
-
-.drill-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  min-height: 200px;
-  background: transparent;
-  border: 1px solid var(--text-dim);
-  color: var(--text);
-  font-family: var(--font-main);
-  cursor: pointer;
-  border-radius: 0;
-  text-align: left;
-  position: relative;
-  overflow: hidden;
-  transition: all var(--transition);
-}
-
-.drill-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity var(--transition);
-  pointer-events: none;
-}
-
-.drill-card.is-ready {
-  border-color: var(--accent);
-}
-
-.drill-card.is-ready:hover {
-  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.2);
-}
-
-.drill-card.is-ready:hover::before {
-  opacity: 0.06;
-}
-
-.drill-card > * { position: relative; z-index: 1; }
-
-.drill-card-num {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--text-muted);
-}
-
-.drill-card-name {
-  font-family: var(--font-accent);
-  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  line-height: 1.15;
-}
-
-.drill-card.is-ready .drill-card-name {
-  color: var(--accent);
-}
-
-.drill-card-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-.drill-card-status {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  border: 1px solid var(--text-dim);
-  padding: 0.25rem 0.6rem;
-  align-self: flex-start;
-}
-
-.drill-card.is-ready .drill-card-status {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.drill-card.is-locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ---------- Drill view (per-drill full screen) ---------- */
-.drill-view {
-  display: none;
-  flex: 1;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  padding: 5rem 1rem 2rem;
-  animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
-}
-
-.drill-view.is-active { display: flex; }
-
-.drill-view-inner {
-  max-width: 520px;
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.drill-view-title {
-  font-family: var(--font-accent);
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-}
-
-.drill-view-sub {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  max-width: 42ch;
-  margin-bottom: 1rem;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 640px) {
-  .drill-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
+  if (els.nmBackBtn) {
+    els.nmBackBtn.addEventListener('click', () => closeDrill());
   }
-  .drill-card { min-height: 150px; }
-  .domain-choice {
-    grid-template-columns: 2.25rem 1fr auto;
-    font-size: 1rem;
-    padding: 0.9rem 1rem;
+
+  setDomain('select');
+}
+
+function setDomain(domain) {
+  state.domain = domain;
+  state.drill = null;
+
+  els.picker.classList.toggle('is-active', domain === 'select');
+  els.drills.classList.toggle('is-active', domain === 'cognitive');
+
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
+
+  els.tab.classList.toggle('is-active', domain !== 'select');
+  els.tab.classList.toggle('is-open', domain !== 'select');
+  els.tab.querySelector('.domain-tab-label').textContent =
+    domain === 'select' ? 'Domain' : capitalize(domain);
+}
+
+function openDrill(id) {
+  state.drill = id;
+  els.drills.classList.remove('is-active');
+
+  if (id === 'number-memory') {
+    if (typeof window.__nmReset === 'function') window.__nmReset();
+    const view = document.querySelector('[data-drill-view="number-memory"]');
+    if (view) view.classList.add('is-active');
   }
-  .domain-tab { padding: 0.5rem 0.75rem; font-size: 0.65rem; }
+}
+
+function closeDrill() {
+  state.drill = null;
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
+  els.drills.classList.add('is-active');
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
