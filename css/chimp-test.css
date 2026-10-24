@@ -25,17 +25,19 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1.5rem;
+  gap: 1rem; /* Reduced gap slightly to keep it compact */
   max-width: 520px;
   width: 100%;
-  padding: 2rem 1rem;
+  padding: 1rem;
+  /* Removed flex: 1 to stop it from stretching to the absolute bottom */
+  margin: auto 0; 
 }
 
 .ct-logo {
-  margin-top: 2.5rem; /* Pushes it slightly downward */
-  margin-bottom: 0.5rem;
-  width: 200px;       /* Increased size */
-  height: 200px;
+  margin-top: 1rem; /* Brought up from 2.5rem */
+  margin-bottom: 0;
+  width: 180px;     /* Slightly reduced to save vertical space */
+  height: 180px;
   display: block;
 }
 
@@ -69,6 +71,12 @@
   color: var(--text-muted);
   line-height: 1.5;
   max-width: 44ch;
+  margin-bottom: 0.5rem;
+}
+
+/* Start Button padding fix */
+.ct-intro .lab-btn {
+  margin-top: 0.5rem;
 }
 
 /* ---------- Play ---------- */
