@@ -1,11 +1,10 @@
 /**
  * domain.js — Domain navigation + drill grid.
- * Owns the domain picker, the mental drills grid, and the stub drill view.
  */
 
 const state = {
-  domain: 'select',   // 'select' | 'mental'
-  drill: null         // null | 'number-memory'
+  domain: 'select',
+  drill: null
 };
 
 const els = {};
@@ -16,19 +15,15 @@ export function initDomain({ onExit } = {}) {
     tab: document.querySelector('.domain-tab'),
     picker: document.getElementById('domainPicker'),
     drills: document.getElementById('domainDrills'),
-    drillView: document.getElementById('drillNumberMemory'),
     backBtn: document.getElementById('domainBackBtn'),
-    drillBackBtn: document.getElementById('drillBackBtn'),
     choices: Array.from(document.querySelectorAll('.domain-choice')),
-    drillCards: Array.from(document.querySelectorAll('.drill-card'))
+    drillCards: Array.from(document.querySelectorAll('.drill-card')),
+    nmView: document.getElementById('drillNumberMemory'),
+    nmBackBtn: document.getElementById('drillBackBtn')
   });
 
-  // Click on the "Domain" tab toggles back to the picker
-  els.tab.addEventListener('click', () => {
-    setDomain('select');
-  });
+  els.tab.addEventListener('click', () => setDomain('select'));
 
-  // Domain choices
   els.choices.forEach(btn => {
     btn.addEventListener('click', () => {
       const d = btn.dataset.domain;
@@ -37,10 +32,8 @@ export function initDomain({ onExit } = {}) {
     });
   });
 
-  // Back from drills → picker
   els.backBtn.addEventListener('click', () => setDomain('select'));
 
-  // Drill cards
   els.drillCards.forEach(card => {
     card.addEventListener('click', () => {
       if (card.classList.contains('is-locked')) return;
@@ -49,8 +42,10 @@ export function initDomain({ onExit } = {}) {
     });
   });
 
-  // Back from drill → drills grid
-  els.drillBackBtn.addEventListener('click', () => closeDrill());
+  // Number Memory back button
+  if (els.nmBackBtn) {
+    els.nmBackBtn.addEventListener('click', () => closeDrill());
+  }
 
   setDomain('select');
 }
@@ -60,8 +55,10 @@ function setDomain(domain) {
   state.drill = null;
 
   els.picker.classList.toggle('is-active', domain === 'select');
-  els.drills.classList.toggle('is-active', domain === 'mental');
-  els.drillView.classList.remove('is-active');
+  els.drills.classList.toggle('is-active', domain === 'cognitive');
+
+  // Hide all drill views
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
 
   els.tab.classList.toggle('is-active', domain !== 'select');
   els.tab.classList.toggle('is-open', domain !== 'select');
@@ -72,12 +69,18 @@ function setDomain(domain) {
 function openDrill(id) {
   state.drill = id;
   els.drills.classList.remove('is-active');
-  els.drillView.classList.add('is-active');
+
+  if (id === 'number-memory') {
+    // Reset the drill state and show its intro
+    if (typeof window.__nmReset === 'function') window.__nmReset();
+    const view = document.querySelector('[data-drill-view="number-memory"]');
+    if (view) view.classList.add('is-active');
+  }
 }
 
 function closeDrill() {
   state.drill = null;
-  els.drillView.classList.remove('is-active');
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
   els.drills.classList.add('is-active');
 }
 
