@@ -6,7 +6,7 @@ import { closeDrill } from './domain.js';
 
 const BEST_KEY = 'lab_nm_best';
 const BASE_MS = 5000;
-const PER_LEVEL_MS = 2000; // Gives extra time as numbers get longer
+const PER_LEVEL_MS = 1000; // 5s + N seconds
 
 const state = {
   running: false,
@@ -121,7 +121,7 @@ function beginDisplayStage() {
   state.currentNumber = numStr;
   els.digitDisplay.textContent = state.currentNumber;
 
-  // 5s base + (N * 2s)
+  // 5s base + (N * 1s)
   const totalMs = BASE_MS + (lvl * PER_LEVEL_MS);
   state.displayDurationMs = totalMs;
 
