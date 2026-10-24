@@ -83,6 +83,10 @@ function openDrill(id) {
     if (typeof window.__vmReset === 'function') window.__vmReset();
     const view = document.querySelector('[data-drill-view="visual-memory"]');
     if (view) view.classList.add('is-active');
+  } else if (id === 'chimp-test') {
+    if (typeof window.__ctReset === 'function') window.__ctReset();
+    const view = document.querySelector('[data-drill-view="chimp-test"]');
+    if (view) view.classList.add('is-active');
   }
 }
 
