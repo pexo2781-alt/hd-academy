@@ -164,18 +164,22 @@ function pickTargets(count) {
 async function playTargets() {
   await sleep(600); // Initial pause
 
-  for (let i = 0; i < state.targetIndices.length; i++) {
-    if (!state.running) return;
-    const idx = state.targetIndices[i];
+  // Light up ALL target squares at once
+  for (const idx of state.targetIndices) {
     const btn = els.grid.querySelector(`[data-index="${idx}"]`);
-    
     if (btn) btn.classList.add('is-lit');
-    await sleep(400); // How long it stays lit
-    if (btn) btn.classList.remove('is-lit');
-    await sleep(150); // Gap between flashes
   }
 
+  // Wait for 4 seconds
+  await sleep(4000);
+
   if (!state.running) return;
+
+  // Fade them all back down
+  for (const idx of state.targetIndices) {
+    const btn = els.grid.querySelector(`[data-index="${idx}"]`);
+    if (btn) btn.classList.remove('is-lit');
+  }
 
   state.acceptingInput = true;
   els.statusText.textContent = 'Your turn.';
