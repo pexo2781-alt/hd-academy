@@ -1,107 +1,95 @@
-import { loadConfig, applyConfigToDOM, onConfigChange } from './config.js';
-import { initBackground } from './background.js';
-import { initAuth, resetAuthForm } from './auth.js';
-import { initSettings } from './settings.js';
-import { initDomain, showDomainView } from './domain.js';
-import { initNumberMemory } from './number-memory.js';
-import { initSequenceMemory } from './sequence-memory.js';
+/**
+ * domain.js — Domain navigation + drill grid.
+ */
 
-const views = {
-  landing: document.getElementById('view-landing'),
-  auth: document.getElementById('view-auth'),
-  lab: document.getElementById('view-lab')
+const state = {
+  domain: 'select',
+  drill: null
 };
 
-const settingsOverlay = document.getElementById('settingsOverlay');
-const openSettingsBtn = document.getElementById('openSettingsBtn');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-const signOutBtn = document.getElementById('signOutBtn');
+const els = {};
 
-function showView(name) {
-  Object.entries(views).forEach(([key, el]) => {
-    el.classList.toggle('is-active', key === name);
+export function initDomain({ onExit } = {}) {
+  Object.assign(els, {
+    topbar: document.getElementById('labTopbar'),
+    tab: document.querySelector('.domain-tab'),
+    picker: document.getElementById('domainPicker'),
+    drills: document.getElementById('domainDrills'),
+    backBtn: document.getElementById('domainBackBtn'),
+    choices: Array.from(document.querySelectorAll('.domain-choice')),
+    drillCards: Array.from(document.querySelectorAll('.drill-card')),
+  });
+
+  els.tab.addEventListener('click', () => setDomain('select'));
+
+  els.choices.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset.domain;
+      if (btn.disabled || d === 'academic' || d === 'physical') return;
+      setDomain(d);
+    });
+  });
+
+  els.backBtn.addEventListener('click', () => setDomain('select'));
+
+  els.drillCards.forEach(card => {
+    card.addEventListener('click', () => {
+      if (card.classList.contains('is-locked')) return;
+      const id = card.dataset.drill;
+      if (id) openDrill(id);
+    });
   });
 }
 
-function openSettings()  { settingsOverlay.classList.add('is-open'); }
-function closeSettings() { settingsOverlay.classList.remove('is-open'); }
-
-function waitFor(predicate, timeout = 5000, interval = 50) {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-    const tick = () => {
-      if (predicate()) return resolve();
-      if (Date.now() - start > timeout) return reject(new Error('Timeout waiting for condition'));
-      setTimeout(tick, interval);
-    };
-    tick();
-  });
+export function showDomainView() {
+  if (els.topbar) els.topbar.style.display = 'flex';
+  setDomain('select');
 }
 
-async function boot() {
-  const cfg = loadConfig();
-  cfg.theme = 'light';
-  applyConfigToDOM(cfg);
-  onConfigChange(applyConfigToDOM);
+function setDomain(domain) {
+  state.domain = domain;
+  state.drill = null;
 
-  initBackground();
-  initSettings({ onClose: () => closeSettings() });
-  initDomain();
-  initNumberMemory();
-  initSequenceMemory();
+  if (els.topbar) els.topbar.style.display = 'flex';
+  if (els.picker) els.picker.classList.toggle('is-active', domain === 'select');
+  if (els.drills) els.drills.classList.toggle('is-active', domain === 'mental');
 
-  try {
-    await waitFor(() => !!window.SB);
-  } catch (e) {
-    console.error('[lab] window.SB never became available.');
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
+
+  if (els.tab) {
+    els.tab.classList.toggle('is-active', domain !== 'select');
+    els.tab.classList.toggle('is-open', domain !== 'select');
+    els.tab.querySelector('.domain-tab-label').textContent =
+      domain === 'select' ? 'Domain' : capitalize(domain);
   }
-
-  initAuth({
-    onSuccess: (session) => {
-      console.log('[lab] authenticated as', session?.user?.email);
-      closeSettings();
-      showView('lab');
-      showDomainView();
-    }
-  });
-
-  document.getElementById('startBtn').addEventListener('click', async () => {
-    try {
-      const session = window.SB ? await window.SB.getSession() : null;
-      if (session) { 
-        showView('lab'); 
-        showDomainView();
-        return; 
-      }
-    } catch (e) { /* fall through */ }
-    showView('auth');
-  });
-
-  document.getElementById('authBackBtn').addEventListener('click', () => {
-    resetAuthForm();
-    showView('landing');
-  });
-
-  openSettingsBtn.addEventListener('click', openSettings);
-  closeSettingsBtn.addEventListener('click', closeSettings);
-  settingsOverlay.addEventListener('click', (e) => {
-    if (e.target === settingsOverlay) closeSettings();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && settingsOverlay.classList.contains('is-open')) {
-      closeSettings();
-    }
-  });
-
-  signOutBtn.addEventListener('click', async () => {
-    try { if (window.SB) await window.SB.signOut(); }
-    catch (e) { console.warn('[lab] sign out failed:', e); }
-    closeSettings();
-    showView('landing');
-  });
-
-  showView('landing');
-  console.log('[lab] booted · v0.36');
 }
 
-document.addEventListener('DOMContentLoaded', boot);
+function openDrill(id) {
+  state.drill = id;
+  
+  if (els.topbar) els.topbar.style.display = 'none';
+  if (els.drills) els.drills.classList.remove('is-active');
+  if (els.picker) els.picker.classList.remove('is-active');
+
+  if (id === 'number-memory') {
+    if (typeof window.__nmReset === 'function') window.__nmReset();
+    const view = document.querySelector('[data-drill-view="number-memory"]');
+    if (view) view.classList.add('is-active');
+  } else if (id === 'sequence-memory') {
+    if (typeof window.__smReset === 'function') window.__smReset();
+    const view = document.querySelector('[data-drill-view="sequence-memory"]');
+    if (view) view.classList.add('is-active');
+  }
+}
+
+// FIXED: Added 'export' to this function
+export function closeDrill() {
+  state.drill = null;
+  document.querySelectorAll('.drill-view').forEach(el => el.classList.remove('is-active'));
+  if (els.topbar) els.topbar.style.display = 'flex';
+  if (els.drills) els.drills.classList.add('is-active');
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
