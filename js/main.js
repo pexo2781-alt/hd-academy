@@ -46,7 +46,6 @@ async function boot() {
   initBackground();
   initSettings({ onClose: () => closeSettings() });
   initDomain();
-
   initNumberMemory();
 
   try {
@@ -59,8 +58,8 @@ async function boot() {
     onSuccess: (session) => {
       console.log('[lab] authenticated as', session?.user?.email);
       closeSettings();
-      showDomainView(); // Reset to domain picker
       showView('lab');
+      showDomainView(); // Explicitly reset lab view
     }
   });
 
@@ -68,8 +67,8 @@ async function boot() {
     try {
       const session = window.SB ? await window.SB.getSession() : null;
       if (session) { 
-        showDomainView();
         showView('lab'); 
+        showDomainView(); // Explicitly reset lab view
         return; 
       }
     } catch (e) { /* fall through */ }
