@@ -301,14 +301,20 @@
           <div class="ct-stage is-active" id="ctStageIntro">
             <div class="ct-intro">
               <div class="ct-logo" aria-hidden="true">
-                <svg viewBox="0 0 100 100" width="120" height="120">
+                <!-- Mathematically precise monkey SVG matching the reference -->
+                <svg viewBox="0 0 100 100" width="140" height="140">
                   <circle cx="16" cy="55" r="10" fill="var(--text)" />
                   <circle cx="84" cy="55" r="10" fill="var(--text)" />
                   <circle cx="50" cy="50" r="38" fill="var(--text)" />
-                  <path d="M 50 28 C 65 28 78 38 78 55 C 78 75 65 82 50 82 C 35 82 22 75 22 55 C 22 38 35 28 50 28 Z" fill="var(--bg)" />
-                  <circle cx="36" cy="48" r="7" fill="var(--text)" />
-                  <circle cx="64" cy="48" r="7" fill="var(--text)" />
-                  <ellipse cx="50" cy="66" rx="8" ry="5" fill="var(--text)" />
+                  <!-- The white face with the M-shaped hairline -->
+                  <path d="M 22 55 A 28 28 0 0 1 78 55 A 26 26 0 0 1 22 55 Z" fill="var(--bg)" />
+                  <path d="M 50 32 C 65 32 78 42 78 55 C 78 65 65 72 50 72 C 35 72 22 65 22 55 C 22 42 35 32 50 32 Z" fill="var(--bg)" />
+                  <!-- The M hairline cutout -->
+                  <path d="M 50 42 C 45 42 38 38 30 32 C 25 35 20 45 22 55 C 35 50 45 45 50 45 C 55 45 65 50 78 55 C 80 45 75 35 70 32 C 62 38 55 42 50 42 Z" fill="var(--bg)"/>
+                  <!-- Eyes and Nose -->
+                  <circle cx="36" cy="50" r="6" fill="var(--text)" />
+                  <circle cx="64" cy="50" r="6" fill="var(--text)" />
+                  <ellipse cx="50" cy="63" rx="7" ry="4.5" fill="var(--text)" />
                 </svg>
               </div>
               <h2 class="ct-title">Are you smarter than a chimpanzee?</h2>
