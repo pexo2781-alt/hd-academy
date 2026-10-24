@@ -97,8 +97,9 @@ function buildBoard(count) {
   // Get the exact available space
   const containerRect = els.gridContainer.getBoundingClientRect();
   
-  // Use 98% of the available height/width to make the grid as large as possible
-  const boardSize = Math.min(containerRect.width, containerRect.height) * 0.98;
+  // Use 98% of the available height/width to make the grid as large as possible.
+  // We subtract 10 to account for any minor border/browser quirks.
+  const boardSize = Math.min(containerRect.width, containerRect.height - 10) * 0.98;
   
   els.grid.style.width = `${boardSize}px`;
   els.grid.style.height = `${boardSize}px`;
@@ -109,8 +110,8 @@ function buildBoard(count) {
   const gridDim = 8;
   const cellSize = boardSize / gridDim;
   
-  // 10% gap instead of 20% to make the tiles larger
-  const tileSize = cellSize * 0.9; 
+  // 5% gap so the tiles almost touch, making them as big as possible
+  const tileSize = cellSize * 0.95; 
 
   // Create all 64 possible cells
   const cells = [];
