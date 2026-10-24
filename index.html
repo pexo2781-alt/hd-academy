@@ -14,9 +14,10 @@
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/settings.css">
   <link rel="stylesheet" href="css/lab.css">
+  <link rel="stylesheet" href="css/domain.css">
 </head>
 <body>
-  <!-- ========== BACKGROUND LAYERS ========== -->
+  <!-- Background layers -->
   <div class="bg-grid"></div>
   <div class="bg-grid-coarse"></div>
   <div class="bg-glow"></div>
@@ -29,7 +30,7 @@
     <section class="lab-view lab-landing is-active" id="view-landing">
       <h1 class="lab-title" id="labTitle">SUBJECT 001</h1>
       <p class="lab-quote" id="labQuote">“The self is the only laboratory that matters.”</p>
-      <button class="lab-start-btn" id="startBtn" type="button">Begin</button>
+      <button class="lab-start-btn" id="startBtn">Begin</button>
       <div class="lab-bottom-line"></div>
     </section>
 
@@ -41,7 +42,7 @@
             <span class="auth-kicker">// ACCESS GATE</span>
             <h2 class="auth-title" id="authTitle">Sign in</h2>
           </div>
-          <button class="lab-close-btn" id="authBackBtn" type="button" aria-label="Back">✕</button>
+          <button class="lab-close-btn" id="authBackBtn" aria-label="Back">✕</button>
         </div>
 
         <div class="auth-tabs">
@@ -81,9 +82,9 @@
       </div>
     </section>
 
-    <!-- ========== LAB WORKSPACE ========== -->
+    <!-- ========== LAB (workspace) ========== -->
     <section class="lab-view lab-workspace" id="view-lab">
-      <button class="lab-gear" id="openSettingsBtn" type="button" aria-label="Open settings" title="Settings">
+      <button class="lab-gear" id="openSettingsBtn" aria-label="Open settings" title="Settings">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
              stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -91,12 +92,90 @@
         </svg>
       </button>
 
-      <div class="lab-empty">
-        <span class="lab-empty-kicker">// LAB // v0.32</span>
-        <p class="lab-empty-text">Workspace online. Awaiting directives.</p>
+      <button class="lab-signout" id="signOutBtn" title="Sign out">Sign out</button>
+
+      <!-- Domain navigation strip -->
+      <nav class="domain-nav" id="domainNav">
+        <button class="domain-tab is-active" data-domain="select" type="button">
+          <span class="domain-tab-label">Domain</span>
+          <span class="domain-tab-caret">▾</span>
+        </button>
+      </nav>
+
+      <!-- Domain: picker (default) -->
+      <div class="domain-picker is-active" id="domainPicker">
+        <div class="domain-picker-inner">
+          <span class="domain-kicker">// SELECT DOMAIN</span>
+          <h2 class="domain-heading">Choose your field.</h2>
+          <p class="domain-sub">Each domain contains drills calibrated to break you down and rebuild you.</p>
+
+          <div class="domain-list">
+            <button class="domain-choice" data-domain="academic" type="button">
+              <span class="domain-choice-num">01</span>
+              <span class="domain-choice-name">Academic</span>
+              <span class="domain-choice-tag">N/A</span>
+            </button>
+            <button class="domain-choice" data-domain="cognitive" type="button">
+              <span class="domain-choice-num">02</span>
+              <span class="domain-choice-name">Cognitive</span>
+              <span class="domain-choice-tag">Ready</span>
+            </button>
+            <button class="domain-choice" data-domain="physical" type="button">
+              <span class="domain-choice-num">03</span>
+              <span class="domain-choice-name">Physical</span>
+              <span class="domain-choice-tag">N/A</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <button class="lab-signout" id="signOutBtn" type="button" title="Sign out">Sign out</button>
+      <!-- Domain: cognitive drills -->
+      <div class="domain-drills" id="domainDrills" data-domain-panel="cognitive">
+        <div class="domain-drills-header">
+          <button class="domain-back" id="domainBackBtn" type="button">← Back</button>
+          <span class="domain-drills-kicker">// COGNITIVE // DRILLS</span>
+        </div>
+
+        <div class="drill-grid">
+          <button class="drill-card is-ready" data-drill="number-memory" type="button">
+            <span class="drill-card-num">01</span>
+            <span class="drill-card-name">Number Memory</span>
+            <span class="drill-card-desc">Recall ever-longer digit strings under time pressure.</span>
+            <span class="drill-card-status">Ready</span>
+          </button>
+
+          <button class="drill-card is-locked" type="button" disabled>
+            <span class="drill-card-num">02</span>
+            <span class="drill-card-name">Pattern Lock</span>
+            <span class="drill-card-desc">—</span>
+            <span class="drill-card-status">N/A</span>
+          </button>
+
+          <button class="drill-card is-locked" type="button" disabled>
+            <span class="drill-card-num">03</span>
+            <span class="drill-card-name">Speed Sort</span>
+            <span class="drill-card-desc">—</span>
+            <span class="drill-card-status">N/A</span>
+          </button>
+
+          <button class="drill-card is-locked" type="button" disabled>
+            <span class="drill-card-num">04</span>
+            <span class="drill-card-name">Reaction Grid</span>
+            <span class="drill-card-desc">—</span>
+            <span class="drill-card-status">N/A</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drill: number memory (stub for v0.34) -->
+      <div class="drill-view" id="drillNumberMemory" data-drill-view="number-memory">
+        <div class="drill-view-inner">
+          <span class="domain-kicker">// DRILL // NUMBER MEMORY</span>
+          <h2 class="drill-view-title">Coming online.</h2>
+          <p class="drill-view-sub">This drill is scheduled for the next build. Return to the Cognitive drills to continue.</p>
+          <button class="lab-btn" id="drillBackBtn" type="button" style="max-width: 240px; margin: 0 auto;">Back to drills</button>
+        </div>
+      </div>
     </section>
 
     <!-- ========== SETTINGS OVERLAY ========== -->
@@ -104,7 +183,7 @@
       <section class="lab-settings" id="view-settings" role="dialog" aria-modal="true" aria-labelledby="settingsHeading">
         <div class="lab-settings-header">
           <h2 id="settingsHeading">LAB CONFIG</h2>
-          <button class="lab-close-btn" id="closeSettingsBtn" type="button" aria-label="Close settings">✕</button>
+          <button class="lab-close-btn" id="closeSettingsBtn" aria-label="Close settings">✕</button>
         </div>
 
         <div class="settings-group">
@@ -156,21 +235,17 @@
         </div>
 
         <div class="settings-actions">
-          <button class="lab-btn" id="applySettingsBtn" type="button">Apply</button>
-          <button class="lab-btn secondary" id="resetSettingsBtn" type="button">Reset</button>
+          <button class="lab-btn" id="applySettingsBtn">Apply</button>
+          <button class="lab-btn secondary" id="resetSettingsBtn">Reset</button>
         </div>
       </section>
     </div>
 
-    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.32</div>
+    <div class="lab-footer" id="labFooter">LAB · SUBJECT 001 · v0.33</div>
   </div>
 
-  <!-- ========== SCRIPTS ========== -->
-  <!-- Supabase SDK — defer so classic scripts below run after it -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Your client — classic, exposes window.SB -->
   <script defer src="js/supabase-client.js"></script>
-  <!-- App bootstrap — module, runs after the above -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
