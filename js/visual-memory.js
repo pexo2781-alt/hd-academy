@@ -164,23 +164,24 @@ function pickTargets(count) {
 async function playTargets() {
   await sleep(600); // Initial pause
 
-  // Light up ALL target squares at once
+  // 1. Light up ALL target squares at once
   for (const idx of state.targetIndices) {
     const btn = els.grid.querySelector(`[data-index="${idx}"]`);
     if (btn) btn.classList.add('is-lit');
   }
 
-  // Wait for 4 seconds
+  // 2. Wait for 4 seconds
   await sleep(4000);
 
   if (!state.running) return;
 
-  // Fade them all back down
+  // 3. Flip them all back down simultaneously
   for (const idx of state.targetIndices) {
     const btn = els.grid.querySelector(`[data-index="${idx}"]`);
     if (btn) btn.classList.remove('is-lit');
   }
 
+  // 4. Allow player to click
   state.acceptingInput = true;
   els.statusText.textContent = 'Your turn.';
 }
