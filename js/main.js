@@ -4,6 +4,7 @@ import { initAuth, resetAuthForm } from './auth.js';
 import { initSettings } from './settings.js';
 import { initDomain, showDomainView } from './domain.js';
 import { initNumberMemory } from './number-memory.js';
+import { initSequenceMemory } from './sequence-memory.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -17,13 +18,14 @@ const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const signOutBtn = document.getElementById('signOutBtn');
 
 function showView(name) {
+  console.log('[lab] switching view to:', name);
   Object.entries(views).forEach(([key, el]) => {
-    el.classList.toggle('is-active', key === name);
+    if (el) el.classList.toggle('is-active', key === name);
   });
 }
 
-function openSettings()  { settingsOverlay.classList.add('is-open'); }
-function closeSettings() { settingsOverlay.classList.remove('is-open'); }
+function openSettings()  { if (settingsOverlay) settingsOverlay.classList.add('is-open'); }
+function closeSettings() { if (settingsOverlay) settingsOverlay.classList.remove('is-open'); }
 
 function waitFor(predicate, timeout = 5000, interval = 50) {
   return new Promise((resolve, reject) => {
@@ -47,11 +49,13 @@ async function boot() {
   initSettings({ onClose: () => closeSettings() });
   initDomain();
   initNumberMemory();
+  initSequenceMemory();
 
   try {
     await waitFor(() => !!window.SB);
+    console.log('[lab] Supabase client found.');
   } catch (e) {
-    console.error('[lab] window.SB never became available.');
+    console.error('[lab] window.SB never became available. Check your network tab.');
   }
 
   initAuth({
@@ -59,47 +63,78 @@ async function boot() {
       console.log('[lab] authenticated as', session?.user?.email);
       closeSettings();
       showView('lab');
-      showDomainView(); // Explicitly reset lab view
+      showDomainView();
     }
   });
 
-  document.getElementById('startBtn').addEventListener('click', async () => {
-    try {
-      const session = window.SB ? await window.SB.getSession() : null;
+  // --- START BUTTON ---
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) {
+    startBtn.addEventListener('click', async () => {
+      console.log('[lab] Begin clicked.');
+      
+      // Safety timeout in case Supabase hangs
+      let session = null;
+      try {
+        if (window.SB) {
+          const sessionPromise = window.SB.getSession();
+          // Race the network call against a 1-second timeout
+          session = await Promise.race([
+            sessionPromise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1000))
+          ]);
+        }
+      } catch (e) {
+        console.warn('[lab] getSession failed or timed out:', e);
+      }
+      
+      // If we got a session, go to lab. If not, go to auth.
       if (session) { 
         showView('lab'); 
-        showDomainView(); // Explicitly reset lab view
-        return; 
+        showDomainView();
+      } else {
+        showView('auth');
       }
-    } catch (e) { /* fall through */ }
-    showView('auth');
-  });
+    });
+  } else {
+    console.error('[lab] Could not find #startBtn in the DOM.');
+  }
 
-  document.getElementById('authBackBtn').addEventListener('click', () => {
-    resetAuthForm();
-    showView('landing');
-  });
+  // --- AUTH BACK BUTTON ---
+  const authBackBtn = document.getElementById('authBackBtn');
+  if (authBackBtn) {
+    authBackBtn.addEventListener('click', () => {
+      resetAuthForm();
+      showView('landing');
+    });
+  }
 
-  openSettingsBtn.addEventListener('click', openSettings);
-  closeSettingsBtn.addEventListener('click', closeSettings);
-  settingsOverlay.addEventListener('click', (e) => {
-    if (e.target === settingsOverlay) closeSettings();
-  });
+  // --- SETTINGS ---
+  if (openSettingsBtn) openSettingsBtn.addEventListener('click', openSettings);
+  if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettings);
+  if (settingsOverlay) {
+    settingsOverlay.addEventListener('click', (e) => {
+      if (e.target === settingsOverlay) closeSettings();
+    });
+  }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && settingsOverlay.classList.contains('is-open')) {
+    if (e.key === 'Escape' && settingsOverlay && settingsOverlay.classList.contains('is-open')) {
       closeSettings();
     }
   });
 
-  signOutBtn.addEventListener('click', async () => {
-    try { if (window.SB) await window.SB.signOut(); }
-    catch (e) { console.warn('[lab] sign out failed:', e); }
-    closeSettings();
-    showView('landing');
-  });
+  // --- SIGN OUT ---
+  if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+      try { if (window.SB) await window.SB.signOut(); }
+      catch (e) { console.warn('[lab] sign out failed:', e); }
+      closeSettings();
+      showView('landing');
+    });
+  }
 
   showView('landing');
-  console.log('[lab] booted · v0.35');
+  console.log('[lab] booted · v0.36');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
