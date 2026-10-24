@@ -5,7 +5,7 @@ import { closeDrill } from './domain.js';
  */
 
 const BEST_KEY = 'lab_nm_best';
-const BASE_MS = 5000;
+const BASE_MS = 3000;
 const PER_LEVEL_MS = 1000; // 5s + N seconds
 
 const state = {
