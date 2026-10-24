@@ -1,0 +1,215 @@
+/* ============================================================
+   Visual Memory drill
+   ============================================================ */
+
+.drill-view[data-drill-view="visual-memory"] {
+  padding: 1rem;
+}
+
+.vm-stage {
+  display: none !important;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  animation: nmFadeIn 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+.vm-stage.is-active {
+  display: flex !important;
+}
+
+/* ---------- Intro ---------- */
+.vm-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+.vm-logo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  width: 136px;
+  height: 136px;
+  margin-bottom: 0.5rem;
+}
+
+.vm-logo-box {
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.vm-logo-box.is-lit {
+  background: var(--accent);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.35);
+}
+
+.vm-logo-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 1px solid var(--text-dim);
+}
+
+.vm-logo-box.is-lit .vm-logo-circle {
+  background: var(--bg);
+}
+
+.vm-quote {
+  font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.vm-subquote {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 44ch;
+}
+
+/* ---------- Play ---------- */
+.vm-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.vm-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vm-lives {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 1.2rem;
+  color: var(--text-dim);
+}
+
+.vm-heart {
+  transition: color var(--transition), transform var(--transition);
+}
+
+.vm-heart.is-active {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+}
+
+.vm-grid-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.vm-grid {
+  display: grid;
+  gap: 0.5rem;
+  /* Width/height set dynamically by JS to ensure square aspect ratio */
+}
+
+.vm-btn {
+  background: transparent;
+  border: 1.5px solid var(--text-dim);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: border-color 0.2s ease;
+  border-radius: 2px;
+  transform-style: preserve-3d;
+}
+
+/* The little circle in the center of every tile */
+.vm-btn::after {
+  content: '';
+  width: 10%;
+  height: 10%;
+  min-width: 4px;
+  min-height: 4px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.3;
+  transition: all var(--transition);
+}
+
+/* States */
+.vm-btn.is-lit {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.4);
+  transform: rotateX(180deg);
+}
+
+.vm-btn.is-lit::after {
+  background: var(--bg);
+  opacity: 1;
+}
+
+.vm-btn.is-matched {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  cursor: default;
+}
+
+.vm-btn.is-wrong {
+  background: #ff3333;
+  border-color: #ff3333;
+  animation: vmShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.vm-btn.is-wrong::after {
+  content: '✕';
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  background: transparent;
+  width: auto;
+  height: auto;
+  opacity: 1;
+}
+
+@keyframes vmShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.vm-status {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  min-height: 1.5rem;
+}
