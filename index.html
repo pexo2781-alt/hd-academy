@@ -301,16 +301,15 @@
           <div class="ct-stage is-active" id="ctStageIntro">
             <div class="ct-intro">
               <div class="ct-logo" aria-hidden="true">
-                <!-- Simple CSS monkey face -->
-                <div class="ct-monkey">
-                  <div class="ct-ear left"></div>
-                  <div class="ct-ear right"></div>
-                  <div class="ct-face">
-                    <div class="ct-eye left"></div>
-                    <div class="ct-eye right"></div>
-                    <div class="ct-nose"></div>
-                  </div>
-                </div>
+                <svg viewBox="0 0 100 100" width="120" height="120">
+                  <circle cx="16" cy="55" r="10" fill="var(--text)" />
+                  <circle cx="84" cy="55" r="10" fill="var(--text)" />
+                  <circle cx="50" cy="50" r="38" fill="var(--text)" />
+                  <path d="M 50 28 C 65 28 78 38 78 55 C 78 75 65 82 50 82 C 35 82 22 75 22 55 C 22 38 35 28 50 28 Z" fill="var(--bg)" />
+                  <circle cx="36" cy="48" r="7" fill="var(--text)" />
+                  <circle cx="64" cy="48" r="7" fill="var(--text)" />
+                  <ellipse cx="50" cy="66" rx="8" ry="5" fill="var(--text)" />
+                </svg>
               </div>
               <h2 class="ct-title">Are you smarter than a chimpanzee?</h2>
               <p class="ct-quote">This is a test of working memory, made famous by a study that found that chimpanzees consistently outperform humans on this task. In the study, some chimps were able to remember 9 digits over 90% of the time.</p>
