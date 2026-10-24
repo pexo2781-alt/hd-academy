@@ -5,6 +5,7 @@ import { initSettings } from './settings.js';
 import { initDomain, showDomainView } from './domain.js';
 import { initNumberMemory } from './number-memory.js';
 import { initSequenceMemory } from './sequence-memory.js';
+import { initVisualMemory } from './visual-memory.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -49,12 +50,12 @@ async function boot() {
   initDomain();
   initNumberMemory();
   initSequenceMemory();
+  initVisualMemory();
 
   try {
     await waitFor(() => !!window.SB);
-    console.log('[lab] Supabase client found.');
   } catch (e) {
-    console.error('[lab] window.SB never became available. Check your network tab.');
+    console.warn('[lab] window.SB not available yet.');
   }
 
   initAuth({
@@ -66,7 +67,6 @@ async function boot() {
     }
   });
 
-  // --- SMART START BUTTON ---
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.addEventListener('click', async () => {
@@ -80,7 +80,6 @@ async function boot() {
       try {
         if (window.SB) {
           const sessionPromise = window.SB.getSession();
-          // 3 second timeout to handle Supabase outages
           const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('timeout')), 3000)
           );
@@ -91,7 +90,6 @@ async function boot() {
         connectionFailed = true;
       }
 
-      // If the server timed out, show a warning on the button before routing
       if (connectionFailed) {
         startBtn.textContent = 'Server Unavailable';
         startBtn.style.color = '#ff5555';
@@ -107,23 +105,18 @@ async function boot() {
         return;
       }
 
-      // If no error, reset button normally
       startBtn.textContent = originalText;
       startBtn.disabled = false;
 
-      // Route based on result
       if (session) { 
-        console.log('[lab] Valid session found, skipping login.');
         showView('lab'); 
         showDomainView();
       } else {
-        console.log('[lab] No valid session, showing login.');
         showView('auth');
       }
     });
   }
 
-  // --- AUTH BACK BUTTON ---
   const authBackBtn = document.getElementById('authBackBtn');
   if (authBackBtn) {
     authBackBtn.addEventListener('click', () => {
@@ -132,7 +125,6 @@ async function boot() {
     });
   }
 
-  // --- SETTINGS ---
   if (openSettingsBtn) openSettingsBtn.addEventListener('click', openSettings);
   if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettings);
   if (settingsOverlay) {
@@ -146,7 +138,6 @@ async function boot() {
     }
   });
 
-  // --- SIGN OUT ---
   if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
       try { if (window.SB) await window.SB.signOut(); }
@@ -157,7 +148,7 @@ async function boot() {
   }
 
   showView('landing');
-  console.log('[lab] booted · v0.36');
+  console.log('[lab] booted · v0.37');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
