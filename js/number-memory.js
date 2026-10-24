@@ -5,23 +5,26 @@
  *
  * Rules:
  *  - One digit (0–9) per level.
- *  - Display duration: 5 seconds × level number.
+ *  - Display duration: 5s + (level × 1s).  [level 1 = 6s, level 5 = 10s, level 10 = 15s]
  *  - Answer window: unlimited, submits on Enter or Submit button.
  *  - Wrong answer ends the session.
  *  - Best level persisted to localStorage.
  */
 
 const BEST_KEY = 'lab_nm_best';
+const BASE_MS = 5000;
+const PER_LEVEL_MS = 1000;
 
 const state = {
   running: false,
   level: 1,
   currentDigit: null,
+  displayDurationMs: 0,
   displayStartedAt: 0,
   answerStartedAt: 0,
-  displayTimer: null,   // timeout id
-  rafId: null,          // animation frame for timer bar
-  history: [],          // [{ level, digit, answer, correct, responseMs }]
+  displayTimer: null,
+  rafId: null,
+  history: [],
   answerInputLocked: false
 };
 
@@ -69,13 +72,11 @@ export function initNumberMemory({ onExit } = {}) {
   els.retryBtn.addEventListener('click', startSession);
   els.exitBtn.addEventListener('click', exitToDrills);
 
-  // Restrict input to digits
   els.answerInput.addEventListener('input', () => {
     const v = els.answerInput.value.replace(/\D/g, '').slice(0, 1);
     if (v !== els.answerInput.value) els.answerInput.value = v;
   });
 
-  // When the drill view becomes active, always start on intro.
   resetToIntro();
 }
 
@@ -85,6 +86,7 @@ export function resetToIntro() {
   state.level = 1;
   state.history = [];
   state.currentDigit = null;
+  state.displayDurationMs = 0;
   state.answerInputLocked = false;
   showStage('intro');
 }
@@ -116,12 +118,13 @@ function beginDisplayStage() {
   els.levelAnswer.textContent = lvl;
   els.levelResult.textContent = lvl;
 
-  // New digit
   state.currentDigit = String(Math.floor(Math.random() * 10));
   els.digitDisplay.textContent = state.currentDigit;
 
-  // Timer bar
-  const totalMs = 5000 * lvl;
+  // 5s + N seconds  →  5000ms + (level × 1000ms)
+  const totalMs = BASE_MS + (lvl * PER_LEVEL_MS);
+  state.displayDurationMs = totalMs;
+
   els.timerFill.classList.remove('is-danger');
   els.timerFill.style.transform = 'scaleX(1)';
   state.displayStartedAt = performance.now();
@@ -187,7 +190,8 @@ function handleSubmit(e) {
     digit: state.currentDigit,
     answer,
     correct,
-    responseMs
+    responseMs,
+    displayMs: state.displayDurationMs
   });
 
   if (correct) {
@@ -195,7 +199,6 @@ function handleSubmit(e) {
     els.resultAnswer.textContent = answer;
     showStage('result');
   } else {
-    // Wrong → session ends immediately, show stats
     setTimeout(() => showStats(), 200);
   }
 }
@@ -218,12 +221,10 @@ function showStats() {
     : state.history.reduce((s, h) => s + h.responseMs, 0) / attempts;
   const avgSec = (avgMs / 1000).toFixed(2);
 
-  // Total time = sum of display durations + answer times
-  const totalDisplayMs = state.history.reduce((s, h) => s + 5000 * h.level, 0);
+  const totalDisplayMs = state.history.reduce((s, h) => s + h.displayMs, 0);
   const totalAnswerMs = state.history.reduce((s, h) => s + h.responseMs, 0);
   const totalSec = ((totalDisplayMs + totalAnswerMs) / 1000).toFixed(1);
 
-  // Best: level reached = highest level the player got *correct*
   const highestCorrect = state.history.filter(h => h.correct).reduce(
     (m, h) => Math.max(m, h.level),
     0
@@ -258,5 +259,4 @@ function cancelTimers() {
   cancelRafTimer();
 }
 
-// Expose resetToIntro via a public handle so domain.js can call it
 window.__nmReset = resetToIntro;
