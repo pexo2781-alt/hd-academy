@@ -7,7 +7,7 @@
 }
 
 .nm-stage {
-  display: none;
+  display: none !important; /* FORCE HIDE */
   width: 100%;
   height: 100%;
   align-items: center;
@@ -15,7 +15,9 @@
   animation: nmFadeIn 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
 }
 
-.nm-stage.is-active { display: flex; }
+.nm-stage.is-active { 
+  display: flex !important; /* FORCE SHOW */
+}
 
 @keyframes nmFadeIn {
   from { opacity: 0; transform: translateY(8px); }
