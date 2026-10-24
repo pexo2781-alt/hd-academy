@@ -3,6 +3,7 @@ import { initBackground } from './background.js';
 import { initAuth, resetAuthForm } from './auth.js';
 import { initSettings } from './settings.js';
 import { initDomain } from './domain.js';
+import { initNumberMemory } from './number-memory.js';
 
 const views = {
   landing: document.getElementById('view-landing'),
@@ -37,29 +38,29 @@ function waitFor(predicate, timeout = 5000, interval = 50) {
 }
 
 async function boot() {
-  // ----- 1. Load saved config, force light for this session -----
   const cfg = loadConfig();
   cfg.theme = 'light';
   applyConfigToDOM(cfg);
   onConfigChange(applyConfigToDOM);
 
-  // ----- 2. Background hook -----
   initBackground();
-
-  // ----- 3. Settings module -----
   initSettings({ onClose: () => closeSettings() });
-
-  // ----- 4. Domain module -----
   initDomain();
 
-  // ----- 5. Wait for Supabase client -----
+  initNumberMemory({
+    onExit: () => {
+      // domain.js handles showing the drills grid
+      const evt = new CustomEvent('nm:exit');
+      window.dispatchEvent(evt);
+    }
+  });
+
   try {
     await waitFor(() => !!window.SB);
   } catch (e) {
     console.error('[lab] window.SB never became available.');
   }
 
-  // ----- 6. Auth module -----
   initAuth({
     onSuccess: (session) => {
       console.log('[lab] authenticated as', session?.user?.email);
@@ -68,7 +69,6 @@ async function boot() {
     }
   });
 
-  // ----- 7. Landing → auth (or straight to lab if signed in) -----
   document.getElementById('startBtn').addEventListener('click', async () => {
     try {
       const session = window.SB ? await window.SB.getSession() : null;
@@ -77,13 +77,11 @@ async function boot() {
     showView('auth');
   });
 
-  // ----- 8. Auth back -----
   document.getElementById('authBackBtn').addEventListener('click', () => {
     resetAuthForm();
     showView('landing');
   });
 
-  // ----- 9. Settings overlay controls -----
   openSettingsBtn.addEventListener('click', openSettings);
   closeSettingsBtn.addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', (e) => {
@@ -95,7 +93,6 @@ async function boot() {
     }
   });
 
-  // ----- 10. Sign out -----
   signOutBtn.addEventListener('click', async () => {
     try { if (window.SB) await window.SB.signOut(); }
     catch (e) { console.warn('[lab] sign out failed:', e); }
@@ -103,9 +100,8 @@ async function boot() {
     showView('landing');
   });
 
-  // ----- 11. Initial view -----
   showView('landing');
-  console.log('[lab] booted · v0.33');
+  console.log('[lab] booted · v0.34');
 }
 
 document.addEventListener('DOMContentLoaded', boot);
